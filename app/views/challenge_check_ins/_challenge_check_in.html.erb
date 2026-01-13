@@ -1,4 +1,4 @@
-<div id="<%= dom_id challenge_check_in %>" 
+<div id="<%= dom_id challenge_check_in %>"
   class="<%= current_user == challenge_check_in.challenge_participant.user ? 'chat chat-end' : 'chat chat-start' %>"
 >
   <div class="chat-image avatar">
@@ -7,7 +7,12 @@
     </div>
   </div>
   <div class="chat-header">
-    <%=  challenge_check_in.challenge_participant.name %>
+    <%= challenge_check_in.challenge_participant.name %>
+    <% if defined?(show_challenge) && show_challenge %>
+      <div class="text-xs opacity-75">
+        <%= link_to challenge_check_in.challenge_story.title, challenge_story_path(challenge_check_in.challenge_story), class: "link" %>
+      </div>
+    <% end %>
     <time class="text-xs opacity-50">
       <%= time_ago_in_words(challenge_check_in.created_at) %> ago
     </time>

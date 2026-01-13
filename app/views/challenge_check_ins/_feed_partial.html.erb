@@ -1,0 +1,3 @@
+<%= turbo_stream.prepend "challenge_check_ins_feed" do %>
+  <%= render partial: "challenge_check_ins/challenge_check_in", locals: { challenge_check_in: @challenge_check_in, show_challenge: true } %>
+<% end %>

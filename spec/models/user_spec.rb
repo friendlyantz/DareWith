@@ -76,7 +76,7 @@ RSpec.describe User, type: :model do
       end
 
       it "token expires in 24 hours" do
-        token = user.generate_email_login_token!
+        user.generate_email_login_token!
 
         expect(user.email_login_token_expires_at).to be_within(1.second).of(24.hours.from_now)
       end

@@ -14,20 +14,23 @@ class ChallengeCheckIn < ApplicationRecord
   validate :one_check_in_per_day_per_participant
 
   # Callbacks (broadcasts_to must be after has_one_attached for Cloudinary compatibility)
-  broadcasts_to ->(check_in) { [check_in.challenge_story, "challenge_check_ins"] }, action: :prepend
+  broadcasts_to lambda { |check_in|
+    [check_in.challenge_story, "challenge_check_ins"]
+  }, action: :prepend, partial: "challenge_check_ins/challenge_check_in", locals: {show_challenge: false}
 
   # Public methods
   def liked_by?(user)
     return false unless user
+
     challenge_check_in_likes.exists?(user: user)
   end
 
   private
 
   def photo_size_validation
-    if photo.present? && photo.blob.byte_size > 10.megabytes
-      errors.add(:photo, "is too large (maximum 10MB)")
-    end
+    return unless photo.present? && photo.blob.byte_size > 10.megabytes
+
+    errors.add(:photo, "is too large (maximum 10MB)")
   end
 
   def one_check_in_per_day_per_participant
@@ -38,8 +41,8 @@ class ChallengeCheckIn < ApplicationRecord
       created_at: Time.zone.today.all_day
     )
 
-    if existing_check_in_today && new_record?
-      errors.add(:base, "You can only check in once per day")
-    end
+    return unless existing_check_in_today && new_record?
+
+    errors.add(:base, "You can only check in once per day")
   end
 end

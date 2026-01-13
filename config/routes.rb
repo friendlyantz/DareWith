@@ -3,14 +3,10 @@ Rails.application.routes.draw do
     delete :unsubscribe, on: :collection
   end
   # Development email preview
-  if Rails.env.development?
-    mount LetterOpenerWeb::Engine, at: "/letter_opener"
-  end
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 
   # Test-only route for signing in without WebAuthn
-  if Rails.env.test?
-    get "test_sign_in/:user_id", to: "webauthn/sessions#test_sign_in", as: :test_sign_in
-  end
+  get "test_sign_in/:user_id", to: "webauthn/sessions#test_sign_in", as: :test_sign_in if Rails.env.test?
 
   resources :challenge_stories, only: %i[index show new create edit update destroy] do
     member do
@@ -23,11 +19,11 @@ Rails.application.routes.draw do
         patch :cancel
       end
     end
-    resource :challenge_story_like, only: [:create, :destroy]
+    resource :challenge_story_like, only: %i[create destroy]
   end
 
-  resources :challenge_check_ins, only: [] do
-    resource :challenge_check_in_like, only: [:create, :destroy]
+  resources :challenge_check_ins, only: %i[index] do
+    resource :challenge_check_in_like, only: %i[create destroy]
   end
 
   resources :challenge_participants, only: %i[create destroy]
@@ -41,22 +37,22 @@ Rails.application.routes.draw do
   root "home#index"
 
   namespace :webauthn do
-    resource :session, only: [:new, :create, :destroy] do
+    resource :session, only: %i[new create destroy] do
       post :callback, on: :collection
     end
 
-    resource :registration, only: [:new, :create] do
+    resource :registration, only: %i[new create] do
       post :callback, on: :collection
     end
   end
 
   namespace :email do
-    resource :session, only: [:new, :create] do
+    resource :session, only: %i[new create] do
       get :verify, on: :collection
     end
   end
 
-  resources :credentials, only: [:index, :create, :destroy] do
+  resources :credentials, only: %i[index create destroy] do
     post :callback, on: :collection
   end
 

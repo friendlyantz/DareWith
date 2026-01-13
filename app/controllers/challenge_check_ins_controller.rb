@@ -2,21 +2,35 @@ class ChallengeCheckInsController < ApplicationController
   include ActionView::RecordIdentifier
 
   before_action :require_current_user!
-  before_action :set_challenge_story
-  before_action :ensure_participant, only: [:new, :create]
+  before_action :set_challenge_story, only: %i[new create]
+  before_action :ensure_participant, only: %i[new create]
+
+  def index
+    @challenge_check_ins = ChallengeCheckIn
+      .joins(:challenge_story)
+      .where(challenge_story_id: current_user.challenge_participants.select(:challenge_story_id))
+      .includes(:challenge_participant, :challenge_check_in_likes, photo_attachment: :blob)
+      .order(created_at: :desc)
+      .limit(20)
+  end
 
   def new
     @challenge_check_in = ChallengeCheckIn.new(challenge_story_id: @challenge_story.id)
   end
 
   def create
-    return redirect_to challenge_story_path(@challenge_story), alert: "Cannot add check-ins to completed challenges" if @challenge_story.completed?
+    if @challenge_story.completed?
+      return redirect_to challenge_story_path(@challenge_story),
+        alert: "Cannot add check-ins to completed challenges"
+    end
 
     @challenge_participant = @challenge_story.find_or_activate_participant!(current_user)
     @challenge_check_in = @challenge_participant.challenge_check_ins.build(challenge_check_in_params)
     @challenge_check_in.challenge_story = @challenge_story
 
     if @challenge_check_in.save
+      @challenge_check_in.broadcast_prepend_to([current_user, "challenge_check_ins_feed"],
+        partial: "challenge_check_ins/challenge_check_in", locals: {show_challenge: true})
       render :success, status: :ok
     else
       render :new, status: :unprocessable_content
@@ -39,6 +53,6 @@ class ChallengeCheckInsController < ApplicationController
   end
 
   def challenge_check_in_params
-    params.expect(challenge_check_in: [:message, :photo])
+    params.expect(challenge_check_in: %i[message photo])
   end
 end

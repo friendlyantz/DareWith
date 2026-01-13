@@ -1,6 +1,7 @@
 <div class="dock dock-sm">
 
-  <%= link_to challenge_stories_path, 
+  <% path =  current_user ? challenge_check_ins_path : challenge_stories_path %>
+  <%= link_to path, 
     class: "dock",
     id: "challenges-dock-button" do %>
     <svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
