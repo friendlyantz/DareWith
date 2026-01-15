@@ -6,9 +6,13 @@ class ChallengeCheckInsController < ApplicationController
   before_action :ensure_participant, only: %i[new create]
 
   def index
+    @challenge_stories = ChallengeStory.where(
+      id: current_user.challenge_participants.select(:challenge_story_id)
+    ).active
+
     @challenge_check_ins = ChallengeCheckIn
       .joins(:challenge_story)
-      .where(challenge_story_id: current_user.challenge_participants.select(:challenge_story_id))
+      .where(challenge_story_id: @challenge_stories.select(:id))
       .includes(:challenge_participant, :challenge_check_in_likes, photo_attachment: :blob)
       .order(created_at: :desc)
       .limit(20)
@@ -29,8 +33,6 @@ class ChallengeCheckInsController < ApplicationController
     @challenge_check_in.challenge_story = @challenge_story
 
     if @challenge_check_in.save
-      @challenge_check_in.broadcast_prepend_to([current_user, "challenge_check_ins_feed"],
-        partial: "challenge_check_ins/challenge_check_in", locals: {show_challenge: true})
       render :success, status: :ok
     else
       render :new, status: :unprocessable_content

@@ -13,10 +13,8 @@ class ChallengeCheckIn < ApplicationRecord
   validate :photo_size_validation
   validate :one_check_in_per_day_per_participant
 
-  # Callbacks (broadcasts_to must be after has_one_attached for Cloudinary compatibility)
-  broadcasts_to lambda { |check_in|
-    [check_in.challenge_story, "challenge_check_ins"]
-  }, action: :prepend, partial: "challenge_check_ins/challenge_check_in", locals: {show_challenge: false}
+  # Callbacks (broadcasts must be after has_one_attached for Cloudinary compatibility)
+  after_create_commit :broadcast_to_story_and_participant_feeds
 
   # Public methods
   def liked_by?(user)
@@ -26,6 +24,20 @@ class ChallengeCheckIn < ApplicationRecord
   end
 
   private
+
+  def broadcast_to_story_and_participant_feeds
+    broadcast_prepend_to challenge_story,
+      target: "challenge_check_ins",
+      partial: "challenge_check_ins/challenge_check_in",
+      locals: {challenge_check_in: self, show_challenge: false}
+
+    User.where(id: challenge_story.challenge_participants.select(:user_id)).find_each do |user|
+      broadcast_prepend_to [user, "challenge_check_ins_feed"],
+        target: "challenge_check_ins_feed",
+        partial: "challenge_check_ins/challenge_check_in",
+        locals: {challenge_check_in: self, show_challenge: true}
+    end
+  end
 
   def photo_size_validation
     return unless photo.present? && photo.blob.byte_size > 10.megabytes

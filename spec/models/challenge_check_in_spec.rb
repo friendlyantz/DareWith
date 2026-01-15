@@ -29,6 +29,35 @@ RSpec.describe ChallengeCheckIn, type: :model do
     end
   end
 
+  describe "broadcasting a new check-in" do
+    let(:challenge_participant) { create(:challenge_participant) }
+    let(:story) { challenge_participant.challenge_story }
+    let(:fellow_participant) { create(:challenge_participant, challenge_story: story) }
+    let(:outsider) { create(:user) }
+
+    def feed_of(user)
+      "#{user.to_gid_param}:challenge_check_ins_feed"
+    end
+
+    def create_check_in
+      create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
+    end
+
+    it "prepends to the challenge story page" do
+      expect { create_check_in }.to have_broadcasted_to(story.to_gid_param)
+    end
+
+    it "prepends to the feed of every participant" do
+      expect { create_check_in }
+        .to have_broadcasted_to(feed_of(challenge_participant.user))
+        .and have_broadcasted_to(feed_of(fellow_participant.user))
+    end
+
+    it "does not reach the feed of users outside the challenge" do
+      expect { create_check_in }.not_to have_broadcasted_to(feed_of(outsider))
+    end
+  end
+
   describe "#liked_by?" do
     let(:check_in) { create(:challenge_check_in) }
     let(:user) { create(:user) }
