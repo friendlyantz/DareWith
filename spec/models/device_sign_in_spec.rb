@@ -24,6 +24,13 @@ RSpec.describe DeviceSignIn do
     end
   end
 
+  it "counts codes expired over a day ago as stale" do
+    create(:device_sign_in, expires_at: 1.hour.ago)
+    stale = create(:device_sign_in, expires_at: 2.days.ago)
+
+    expect(DeviceSignIn.stale).to contain_exactly(stale)
+  end
+
   describe "#claim!" do
     it "returns the approving user only once" do
       device_sign_in = create(:device_sign_in, :approved)

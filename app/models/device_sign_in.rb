@@ -15,6 +15,7 @@ class DeviceSignIn < ApplicationRecord
   validates :code, :expires_at, presence: true
 
   scope :live, -> { where(expires_at: Time.current..) }
+  scope :stale, -> { where(expires_at: ...1.day.ago) }
 
   before_validation on: :create do
     self.code ||= SecureRandom.alphanumeric(CODE_LENGTH, chars: CODE_CHARACTERS)
