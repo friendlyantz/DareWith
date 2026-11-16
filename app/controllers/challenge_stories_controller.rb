@@ -21,6 +21,7 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def show
+    remember_location unless current_user
     @challenge_story = ChallengeStory
       .includes(
         active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins],

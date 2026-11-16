@@ -26,7 +26,7 @@
   <div class="flex flex-col gap-2 text-center text-sm">
     <p>
       New here?
-      <%= link_to "Create an account", (session[:return_to] ? new_webauthn_registration_path(return_to: session[:return_to]) : new_webauthn_registration_path), class: "link link-accent font-semibold" %>
+      <%= link_to "Create an account", new_webauthn_registration_path, class: "link link-accent font-semibold" %>
     </p>
     <p><%= link_to "Sign in with email instead", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
   </div>

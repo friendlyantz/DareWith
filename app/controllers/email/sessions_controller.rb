@@ -66,7 +66,7 @@ module Email
       user.verify_email!
       sign_in(user)
 
-      redirect_to root_path, notice: "Signed in successfully!"
+      redirect_to after_sign_in_path, notice: "Signed in successfully!"
     end
 
     private

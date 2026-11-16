@@ -21,7 +21,9 @@ function callback(url, body) {
     credentials: 'same-origin'
   }).then(function(response) {
     if (response.ok) {
-      window.location.replace("/")
+      response.json()
+        .then((data) => window.location.replace(data.redirect_to || "/"))
+        .catch(() => window.location.replace("/"))
     } else if (response.status < 500) {
       response.text().then(showMessage);
     } else {

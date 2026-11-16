@@ -40,3 +40,6 @@
 spec/examples.txt
 
 /config/credentials/production.key
+
+# Local environment overrides (secrets), loaded by mise
+/mise.local.toml

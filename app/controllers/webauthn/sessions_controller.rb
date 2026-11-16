@@ -41,7 +41,7 @@ module Webauthn
         credential.update!(sign_count: webauthn_credential.sign_count)
         sign_in(user)
 
-        render json: {status: "ok"}, status: :ok
+        render json: {status: "ok", redirect_to: after_sign_in_path}, status: :ok
       rescue WebAuthn::Error => e
         render json: "Verification failed: #{e.message}", status: :unprocessable_content
       ensure

@@ -43,7 +43,7 @@ module Webauthn
         if user.save
           sign_in(user)
 
-          render json: {status: "ok"}, status: :ok
+          render json: {status: "ok", redirect_to: after_sign_in_path}, status: :ok
         else
           render json: {errors: user.errors.full_messages}, status: :unprocessable_content
         end

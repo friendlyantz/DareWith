@@ -75,6 +75,35 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       expect(session[:user_id]).to eq(user.id)
     end
 
+    it "returns to the challenge the visitor was invited to" do
+      story = create(:challenge_story)
+      get challenge_story_path(story)
+      token = user.generate_email_login_token!
+
+      get verify_email_session_path, params: {token: token}
+
+      expect(response).to redirect_to(challenge_story_path(story))
+    end
+
+    it "returns to the page that asked them to sign in" do
+      get today_path
+      token = user.generate_email_login_token!
+
+      get verify_email_session_path, params: {token: token}
+
+      expect(response).to redirect_to(today_path)
+    end
+
+    it "only returns once" do
+      get challenge_story_path(create(:challenge_story))
+      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+      delete webauthn_session_path
+
+      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+
+      expect(response).to redirect_to(root_path)
+    end
+
     it "clears token after successful verification" do
       token = user.generate_email_login_token!
 

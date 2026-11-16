@@ -41,6 +41,18 @@ class ApplicationController < ActionController::Base
   end
 
   def require_current_user!
-    redirect_to new_webauthn_session_path if current_user.blank?
+    return if current_user.present?
+
+    remember_location if request.get? || request.head?
+    redirect_to new_webauthn_session_path
+  end
+
+  # Where to send a visitor back to once they sign in or sign up, e.g. an invite link
+  def remember_location(path = request.fullpath)
+    session[:return_to] = path if path.start_with?("/") && !path.start_with?("//")
+  end
+
+  def after_sign_in_path
+    session.delete(:return_to).presence || root_path
   end
 end

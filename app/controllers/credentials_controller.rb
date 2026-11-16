@@ -38,7 +38,7 @@ class CredentialsController < ApplicationController
         public_key: webauthn_credential.public_key,
         sign_count: webauthn_credential.sign_count
       )
-        render json: {status: "ok"}, status: :ok
+        render json: {status: "ok", redirect_to: credentials_path}, status: :ok
       else
         render json: "Couldn't add your Security Key", status: :unprocessable_content
       end
