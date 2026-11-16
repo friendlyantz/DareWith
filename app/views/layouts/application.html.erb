@@ -37,7 +37,7 @@
     <%= render "layouts/navbar" %>
     <%= render "layouts/flash" %>
 
-    <% if current_user %>
+    <% if current_user && !current_page?(profile_path) %>
       <%= render "web_push_notifications/banner" %>
     <% end %>
 

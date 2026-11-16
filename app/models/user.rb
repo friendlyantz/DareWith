@@ -33,6 +33,10 @@ class User < ApplicationRecord
     credentials.size > CREDENTIAL_MIN_AMOUNT
   end
 
+  def past_challenge_stories
+    challenge_stories.merge(ChallengeStory.completed)
+  end
+
   def active_challenge_stories
     challenge_stories
       .merge(ChallengeParticipant.active)

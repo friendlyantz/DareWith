@@ -17,6 +17,18 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#past_challenge_stories" do
+    let(:user) { create(:user) }
+
+    it "returns completed stories the user took part in" do
+      completed = create(:challenge_story, :completed)
+      create(:challenge_participant, user: user, challenge_story: completed)
+      create(:challenge_participant, user: user)
+
+      expect(user.past_challenge_stories).to eq([completed])
+    end
+  end
+
   describe "#active_challenge_stories" do
     let(:user) { create(:user) }
 

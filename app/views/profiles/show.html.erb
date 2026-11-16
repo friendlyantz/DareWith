@@ -1,0 +1,57 @@
+<% content_for :title, "Me" %>
+<div class="w-full max-w-md flex flex-col gap-6 pt-2">
+  <h1 class="font-display text-4xl font-bold tracking-tight">Me</h1>
+
+  <div class="flex items-center gap-4">
+    <%= render "shared/avatar", name: current_user.username, size: "size-16", text: "font-display text-xl" %>
+    <div>
+      <p class="text-lg font-semibold"><%= current_user.username %></p>
+      <p class="text-sm text-base-content/70">
+        <%= pluralize(@active_challenges_count, "active challenge") %> · <%= @past_challenge_stories.size %> finished
+      </p>
+    </div>
+  </div>
+
+  <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+    <li class="flex min-h-14 items-center gap-3 px-4" data-controller="push-notifications">
+      <%= icon(:bell, css: "size-5 text-base-content/70") %>
+      <label for="push_toggle" class="flex-1">Check-in reminders</label>
+      <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
+    </li>
+    <li>
+      <%= link_to credentials_path, class: "flex min-h-14 items-center gap-3 px-4" do %>
+        <%= icon(:key, css: "size-5 text-base-content/70") %>
+        <span class="flex-1">Passkeys</span>
+        <span class="text-sm text-base-content/70"><%= current_user.credentials.size %></span>
+        <%= icon(:chevron_right, css: "size-5 text-base-content/50") %>
+      <% end %>
+    </li>
+    <li>
+      <details class="group">
+        <summary class="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4">
+          <%= icon(:archive, css: "size-5 text-base-content/70") %>
+          <span class="flex-1">Past challenges</span>
+          <span class="text-sm text-base-content/70"><%= @past_challenge_stories.size %></span>
+          <%= icon(:chevron_right, css: "size-5 text-base-content/50 transition-transform group-open:rotate-90") %>
+        </summary>
+        <ul class="border-t border-base-300 pb-1">
+          <% @past_challenge_stories.each do |challenge_story| %>
+            <li>
+              <%= link_to challenge_story, class: "flex items-center gap-3 py-2.5 pl-12 pr-4" do %>
+                <div class="flex-1 min-w-0">
+                  <p class="truncate font-semibold"><%= challenge_story.title %></p>
+                  <p class="text-sm text-base-content/70">Ended <%= challenge_story.finish.strftime("%-d %b %Y") %></p>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+          <% if @past_challenge_stories.empty? %>
+            <li class="py-2.5 pl-12 pr-4 text-sm text-base-content/70">None yet</li>
+          <% end %>
+        </ul>
+      </details>
+    </li>
+  </ul>
+
+  <%= button_to "Sign out", webauthn_session_path, method: :delete, class: "btn btn-block h-12 border-base-300 bg-base-100 text-error" %>
+</div>
