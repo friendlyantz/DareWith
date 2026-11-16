@@ -58,6 +58,31 @@ RSpec.describe ChallengeCheckIn, type: :model do
     end
   end
 
+  describe "#notify_other_participants" do
+    let(:story) { create(:challenge_story, title: "Morning run") }
+    let(:author) { create(:challenge_participant, challenge_story: story, user: create(:user, username: "maya")) }
+    let(:friend) { create(:challenge_participant, challenge_story: story) }
+    let!(:friend_device) { create(:web_push_notification, user: friend.user) }
+
+    before { create(:web_push_notification, user: author.user) }
+
+    it "notifies the other participants but not the author" do
+      check_in = create(:challenge_check_in, challenge_participant: author, message: "5 km done")
+
+      expect { check_in.notify_other_participants }
+        .to have_enqueued_job(PushNotificationJob)
+        .with(friend_device, title: "maya checked in", body: "Morning run: 5 km done", path: "/challenge_stories/#{story.id}")
+        .exactly(:once)
+    end
+
+    it "skips participants who left" do
+      friend.leave!
+      check_in = create(:challenge_check_in, challenge_participant: author)
+
+      expect { check_in.notify_other_participants }.not_to have_enqueued_job(PushNotificationJob)
+    end
+  end
+
   describe "#liked_by?" do
     let(:check_in) { create(:challenge_check_in) }
     let(:user) { create(:user) }

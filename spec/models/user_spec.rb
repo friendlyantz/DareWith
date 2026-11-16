@@ -17,6 +17,22 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#notify" do
+    let(:user) { create(:user) }
+
+    it "enqueues one push per device" do
+      create_list(:web_push_notification, 2, user: user)
+
+      expect {
+        user.notify(title: "Hello", path: "/today")
+      }.to have_enqueued_job(PushNotificationJob).exactly(2).times
+    end
+
+    it "does nothing without devices" do
+      expect { user.notify(title: "Hello") }.not_to have_enqueued_job(PushNotificationJob)
+    end
+  end
+
   describe "#past_challenge_stories" do
     let(:user) { create(:user) }
 

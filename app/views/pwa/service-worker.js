@@ -1,7 +1,7 @@
 console.log('Service worker loaded.');
 
-self.addEventListener("push", async (event) => {
-  const { title, options } = await event.data.json()
+self.addEventListener("push", (event) => {
+  const { title, options } = event.data.json()
   event.waitUntil(self.registration.showNotification(title, options))
 })
 

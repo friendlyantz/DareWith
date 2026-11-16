@@ -33,6 +33,7 @@ class ChallengeCheckInsController < ApplicationController
     @challenge_check_in.challenge_story = @challenge_story
 
     if @challenge_check_in.save
+      @challenge_check_in.notify_other_participants
       render :success, status: :ok
     else
       render :new, status: :unprocessable_content

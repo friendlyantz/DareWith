@@ -24,6 +24,15 @@ class ChallengeParticipant < ApplicationRecord
     todays_check_ins.any?
   end
 
+  def announce_joining
+    challenge_story.active_participants.where.not(id:).includes(:user).find_each do |participant|
+      participant.user.notify(
+        title: "#{name} joined #{challenge_story.title}",
+        path: Rails.application.routes.url_helpers.challenge_story_path(challenge_story)
+      )
+    end
+  end
+
   def leave!
     update!(status: :inactive)
   end

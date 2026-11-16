@@ -17,12 +17,19 @@ export default class extends Controller {
       this.toggleTarget.checked = isSubscribed
     }
     
-    // Show/hide banner
+    // Only offer notifications when the browser supports them and they aren't blocked
     if (isSubscribed) {
       this.removeBanner()
-    } else {
+    } else if (this.canAsk()) {
       this.showBanner()
     }
+  }
+
+  canAsk() {
+    return 'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window &&
+      Notification.permission !== 'denied'
   }
 
   async toggle(event) {
@@ -46,7 +53,8 @@ export default class extends Controller {
     try {
       if (wasChecked) {
         console.log('Toggle: subscribing...')
-        await this.subscribe()
+        const subscribed = await this.subscribe()
+        if (!subscribed) checkbox.checked = false
       } else {
         console.log('Toggle: unsubscribing...')
         await this.unsubscribe()
@@ -92,14 +100,14 @@ export default class extends Controller {
   }
 
   async subscribe() {
-    if (!('serviceWorker' in navigator)) {
-      alert('Push notifications are not supported in this browser')
-      return
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      alert('Notifications are not supported in this browser. On iPhone, add Strivo to your Home Screen first.')
+      return false
     }
 
     if (!window.vapidPublicKey) {
       console.error('VAPID public key not found')
-      return
+      return false
     }
 
     try {
@@ -112,7 +120,7 @@ export default class extends Controller {
       if (existingSub) {
         await this.sendSubscriptionToServer(existingSub)
         this.removeBanner()
-        return
+        return true
       }
 
       // Request permission
@@ -121,7 +129,8 @@ export default class extends Controller {
       
       if (permission !== 'granted') {
         console.warn('Notification permission denied')
-        return
+        this.removeBanner()
+        return false
       }
 
       // Subscribe
@@ -133,9 +142,11 @@ export default class extends Controller {
       console.log('Subscription successful:', sub)
       await this.sendSubscriptionToServer(sub)
       this.removeBanner()
+      return true
     } catch (error) {
       console.error('Subscription error:', error)
       alert('Failed to subscribe to notifications. Please try again.')
+      return false
     }
   }
 

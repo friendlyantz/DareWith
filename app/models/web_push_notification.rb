@@ -1,4 +1,6 @@
 class WebPushNotification < ApplicationRecord
+  VAPID_SUBJECT = "https://strivo.me"
+
   belongs_to :user
 
   def send_notification(title:, body: nil, icon: nil, badge: nil, path: "/")
@@ -20,6 +22,7 @@ class WebPushNotification < ApplicationRecord
       p256dh: p256dh_key,
       auth: auth_key,
       vapid: {
+        subject: VAPID_SUBJECT,
         private_key: Rails.application.credentials.dig(:web_push, :vapid_private_key),
         public_key: Rails.application.credentials.dig(:web_push, :vapid_public_key)
       }

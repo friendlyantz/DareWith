@@ -33,6 +33,12 @@ class User < ApplicationRecord
     credentials.size > CREDENTIAL_MIN_AMOUNT
   end
 
+  def notify(title:, body: nil, path: "/")
+    web_push_notifications.each do |subscription|
+      PushNotificationJob.perform_later(subscription, title:, body:, path:)
+    end
+  end
+
   def past_challenge_stories
     challenge_stories.merge(ChallengeStory.completed)
   end

@@ -5,7 +5,10 @@ class ChallengeParticipantsController < ApplicationController
   def create
     return redirect_to challenge_story_path(@challenge_story), alert: "This challenge is full (max #{ChallengeStory::MAX_PARTICIPANTS} participants)" if @challenge_story.at_capacity?
 
-    @challenge_story.find_or_activate_participant!(current_user)
+    joining = @challenge_story.participant_for(current_user).nil?
+    participant = @challenge_story.find_or_activate_participant!(current_user)
+    participant.announce_joining if joining
+
     redirect_to challenge_story_path(@challenge_story), notice: "You've joined! Welcome to the challenge."
   end
 

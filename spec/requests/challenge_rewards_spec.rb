@@ -48,6 +48,17 @@ RSpec.describe "ChallengeRewards", type: :request do
       end
     end
 
+    context "when the receiver has notifications on" do
+      it "notifies the receiver" do
+        device = create(:web_push_notification, user: receiver.user)
+
+        expect {
+          post challenge_story_challenge_rewards_path(story),
+            params: {challenge_reward: {receiver_id: receiver.id, description: "Coffee treat!"}}
+        }.to have_enqueued_job(PushNotificationJob).with(device, hash_including(title: "#{giver.name} pledged you a reward"))
+      end
+    end
+
     context "when posting someone else as the giver" do
       let(:third) { create(:challenge_participant, challenge_story: story) }
 
@@ -90,6 +101,14 @@ RSpec.describe "ChallengeRewards", type: :request do
 
         expect(reward.reload).to be_fulfilled
         expect(response).to redirect_to(challenge_story_challenge_rewards_path(story))
+      end
+
+      it "tells the giver" do
+        device = create(:web_push_notification, user: giver.user)
+
+        expect {
+          patch fulfill_challenge_story_challenge_reward_path(story, reward)
+        }.to have_enqueued_job(PushNotificationJob).with(device, hash_including(title: "#{receiver.name} received your reward"))
       end
     end
 

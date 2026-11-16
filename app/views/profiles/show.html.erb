@@ -15,7 +15,7 @@
   <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
     <li class="flex min-h-14 items-center gap-3 px-4" data-controller="push-notifications">
       <%= icon(:bell, css: "size-5 text-base-content/70") %>
-      <label for="push_toggle" class="flex-1">Check-in reminders</label>
+      <label for="push_toggle" class="flex-1">Notifications on this device</label>
       <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
     </li>
     <li>
@@ -52,6 +52,10 @@
       </details>
     </li>
   </ul>
+
+  <p class="-mt-3 px-1 text-xs text-base-content/60">
+    Get notified when friends check in, join, or pledge you a reward. On iPhone, add Strivo to your Home Screen first.
+  </p>
 
   <%= button_to "Sign out", webauthn_session_path, method: :delete, class: "btn btn-block h-12 border-base-300 bg-base-100 text-error" %>
 </div>

@@ -20,6 +20,16 @@ class ChallengeCheckIn < ApplicationRecord
   after_create_commit :broadcast_to_story_and_participant_feeds
 
   # Public methods
+  def notify_other_participants
+    challenge_story.active_participants.where.not(id: challenge_participant_id).includes(:user).find_each do |participant|
+      participant.user.notify(
+        title: "#{challenge_participant.name} checked in",
+        body: "#{challenge_story.title}: #{message.truncate(80)}",
+        path: Rails.application.routes.url_helpers.challenge_story_path(challenge_story)
+      )
+    end
+  end
+
   def liked_by?(user)
     return false unless user
 

@@ -1,19 +1,18 @@
 class WebPushNotificationsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:create]
-
   def create
     return head :unauthorized unless current_user
 
     subscription = JSON.parse(request.body.read)
 
-    notification = current_user.web_push_notifications.find_or_create_by(
-      endpoint: subscription["endpoint"]
-    ) do |n|
-      n.auth_key = subscription.dig("keys", "auth")
-      n.p256dh_key = subscription.dig("keys", "p256dh")
-      n.device_name = detect_device_name
-      n.user_agent = request.user_agent
-    end
+    WebPushNotification.where(endpoint: subscription["endpoint"]).where.not(user: current_user).destroy_all
+
+    notification = current_user.web_push_notifications.find_or_initialize_by(endpoint: subscription["endpoint"])
+    notification.update!(
+      auth_key: subscription.dig("keys", "auth"),
+      p256dh_key: subscription.dig("keys", "p256dh"),
+      device_name: detect_device_name,
+      user_agent: request.user_agent
+    )
 
     render json: {success: true, id: notification.id}, status: :created
   end

@@ -29,6 +29,24 @@ RSpec.describe "ChallengeParticipants", type: :request do
         expect(flash[:notice]).to include("You've joined!")
       end
 
+      it "tells existing participants someone joined" do
+        existing = create(:challenge_participant, challenge_story: story)
+        create(:web_push_notification, user: existing.user)
+
+        expect {
+          post challenge_participants_path, params: {challenge_story_id: story.id}
+        }.to have_enqueued_job(PushNotificationJob).exactly(:once)
+      end
+
+      it "does not announce again when already a participant" do
+        create(:challenge_participant, user: user, challenge_story: story)
+        create(:web_push_notification, user: create(:challenge_participant, challenge_story: story).user)
+
+        expect {
+          post challenge_participants_path, params: {challenge_story_id: story.id}
+        }.not_to have_enqueued_job(PushNotificationJob)
+      end
+
       it "associates the participant with the user" do
         post challenge_participants_path, params: {challenge_story_id: story.id}
 

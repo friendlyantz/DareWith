@@ -29,7 +29,27 @@ class ChallengeReward < ApplicationRecord
     update!(status: :canceled)
   end
 
+  def notify_receiver
+    receiver.user.notify(
+      title: "#{giver.name} pledged you a reward",
+      body: description.truncate(80),
+      path: rewards_path
+    )
+  end
+
+  def notify_giver_of_fulfilment
+    giver.user.notify(
+      title: "#{receiver.name} received your reward",
+      body: description.truncate(80),
+      path: rewards_path
+    )
+  end
+
   private
+
+  def rewards_path
+    Rails.application.routes.url_helpers.challenge_story_challenge_rewards_path(challenge_story)
+  end
 
   def cannot_reward_self
     errors.add(:receiver_id, "can't be the same as giver") if giver_id == receiver_id

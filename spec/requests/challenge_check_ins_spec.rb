@@ -125,6 +125,15 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
         expect(response).to have_http_status(:ok)
       end
+
+      it "notifies the other participants" do
+        friend = create(:challenge_participant, challenge_story: story)
+        create(:web_push_notification, user: friend.user)
+
+        expect {
+          post challenge_story_challenge_check_ins_path(story), params: valid_params
+        }.to have_enqueued_job(PushNotificationJob).exactly(:once)
+      end
     end
 
     context "with invalid params" do

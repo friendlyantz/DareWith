@@ -45,6 +45,7 @@ class ChallengeRewardsController < ApplicationController
     @reward.giver = @current_challenge_participant
 
     if @reward.save
+      @reward.notify_receiver
       redirect_to challenge_story_challenge_rewards_path(@challenge_story),
         notice: "You've successfully pledged a reward!"
     else
@@ -55,6 +56,7 @@ class ChallengeRewardsController < ApplicationController
 
   def fulfill
     @reward.fulfill!
+    @reward.notify_giver_of_fulfilment
     redirect_to challenge_story_challenge_rewards_path(@challenge_story),
       notice: "Reward has been marked as fulfilled!"
   end
