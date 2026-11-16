@@ -2,7 +2,7 @@
 <% participant = challenge_check_in.challenge_participant %>
 <article id="<%= dom_id challenge_check_in %>" class="card overflow-hidden border border-base-300 bg-base-100">
   <div class="flex items-center gap-3 px-4 py-3">
-    <%= render "shared/avatar", name: participant.name, size: "size-9" %>
+    <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-9" %>
     <div class="flex-1 min-w-0">
       <div class="flex items-baseline justify-between gap-2">
         <span class="font-semibold truncate"><%= participant.user_id == current_user&.id ? "You" : participant.name %></span>

@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :challenge_participants, dependent: :destroy
   has_many :challenge_stories, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
+  has_one_attached :avatar
 
   # Validations
   validates :username, presence: true, uniqueness: true,
@@ -25,6 +26,7 @@ class User < ApplicationRecord
   validates :email, presence: false, uniqueness: {allow_nil: true}, format: {with: URI::MailTo::EMAIL_REGEXP, allow_nil: true}
   validates :reminder_hour, inclusion: {in: 0..23}, allow_nil: true
   validates :time_zone, presence: true
+  validate :avatar_is_a_small_image
 
   # Callbacks
   after_initialize do
@@ -127,5 +129,14 @@ class User < ApplicationRecord
 
   def verify_email!
     update!(email_verified_at: Time.current)
+  end
+
+  private
+
+  def avatar_is_a_small_image
+    return unless avatar.attached?
+
+    errors.add(:avatar, "must be an image") unless avatar.blob.content_type.to_s.start_with?("image/")
+    errors.add(:avatar, "is too large (maximum 10MB)") if avatar.blob.byte_size > 10.megabytes
   end
 end

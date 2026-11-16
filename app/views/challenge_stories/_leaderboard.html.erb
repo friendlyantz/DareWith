@@ -5,7 +5,7 @@
     <% challenge_story.ranked_participants.each.with_index(1) do |participant, rank| %>
       <li class="flex items-center gap-3 px-4 py-3">
         <span class="w-4 font-display font-bold text-base-content/60"><%= rank %></span>
-        <%= render "shared/avatar", name: participant.name, size: "size-9" %>
+        <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-9" %>
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <div class="flex justify-between gap-2">
             <span class="font-semibold truncate"><%= participant.name %></span>

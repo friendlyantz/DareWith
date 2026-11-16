@@ -1,6 +1,15 @@
-<%# locals: (name:, checked_in: false, size: "size-8", text: "text-[0.65rem]") %>
-<div class="avatar avatar-placeholder" title="<%= name %>">
-  <div class="<%= class_names(size, avatar_tint(name), "rounded-full text-stone-900", checked_in ? "ring-2 ring-info" : "ring-2 ring-base-100") %>">
-    <span class="<%= class_names(text, "font-bold tracking-tight") %>"><%= avatar_initials(name) %></span>
+<%# locals: (name:, user: nil, checked_in: false, size: "size-8", text: "text-[0.65rem]") %>
+<% ring = checked_in ? "ring-2 ring-info" : "ring-2 ring-base-100" %>
+<% if user&.avatar&.attached? %>
+  <div class="avatar" title="<%= name %>">
+    <div class="<%= class_names(size, "rounded-full", ring) %>">
+      <%= cl_image_tag(user.avatar.key, width: 160, height: 160, crop: :thumb, gravity: :face, alt: name) %>
+    </div>
   </div>
-</div>
+<% else %>
+  <div class="avatar avatar-placeholder" title="<%= name %>">
+    <div class="<%= class_names(size, avatar_tint(name), "rounded-full text-stone-900", ring) %>">
+      <span class="<%= class_names(text, "font-bold tracking-tight") %>"><%= avatar_initials(name) %></span>
+    </div>
+  </div>
+<% end %>

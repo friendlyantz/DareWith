@@ -3,12 +3,30 @@
   <h1 class="font-display text-4xl font-bold tracking-tight">Me</h1>
 
   <div class="flex items-center gap-4">
-    <%= render "shared/avatar", name: current_user.username, size: "size-16", text: "font-display text-xl" %>
+    <%= form_with model: current_user, url: avatar_path, method: :patch,
+      data: {controller: "image-compressor autosubmit", action: "image-compressor:compressed->autosubmit#submit"} do |form| %>
+      <label class="relative block cursor-pointer" title="Change photo">
+        <%= render "shared/avatar", name: current_user.username, user: current_user, size: "size-16", text: "font-display text-xl" %>
+        <span class="absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full border-2 border-base-200 bg-base-100">
+          <%= icon(:camera, css: "size-4") %>
+        </span>
+        <span class="sr-only">Change photo</span>
+        <%= form.file_field :avatar,
+          accept: "image/*",
+          class: "sr-only",
+          data: {image_compressor_target: "input", action: "change->image-compressor#compress"} %>
+      </label>
+    <% end %>
     <div>
       <p class="text-lg font-semibold"><%= current_user.username %></p>
       <p class="text-sm text-base-content/70">
         <%= pluralize(@active_challenges_count, "active challenge") %> · <%= @past_challenge_stories.size + @wrap_up_stories.size %> finished
       </p>
+      <% if current_user.avatar.attached? %>
+        <%= button_to "Remove photo", avatar_path, method: :delete, class: "link link-hover text-sm text-base-content/70", form_class: "mt-0.5" %>
+      <% else %>
+        <p class="text-sm text-base-content/60 mt-0.5">Tap to add a photo. Friends and anyone with a challenge link can see it.</p>
+      <% end %>
     </div>
   </div>
 

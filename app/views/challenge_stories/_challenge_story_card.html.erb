@@ -18,7 +18,7 @@
     <% if challenge_story.active_participants.any? %>
       <div class="flex -space-x-1">
         <% challenge_story.active_participants.each do |participant| %>
-          <%= render "shared/avatar", name: participant.name, size: "size-7" %>
+          <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-7" %>
         <% end %>
       </div>
     <% end %>

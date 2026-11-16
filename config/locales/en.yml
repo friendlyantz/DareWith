@@ -33,3 +33,5 @@ en:
     attributes:
       challenge_story:
         description: "Rules"
+      user:
+        avatar: "Photo"

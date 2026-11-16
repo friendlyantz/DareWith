@@ -20,7 +20,7 @@
     <div class="flex items-center gap-2.5 mt-1">
       <div class="flex -space-x-1 shrink-0">
         <% challenge_story.active_participants.each do |participant| %>
-          <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today? %>
+          <%= render "shared/avatar", name: participant.name, user: participant.user, checked_in: participant.checked_in_today? %>
         <% end %>
       </div>
       <% if challenge_story.accepting_check_ins? %>

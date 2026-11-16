@@ -8,7 +8,7 @@ class ChallengeStoriesController < ApplicationController
     @challenge_stories = ChallengeStory
       .joins(:challenge_participants)
       .where(challenge_participants: {user_id: current_user.id, status: :active})
-      .includes(:active_participants, challenge_check_ins: {photo_attachment: :blob})
+      .includes({active_participants: {user: {avatar_attachment: :blob}}}, challenge_check_ins: {photo_attachment: :blob})
       .left_joins(:challenge_check_ins)
       .group("challenge_stories.id")
       .order(Arel.sql("MAX(challenge_check_ins.created_at) DESC NULLS LAST, challenge_stories.updated_at DESC"))
@@ -23,9 +23,9 @@ class ChallengeStoriesController < ApplicationController
   def show
     @challenge_story = ChallengeStory
       .includes(
-        active_participants: [:user, :todays_check_ins],
+        active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins],
         challenge_rewards: [:giver, :receiver],
-        challenge_check_ins: [:challenge_participant, :challenge_check_in_likes, photo_attachment: :blob]
+        challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, photo_attachment: :blob]
       )
       .find(params[:id])
 

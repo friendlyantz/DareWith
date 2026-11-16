@@ -1,4 +1,4 @@
-<% demo_challenges = ChallengeStory.includes(:active_participants).where(
+<% demo_challenges = ChallengeStory.includes(active_participants: {user: {avatar_attachment: :blob}}).where(
   id: [
     "00000000-0000-4000-8000-000000000001",
     "00000000-0000-4000-8000-000000000002",

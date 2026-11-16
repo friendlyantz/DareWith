@@ -57,6 +57,7 @@ export default class extends Controller {
         this.statusTarget.classList.add("alert-error")
       }
     }
+    this.dispatch("compressed")
   }
 
   async compressFile(file) {
