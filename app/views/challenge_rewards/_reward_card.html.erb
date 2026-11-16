@@ -1,37 +1,33 @@
 <%# locals: (reward:, challenge_story:) %>
-<div class="card bg-base-100 shadow-xl">
-  <div class="card-body">
-    <div class="flex justify-between items-start">
-      <h2 class="card-title">
-        <%= reward.giver.name %> → <%= reward.receiver.name %>
-        <div class="badge <%= reward_status_class(reward.status) %>"><%= reward.status.capitalize %></div>
-      </h2>
+<div class="flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-4">
+  <div class="flex items-start gap-3">
+    <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
+      <%= icon(:gift) %>
     </div>
-
-    <p><%= reward.description %></p>
-
-    <% if reward.fulfilled_at.present? %>
-      <p class="text-sm opacity-70 mt-2">Fulfilled on: <%= reward.fulfilled_at.strftime("%B %d, %Y") %></p>
-    <% end %>
-
-    <% if reward.status == 'pending' && challenge_story.finished? %>
-      <div class="card-actions justify-end mt-4">
-        <% if reward.receiver.user == current_user %>
-          <%= button_to "Mark as Received", fulfill_challenge_story_challenge_reward_path(challenge_story, reward), 
-              method: :patch, 
-              class: "btn btn-success btn-sm",
-              data: { turbo_confirm: "Are you sure you have received this reward from #{reward.giver.name}?" }
-              %>
-        <% end %>
-
-        <% if reward.giver.user == current_user %>
-          <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward), 
-              method: :patch, 
-              class: "btn btn-error btn-sm",
-              data: { turbo_confirm: "Are you sure? you cannot pledge again during the challenge." } %>
-        <% end %>
-
-      </div>
-    <% end %>
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold"><%= reward.description %></p>
+      <p class="text-sm text-base-content/70 mt-0.5"><%= reward.giver.name %> → <%= reward.receiver.name %></p>
+      <% if reward.fulfilled_at.present? %>
+        <p class="text-sm text-base-content/70">Received <%= reward.fulfilled_at.strftime("%-d %b %Y") %></p>
+      <% end %>
+    </div>
+    <span class="badge badge-sm <%= reward_status_class(reward.status) %>"><%= reward.status.capitalize %></span>
   </div>
+
+  <% if reward.pending? && challenge_story.finished? %>
+    <div class="flex justify-end gap-2">
+      <% if reward.giver.user == current_user %>
+        <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),
+          method: :patch,
+          class: "btn btn-sm btn-ghost text-error",
+          data: {turbo_confirm: "Cancel this reward? You can't pledge again during this challenge."} %>
+      <% end %>
+      <% if reward.receiver.user == current_user %>
+        <%= button_to "Mark as received", fulfill_challenge_story_challenge_reward_path(challenge_story, reward),
+          method: :patch,
+          class: "btn btn-sm btn-primary",
+          data: {turbo_confirm: "Have you received this reward from #{reward.giver.name}?"} %>
+      <% end %>
+    </div>
+  <% end %>
 </div>

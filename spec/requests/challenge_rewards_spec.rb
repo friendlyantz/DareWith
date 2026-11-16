@@ -33,7 +33,6 @@ RSpec.describe "ChallengeRewards", type: :request do
       let(:valid_params) do
         {
           challenge_reward: {
-            giver_id: giver.id,
             receiver_id: receiver.id,
             description: "Coffee treat!"
           }
@@ -49,11 +48,21 @@ RSpec.describe "ChallengeRewards", type: :request do
       end
     end
 
+    context "when posting someone else as the giver" do
+      let(:third) { create(:challenge_participant, challenge_story: story) }
+
+      it "always records the current user as the giver" do
+        post challenge_story_challenge_rewards_path(story),
+          params: {challenge_reward: {giver_id: third.id, receiver_id: receiver.id, description: "Forged"}}
+
+        expect(ChallengeReward.last.giver).to eq(giver)
+      end
+    end
+
     context "when rewarding self" do
       let(:invalid_params) do
         {
           challenge_reward: {
-            giver_id: giver.id,
             receiver_id: giver.id,
             description: "Self reward"
           }

@@ -14,11 +14,11 @@ RSpec.describe "Challenge Rewards", type: :system do
     scenario "participant can pledge a reward to another participant" do
       visit challenge_story_challenge_rewards_path(challenge)
 
-      click_on "Pledge a New Reward"
+      click_on "Pledge a reward"
 
       select receiver.name, from: "Who gets the reward?"
       fill_in "What will you give them?", with: "I'll buy you coffee if you complete the challenge!"
-      click_on "Pledge Reward"
+      click_on "Pledge reward"
 
       expect(page).to have_content("I'll buy you coffee")
     end
@@ -36,7 +36,7 @@ RSpec.describe "Challenge Rewards", type: :system do
     scenario "participant can see rewards they've pledged" do
       visit challenge_story_challenge_rewards_path(challenge)
 
-      expect(page).to have_content("Rewards You've Pledged")
+      expect(page).to have_content("You pledged")
       expect(page).to have_content("Coffee reward")
     end
   end

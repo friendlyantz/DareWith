@@ -12,7 +12,7 @@ RSpec.describe "Challenge Stories", type: :system do
     scenario "user creates a new challenge successfully" do
       new_challenge_page.load
 
-      expect(page).to have_content("Start a New Challenge")
+      expect(page).to have_content("New challenge")
 
       new_challenge_page.fill_form(
         title: "30 Day Fitness Challenge",

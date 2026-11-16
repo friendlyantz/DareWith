@@ -13,20 +13,18 @@
       </button>
     </div>
 
-    <% if current_user %>
+    <% if participant %>
       <details class="dropdown dropdown-end">
         <summary class="btn btn-ghost btn-circle" aria-label="More actions"><%= icon(:dots) %></summary>
         <ul class="dropdown-content menu z-20 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
           <li><%= link_to "Edit challenge", edit_challenge_story_path(challenge_story) %></li>
           <li><%= link_to "All rewards", challenge_story_challenge_rewards_path(challenge_story) %></li>
-          <% if participant %>
-            <li>
-              <%= button_to "Leave challenge", challenge_participant_path(participant),
-                method: :delete,
-                class: "text-error",
-                data: {turbo_confirm: "Are you sure you want to leave this challenge?"} %>
-            </li>
-          <% end %>
+          <li>
+            <%= button_to "Leave challenge", challenge_participant_path(participant),
+              method: :delete,
+              class: "text-error",
+              data: {turbo_confirm: "Are you sure you want to leave this challenge?"} %>
+          </li>
         </ul>
       </details>
     <% end %>

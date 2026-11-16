@@ -1,15 +1,15 @@
-<% content_for :title, "New challenge story" %>
-<div class="w-full max-w-4xl mx-auto">
-  <div class="mb-6">
-    <h1 class="font-bold text-4xl mb-2">Start a New Challenge</h1>
-    <p class="text-base-content/70">Create a challenge and invite others to join you!</p>
-  </div>
-
-  <%= render "form", challenge_story: @challenge_story %>
-
-  <div class="mt-4">
-    <%= link_to challenge_stories_path, class: "btn btn-ghost" do %>
-      <%= render Button::Component.new(color: "outline", icon: :arrow_left, text: "Back to Challenges") %>
+<% content_for :title, "New challenge" %>
+<div class="w-full max-w-md flex flex-col gap-4">
+  <div class="-mx-2">
+    <%= link_to today_path, class: "btn btn-ghost px-2 gap-1" do %>
+      <%= icon(:chevron_left) %> Today
     <% end %>
   </div>
+
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">New challenge</h1>
+    <p class="text-sm text-base-content/70 mt-1">Set the rules and dates, then share the link with up to <%= ChallengeStory::MAX_PARTICIPANTS - 1 %> friends.</p>
+  </div>
+
+  <%= render "form", challenge_story: @challenge_story, submit_text: "Start challenge" %>
 </div>

@@ -74,7 +74,7 @@ class ChallengeStoriesController < ApplicationController
   private
 
   def set_challenge_story
-    @challenge_story = ChallengeStory.find(params.expect(:id))
+    @challenge_story = current_user.challenge_stories.merge(ChallengeParticipant.active).find(params.expect(:id))
   end
 
   def challenge_story_params

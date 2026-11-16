@@ -36,14 +36,18 @@ class ChallengeRewardsController < ApplicationController
   end
 
   def create
-    @reward = ChallengeReward.new(reward_params)
-    @reward.challenge_story = @challenge_story
+    @current_challenge_participant = current_challenge_participant_for_story
+    unless @current_challenge_participant
+      return redirect_to challenge_story_path(@challenge_story), alert: "Join this challenge to pledge a reward."
+    end
+
+    @reward = @challenge_story.challenge_rewards.build(reward_params)
+    @reward.giver = @current_challenge_participant
 
     if @reward.save
       redirect_to challenge_story_challenge_rewards_path(@challenge_story),
         notice: "You've successfully pledged a reward!"
     else
-      @current_challenge_participant = current_challenge_participant_for_story
       @participants = available_participants_for_pledge
       render :new, status: :unprocessable_content
     end
@@ -86,7 +90,7 @@ class ChallengeRewardsController < ApplicationController
   end
 
   def reward_params
-    params.require(:challenge_reward).permit(:giver_id, :receiver_id, :description)
+    params.expect(challenge_reward: [:receiver_id, :description])
   end
 
   def current_challenge_participant_for_story

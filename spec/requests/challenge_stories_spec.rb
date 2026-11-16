@@ -122,10 +122,33 @@ RSpec.describe "ChallengeStories", type: :request do
     before { sign_in_as(user) }
 
     it "marks the story as complete" do
+      create(:challenge_participant, user: user, challenge_story: story)
+
       patch complete_challenge_story_path(story)
 
       expect(story.reload).to be_completed
       expect(response).to redirect_to(challenge_stories_path)
+    end
+
+    it "does not let non-participants complete it" do
+      patch complete_challenge_story_path(story)
+
+      expect(response).to have_http_status(:not_found)
+      expect(story.reload).not_to be_completed
+    end
+  end
+
+  describe "PATCH /challenge_stories/:id" do
+    let(:user) { create(:user) }
+    let(:story) { create(:challenge_story, title: "Original") }
+
+    before { sign_in_as(user) }
+
+    it "does not let non-participants edit it" do
+      patch challenge_story_path(story), params: {challenge_story: {title: "Hijacked"}}
+
+      expect(response).to have_http_status(:not_found)
+      expect(story.reload.title).to eq("Original")
     end
   end
 
@@ -136,6 +159,8 @@ RSpec.describe "ChallengeStories", type: :request do
     before { sign_in_as(user) }
 
     it "destroys the challenge story" do
+      create(:challenge_participant, user: user, challenge_story: story)
+
       expect {
         delete challenge_story_path(story)
       }.to change(ChallengeStory, :count).by(-1)

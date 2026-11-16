@@ -1,17 +1,12 @@
-<% content_for :title, "Editing challenge story" %>
-<div class="w-full max-w-4xl mx-auto">
-  <%= turbo_frame_tag "challenge_story" do %>
-    <div class="mb-6">
-      <h1 class="font-bold text-4xl mb-2">Edit Challenge</h1>
-      <p class="text-base-content/70">Update your challenge details</p>
-    </div>
+<% content_for :title, "Edit challenge" %>
+<div class="w-full max-w-md flex flex-col gap-4">
+  <div class="-mx-2">
+    <%= link_to challenge_story_path(@challenge_story), class: "btn btn-ghost px-2 gap-1" do %>
+      <%= icon(:chevron_left) %> Back
+    <% end %>
+  </div>
 
-    <%= render "form", challenge_story: @challenge_story %>
+  <h1 class="font-display text-3xl font-bold tracking-tight">Edit challenge</h1>
 
-    <div class="mt-4">
-      <%= link_to challenge_story_path(@challenge_story), "data-turbo-frame": "_top" do %>
-        <%= render Button::Component.new(text: "Cancel", icon: :x, color: "ghost") %>
-      <% end %>
-    </div>
-  <% end%>
+  <%= render "form", challenge_story: @challenge_story, submit_text: "Save changes" %>
 </div>
