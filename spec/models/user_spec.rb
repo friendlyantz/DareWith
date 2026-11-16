@@ -17,6 +17,63 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#reminder_due?" do
+    let(:user) { build(:user, time_zone: "Australia/Melbourne", reminder_hour: 19) }
+
+    it "is due at the reminder hour in the user's time zone" do
+      expect(user.reminder_due?(Time.utc(2026, 11, 16, 8, 30))).to be true
+    end
+
+    it "is not due at other hours" do
+      expect(user.reminder_due?(Time.utc(2026, 11, 16, 19, 30))).to be false
+    end
+
+    it "is not due twice on the same local day" do
+      user.last_reminded_on = Date.new(2026, 11, 16)
+
+      expect(user.reminder_due?(Time.utc(2026, 11, 16, 8, 30))).to be false
+    end
+
+    it "is never due when turned off" do
+      user.reminder_hour = nil
+
+      expect(user.reminder_due?(Time.utc(2026, 11, 16, 8, 30))).to be false
+    end
+  end
+
+  describe "#remind_to_check_in" do
+    let(:user) { create(:user, time_zone: "Australia/Melbourne", reminder_hour: 19) }
+    let(:story) { create(:challenge_story, title: "Morning run", start: Date.new(2026, 11, 10), finish: Date.new(2026, 11, 30)) }
+    let!(:participant) { create(:challenge_participant, user: user, challenge_story: story) }
+    let!(:device) { create(:web_push_notification, user: user) }
+    let(:seven_pm_in_melbourne) { Time.utc(2026, 11, 16, 8, 0) }
+
+    it "reminds about challenges without a check-in today" do
+      travel_to(seven_pm_in_melbourne) do
+        expect { user.remind_to_check_in }
+          .to have_enqueued_job(PushNotificationJob)
+          .with(device, title: "Still time to check in", body: "Morning run", path: "/today")
+        expect(user.reload.last_reminded_on).to eq(Date.new(2026, 11, 16))
+      end
+    end
+
+    it "counts a check-in from earlier in the local day, even if it was yesterday in UTC" do
+      travel_to(seven_pm_in_melbourne) do
+        create(:challenge_check_in, challenge_participant: participant).update_column(:created_at, Time.utc(2026, 11, 15, 20, 0))
+
+        expect { user.remind_to_check_in }.not_to have_enqueued_job(PushNotificationJob)
+      end
+    end
+
+    it "skips challenges that haven't started" do
+      story.update!(start: Date.new(2026, 11, 20))
+
+      travel_to(seven_pm_in_melbourne) do
+        expect { user.remind_to_check_in }.not_to have_enqueued_job(PushNotificationJob)
+      end
+    end
+  end
+
   describe "#notify" do
     let(:user) { create(:user) }
 

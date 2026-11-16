@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   get "test_sign_in/:user_id", to: "webauthn/sessions#test_sign_in", as: :test_sign_in if Rails.env.test?
 
   resource :today, only: %i[show], controller: "today"
-  resource :profile, only: %i[show], path: "me"
+  resource :profile, only: %i[show update], path: "me"
 
   resources :challenge_stories, only: %i[index show new create edit update destroy] do
     member do

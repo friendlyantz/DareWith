@@ -5,6 +5,7 @@ class User < ApplicationRecord
   EMAIL_TOKEN_EXPIRY = 24.hours
   RATE_LIMIT_WINDOW = 15.minutes
   MAX_EMAIL_ATTEMPTS = 3
+  REMINDER_HOURS = (6..22).to_a
 
   # Associations
   has_many :credentials, dependent: :destroy
@@ -22,6 +23,8 @@ class User < ApplicationRecord
       message: "can only contain letters, numbers, underscores, and hyphens"
     }
   validates :email, presence: false, uniqueness: {allow_nil: true}, format: {with: URI::MailTo::EMAIL_REGEXP, allow_nil: true}
+  validates :reminder_hour, inclusion: {in: 0..23}, allow_nil: true
+  validates :time_zone, presence: true
 
   # Callbacks
   after_initialize do
@@ -31,6 +34,33 @@ class User < ApplicationRecord
   # Public methods
   def can_delete_credentials?
     credentials.size > CREDENTIAL_MIN_AMOUNT
+  end
+
+  def reminder_due?(now = Time.current)
+    return false if reminder_hour.nil?
+
+    local_now = now.in_time_zone(time_zone)
+    local_now.hour == reminder_hour && last_reminded_on != local_now.to_date
+  end
+
+  def challenges_to_check_in_today
+    Time.use_zone(time_zone) do
+      active_challenge_stories.includes(active_participants: :todays_check_ins).select do |challenge_story|
+        challenge_story.accepting_check_ins? &&
+          challenge_story.start <= Time.zone.today &&
+          !challenge_story.participant_for(self).checked_in_today?
+      end
+    end
+  end
+
+  def remind_to_check_in(now = Time.current)
+    return unless reminder_due?(now)
+
+    update!(last_reminded_on: now.in_time_zone(time_zone).to_date)
+    challenge_stories = challenges_to_check_in_today
+    return if challenge_stories.empty?
+
+    notify(title: "Still time to check in", body: challenge_stories.map(&:title).to_sentence, path: "/today")
   end
 
   def notify(title:, body: nil, path: "/")

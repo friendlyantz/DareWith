@@ -18,6 +18,17 @@
       <label for="push_toggle" class="flex-1">Notifications on this device</label>
       <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
     </li>
+    <li class="flex min-h-14 items-center gap-3 px-4">
+      <%= icon(:clock, css: "size-5 text-base-content/70") %>
+      <%= form_with model: current_user, url: profile_path, method: :patch, class: "flex flex-1 items-center gap-3", data: {controller: "autosubmit"} do |form| %>
+        <%= form.label :reminder_hour, "Daily reminder", class: "flex-1" %>
+        <%= form.select :reminder_hour,
+          User::REMINDER_HOURS.map { [format("%02d:00", it), it] },
+          {include_blank: "Off"},
+          class: "select select-sm w-28",
+          data: {action: "autosubmit#submit"} %>
+      <% end %>
+    </li>
     <li>
       <%= link_to credentials_path, class: "flex min-h-14 items-center gap-3 px-4" do %>
         <%= icon(:key, css: "size-5 text-base-content/70") %>
@@ -54,7 +65,8 @@
   </ul>
 
   <p class="-mt-3 px-1 text-xs text-base-content/60">
-    Get notified when friends check in, join, or pledge you a reward. On iPhone, add Strivo to your Home Screen first.
+    Get notified when friends check in, join, or pledge you a reward, plus a daily reminder if you haven't checked in yet
+    (<%= current_user.time_zone.tr("_", " ") %> time). On iPhone, add Strivo to your Home Screen first.
   </p>
 
   <%= button_to "Sign out", webauthn_session_path, method: :delete, class: "btn btn-block h-12 border-base-300 bg-base-100 text-error" %>

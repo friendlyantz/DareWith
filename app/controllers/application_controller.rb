@@ -4,7 +4,19 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :likely_webview?
 
+  around_action :use_time_zone
+
   private
+
+  # The browser sets a time_zone cookie, so "today" follows the user's own day
+  def use_time_zone(&)
+    browser_zone = ActiveSupport::TimeZone[cookies[:time_zone].to_s]
+    if current_user && browser_zone && current_user.time_zone != browser_zone.tzinfo.name
+      current_user.update_column(:time_zone, browser_zone.tzinfo.name)
+    end
+
+    Time.use_zone(current_user&.time_zone || browser_zone || "UTC", &)
+  end
 
   def likely_webview?
     ua = request.user_agent.to_s.downcase

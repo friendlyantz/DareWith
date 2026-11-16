@@ -6,6 +6,14 @@ import "messenger"
 
 import Rails from "@rails/ujs";
 
+// Remember the browser's time zone so "today" matches the user's own day
+try {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (timeZone) document.cookie = `time_zone=${encodeURIComponent(timeZone)}; path=/; max-age=31536000; samesite=lax`
+} catch (error) {
+  console.warn("Could not detect time zone", error)
+}
+
 // Detect Telegram WebView and set a cookie
 document.addEventListener('DOMContentLoaded', () => {
   const isTelegramAndroid = navigator.userAgent.includes('Android') && typeof TelegramWebview !== 'undefined';
