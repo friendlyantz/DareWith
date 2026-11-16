@@ -12,7 +12,7 @@ class ChallengeStory < ApplicationRecord
   has_many :liking_users, through: :challenge_story_likes, source: :user
 
   # Broadcasts (after associations)
-  broadcasts
+  broadcasts_refreshes
 
   # Validations
   validates :title, presence: true

@@ -1,36 +1,39 @@
-<div class="mt-8">
+<% content_for :title, "Create an account" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Create an account</h1>
+    <p class="text-sm text-base-content/70 mt-1">No password: you sign in with a passkey saved on this device.</p>
+  </div>
 
-  <%= render partial: 'webauthn/alerts/feature_detection' %>
+  <%= render partial: "webauthn/alerts/feature_detection" %>
 
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
-    <legend class="fieldset-legend">Register with Passkeys</legend>
-    <%= form_with scope: :registration, url: webauthn_registration_path, id: "new-registration", data: { controller: "new-registration", turbo: false, action: "submit->new-registration#submit" } do |form| %>
-      <div class="mdc-text-field mdc-text-field--fullwidth" data-controller="textfield" data-new-registration-target="usernameField">
-        <%= form.text_field :username, class: "input mdc-text-field__input", placeholder: "Username", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
+  <div class="rounded-box border border-base-300 bg-base-100 p-5">
+    <%= form_with scope: :registration, url: webauthn_registration_path, id: "new-registration",
+      data: {controller: "new-registration", turbo: false, action: "submit->new-registration#submit"} do |form| %>
+      <%= form.label :username, "Username", class: "text-sm font-semibold" %>
+      <div class="mdc-text-field mdc-text-field--fullwidth mt-1.5" data-controller="textfield" data-new-registration-target="usernameField">
+        <%= form.text_field :username, class: "input mdc-text-field__input w-full", placeholder: "e.g. anton", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
       </div>
-      <p class="text-xs text-gray-500 mt-1">Can't be changed later</p>
       <div class="mdc-text-field-helper-line">
-        <div class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg text-error" id="username-helper-text">
-        </div>
+        <div class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg text-sm text-error mt-1" id="username-helper-text"></div>
       </div>
-      <br>
-      <div>
-        <%= form.text_field :nickname, class: "input", placeholder: "Device key nickname", required: true %>
-      </div>
-      <%= form.submit "Register", class: "btn btn-neutral mt-4 w-full" %>
+      <p class="text-xs text-base-content/70 mt-1">Friends see this name. It can't be changed later.</p>
+
+      <%= form.label :nickname, "Name this device", class: "text-sm font-semibold mt-4 block" %>
+      <%= form.text_field :nickname, class: "input w-full mt-1.5", placeholder: "e.g. iPhone", required: true %>
+
+      <%= form.submit "Create account", class: "btn btn-primary mt-5 w-full" %>
     <% end %>
 
-    <%= render partial: 'application/js_error' %>
+    <%= render partial: "application/js_error" %>
+  </div>
 
-    <%= link_to new_webauthn_session_path do %>
-      <%= render Button::Component.new(text: "Sign In Instead", color: "primary", button_css_options: "w-full") %>
-    <% end %>
-  </fieldset>
+  <p class="text-center text-sm">
+    Already have an account?
+    <%= link_to "Sign in", new_webauthn_session_path, class: "link link-accent font-semibold" %>
+  </p>
 
   <% if likely_webview? %>
-    <div class="container mx-auto px-4">
-      <%= render "application/alerts/unsupported_browser", url: request.original_url %>
-    </div>
+    <%= render "application/alerts/unsupported_browser", url: request.original_url %>
   <% end %>
-
 </div>

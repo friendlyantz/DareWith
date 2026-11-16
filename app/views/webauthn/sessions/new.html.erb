@@ -1,42 +1,37 @@
-<div class="mt-8">
-  <%= render partial: 'webauthn/alerts/feature_detection' %>
+<% content_for :title, "Sign in" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Sign in</h1>
+    <p class="text-sm text-base-content/70 mt-1">Use the passkey saved on this device.</p>
+  </div>
 
-  <div class="flex flex-col gap-4 max-w-xs">
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
-      <legend class="fieldset-legend">Sign In with Passkey</legend>
-      <%= form_with scope: :session, url: webauthn_session_path, id: "new-session",
-      data: { controller: "new-session", turbo: false,
-      action: "submit->new-session#submit" } do |form| %>
-        <div class="mdc-text-field mdc-text-field--fullwidth" data-controller="textfield" data-new-session-target="usernameField">
-          <%= form.text_field :username, class: "input mdc-text-field__input", placeholder: "Username", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
-        </div>
+  <%= render partial: "webauthn/alerts/feature_detection" %>
 
-        <div class="mdc-text-field-helper-line">
-          <div class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg">
-          </div>
-        </div>
-        <%= form.submit "Sign in with Passkey", class: "btn btn-primary mt-4 w-full" %>
-      <% end %>
+  <div class="rounded-box border border-base-300 bg-base-100 p-5">
+    <%= form_with scope: :session, url: webauthn_session_path, id: "new-session",
+      data: {controller: "new-session", turbo: false, action: "submit->new-session#submit"} do |form| %>
+      <%= form.label :username, "Username", class: "text-sm font-semibold" %>
+      <div class="mdc-text-field mdc-text-field--fullwidth mt-1.5" data-controller="textfield" data-new-session-target="usernameField">
+        <%= form.text_field :username, class: "input mdc-text-field__input w-full", placeholder: "Username", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
+      </div>
+      <div class="mdc-text-field-helper-line">
+        <div class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg text-sm text-error mt-1"></div>
+      </div>
+      <%= form.submit "Sign in with passkey", class: "btn btn-primary mt-4 w-full" %>
+    <% end %>
 
-      <%= render partial: 'application/js_error' %>
+    <%= render partial: "application/js_error" %>
+  </div>
 
-      <%# TODO: make return_to redirect work %>
-      <%= link_to (session[:return_to] ? new_webauthn_registration_path(return_to: session[:return_to]) : new_webauthn_registration_path) do %>
-        <%= render Button::Component.new(text: "Register Instead", color: "secondary", button_css_options: "w-full") %>
-      <% end %>
-
-      <%= link_to  new_email_session_path do %>
-        <%= render Button::Component.new(text: "Sign in with email", color: "neutral", button_css_options: "w-full") %>
-      <% end %>
-
-    </fieldset>
+  <div class="flex flex-col gap-2 text-center text-sm">
+    <p>
+      New here?
+      <%= link_to "Create an account", (session[:return_to] ? new_webauthn_registration_path(return_to: session[:return_to]) : new_webauthn_registration_path), class: "link link-accent font-semibold" %>
+    </p>
+    <p><%= link_to "Sign in with email instead", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
   </div>
 
   <% if likely_webview? %>
-    <div class="container mx-auto px-4">
-      <%= render "application/alerts/unsupported_browser", url: request.original_url %>
-    </div>
+    <%= render "application/alerts/unsupported_browser", url: request.original_url %>
   <% end %>
-
-
 </div>

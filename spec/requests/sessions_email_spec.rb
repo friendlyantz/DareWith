@@ -10,7 +10,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       get new_email_session_path
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Continue with Email")
+      expect(response.body).to include("Continue with email")
       expect(response.body).to include("email")
     end
   end
