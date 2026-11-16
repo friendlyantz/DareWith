@@ -4,9 +4,6 @@ import "controllers"
 import "credential"
 import "messenger"
 
-import "chartkick"
-import "Chart.bundle"
-
 import Rails from "@rails/ujs";
 
 // Detect Telegram WebView and set a cookie

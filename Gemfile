@@ -45,9 +45,6 @@ gem "thruster", require: false
 
 gem "webauthn"
 
-gem "chartkick"
-gem "groupdate"
-
 group :production do
   gem "newrelic_rpm"
   gem "brevo-rails" # For sending emails via Brevo (formerly Sendinblue)

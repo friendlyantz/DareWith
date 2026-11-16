@@ -81,8 +81,6 @@ A social app to help people stay accountable by joining challenges (e.g., gym ro
 - **Backend**: Ruby on Rails.
 - **Auth**: WebAuthn + Magic link
 - **Frontend**: Rails views/Hotwire
-- **Data Visualization**:
-  - **Chartkick + Groupdate**: Simple one-line charts with time-series grouping
 
 ### 🛠️ Key Features
 
@@ -209,7 +207,6 @@ A social app to help people stay accountable by joining challenges (e.g., gym ro
 - Tailwind / DaisyUI
 - SitePrism
 
-- <https://chartkick.com/>
 -
 
 # Debugging
