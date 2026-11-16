@@ -1,47 +1,41 @@
 <% content_for :title, @challenge_story.title %>
-<div class="md:w-2/3 w-full pt-4">
-  <div class="flex justify-between items-center mb-6">
+<% turbo_refreshes_with method: :morph, scroll: :preserve %>
+<%= turbo_stream_from @challenge_story %>
 
-    <%= link_to challenge_stories_path do %>
-      <%= render Button::Component.new(color: "outline", icon: :arrow_left, text: "My Challenges") %>
-    <% end %>
+<div class="w-full max-w-md flex flex-col gap-4" data-controller="sheet">
+  <%= render "challenge_stories/top_bar", challenge_story: @challenge_story, participant: @current_challenge_participant %>
+  <%= render "challenge_stories/header", challenge_story: @challenge_story %>
 
-    <div class="flex items-center gap-3">
-      <%= render 'challenge_stories/share_challenge', url: challenge_story_url(@challenge_story) %>
-      <%= render 'challenge_stories/likes', challenge_story: @challenge_story %>
+  <% if @current_challenge_participant %>
+    <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @current_challenge_participant %>
+  <% else %>
+    <%= render "challenge_stories/join_card", challenge_story: @challenge_story %>
+  <% end %>
+
+  <div role="tablist" class="tabs tabs-box bg-base-300/60">
+    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Check-ins" checked>
+    <div class="tab-content pt-4">
+      <div id="challenge_check_ins" class="flex flex-col gap-3">
+        <%= render @challenge_story.challenge_check_ins %>
+      </div>
+      <% if @challenge_story.challenge_check_ins.empty? %>
+        <p class="py-8 text-center text-base-content/70">No check-ins yet. Be the first today.</p>
+      <% end %>
+    </div>
+
+    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Leaderboard">
+    <div class="tab-content pt-4">
+      <%= render "challenge_stories/leaderboard", challenge_story: @challenge_story %>
+    </div>
+
+    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Rewards · <%= @challenge_story.challenge_rewards.size %>">
+    <div class="tab-content pt-4">
+      <%= render "challenge_stories/rewards", challenge_story: @challenge_story, participant: @current_challenge_participant %>
     </div>
   </div>
 
-  <%= render @challenge_story, show_actions: true %>
-
-  <%= render "rewards_section", challenge_story: @challenge_story %>
-
-  <%= turbo_stream_from @challenge_story %>
-
-  <%= turbo_frame_tag "challenge_story" do %>
-    <%= render "challenge_stories/progress_timeline", challenge_story: @challenge_story, participants: @participants %>
+  <% if @current_challenge_participant %>
+    <%= render "challenge_stories/check_in_bar", challenge_story: @challenge_story, participant: @current_challenge_participant %>
+    <%= render "challenge_check_ins/sheet" %>
   <% end %>
-
-  <%= render "challenge_stories/add_check_in_section", current_challenge_participant: @current_challenge_participant, challenge_story: @challenge_story, time_of_a_next_check_in: @time_of_a_next_check_in %>
-
-  <div class="divider">Check-ins</div>
-
-  <div id="challenge_check_ins" class="w-full sm:w-auto my-5 space-y-5">
-    <%= render @challenge_story.challenge_check_ins %>
-  </div>
-
-  <div class="divider"></div>
-
-  <% if @current_challenge_participant&.active? %>
-    <div class="text-center mt-4">
-      <%= button_to 'Leave Challenge',
-        challenge_participant_path(@current_challenge_participant),
-        method: :delete,
-        class: 'btn btn-error',
-        data: { turbo_confirm: "Are you sure you want to leave this challenge?" }
-      %>
-    </div>
-  <% end %>
-
-
 </div>

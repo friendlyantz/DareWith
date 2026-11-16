@@ -1,0 +1,33 @@
+<%# locals: (challenge_story:, participant:) %>
+<div class="flex flex-col gap-3">
+  <% if challenge_story.finished? && challenge_story.challenge_rewards.any? %>
+    <%= link_to challenge_story_challenge_rewards_path(challenge_story), class: "alert alert-warning alert-soft" do %>
+      Time's up: time to fulfil the pledges.
+    <% end %>
+  <% end %>
+
+  <% challenge_story.challenge_rewards.each do |reward| %>
+    <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-100 p-4">
+      <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
+        <%= icon(:gift) %>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold line-clamp-2"><%= reward.description %></p>
+        <p class="text-sm text-base-content/70 mt-0.5"><%= reward.giver.name %> → <%= reward.receiver.name %></p>
+      </div>
+      <span class="badge badge-sm <%= reward_status_class(reward.status) %>"><%= reward.status.capitalize %></span>
+    </div>
+  <% end %>
+
+  <% if challenge_story.challenge_rewards.empty? %>
+    <p class="py-6 text-center text-base-content/70">No rewards yet. Pledge one to raise the stakes.</p>
+  <% end %>
+
+  <% if participant %>
+    <% if challenge_story.active_participants.size > 1 %>
+      <%= link_to "Pledge a reward", new_challenge_story_challenge_reward_path(challenge_story), class: "btn bg-base-100" %>
+    <% else %>
+      <p class="text-sm text-center text-base-content/70">Invite someone to unlock reward pledging.</p>
+    <% end %>
+  <% end %>
+</div>

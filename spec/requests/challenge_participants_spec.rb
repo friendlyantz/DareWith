@@ -22,6 +22,13 @@ RSpec.describe "ChallengeParticipants", type: :request do
         }.to change(ChallengeParticipant, :count).by(1)
       end
 
+      it "returns to the challenge with a welcome notice" do
+        post challenge_participants_path, params: {challenge_story_id: story.id}
+
+        expect(response).to redirect_to(challenge_story_path(story))
+        expect(flash[:notice]).to include("You've joined!")
+      end
+
       it "associates the participant with the user" do
         post challenge_participants_path, params: {challenge_story_id: story.id}
 
@@ -57,6 +64,15 @@ RSpec.describe "ChallengeParticipants", type: :request do
 
       expect(participant.reload).to be_inactive
       expect(response).to redirect_to(challenge_story_path(story))
+    end
+
+    it "does not let a user remove someone else" do
+      other = create(:challenge_participant, challenge_story: story)
+
+      delete challenge_participant_path(other)
+
+      expect(response).to have_http_status(:not_found)
+      expect(other.reload).to be_active
     end
   end
 end

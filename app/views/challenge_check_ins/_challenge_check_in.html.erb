@@ -1,27 +1,23 @@
-<div id="<%= dom_id challenge_check_in %>"
-  class="<%= current_user == challenge_check_in.challenge_participant.user ? 'chat chat-end' : 'chat chat-start' %>"
->
-  <div class="chat-image avatar">
-    <div class="w-10 rounded-full">
-      <%= image_tag "https://api.dicebear.com/9.x/avataaars-neutral/svg?seed=#{challenge_check_in.challenge_participant.name}&options[skinColor]=random&size=80", alt: 'avatar', class: "rounded-full" %>
+<% show_challenge = local_assigns.fetch(:show_challenge, false) %>
+<% participant = challenge_check_in.challenge_participant %>
+<article id="<%= dom_id challenge_check_in %>" class="card overflow-hidden border border-base-300 bg-base-100">
+  <div class="flex items-center gap-3 px-4 py-3">
+    <%= render "shared/avatar", name: participant.name, size: "size-9" %>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-baseline justify-between gap-2">
+        <span class="font-semibold truncate"><%= participant.user_id == current_user&.id ? "You" : participant.name %></span>
+        <time class="shrink-0 text-xs text-base-content/60" datetime="<%= challenge_check_in.created_at.iso8601 %>"><%= short_time_ago(challenge_check_in.created_at) %></time>
+      </div>
+      <% if show_challenge %>
+        <%= link_to challenge_check_in.challenge_story.title, challenge_story_path(challenge_check_in.challenge_story), class: "link link-hover link-accent block truncate text-sm font-semibold" %>
+      <% end %>
     </div>
   </div>
-  <div class="chat-header">
-    <%= challenge_check_in.challenge_participant.name %>
-    <% if defined?(show_challenge) && show_challenge %>
-      <div class="text-xs opacity-75">
-        <%= link_to challenge_check_in.challenge_story.title, challenge_story_path(challenge_check_in.challenge_story), class: "link" %>
-      </div>
-    <% end %>
-    <time class="text-xs opacity-50">
-      <%= time_ago_in_words(challenge_check_in.created_at) %> ago
-    </time>
-  </div>
-  <div class="chat-bubble">
-    <%= simple_format(challenge_check_in.message) %>
-    <%= cl_image_tag(challenge_check_in.photo.key, height: 300, width: 400, lazy: true, placeholder: true, crop: :fill) if challenge_check_in.photo.attached?%>
-  </div>
-  <div class="flex items-center gap-2 mt-3">
-    <%= render 'challenge_check_ins/likes', challenge_check_in: challenge_check_in %>
-  </div>
-</div>
+
+  <% if challenge_check_in.photo.attached? %>
+    <%= cl_image_tag(challenge_check_in.photo.key, width: 800, height: 600, crop: :fill, lazy: true, placeholder: true, class: "w-full aspect-4/3 object-cover bg-base-200", alt: "Check-in photo") %>
+  <% end %>
+
+  <div class="px-4 pt-3"><%= simple_format challenge_check_in.message %></div>
+  <div class="px-2 pb-1"><%= render "challenge_check_ins/likes", challenge_check_in: challenge_check_in %></div>
+</article>

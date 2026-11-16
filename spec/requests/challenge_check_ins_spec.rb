@@ -32,6 +32,20 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
           expect(response.body).to include(story.title)
         end
+
+        it "labels the user's own check-ins as You" do
+          get challenge_check_ins_path
+
+          expect(response.body).to include(">You<")
+        end
+
+        it "renders check-ins with photos" do
+          create(:challenge_check_in, :with_photo, challenge_participant: create(:challenge_participant, challenge_story: story))
+
+          get challenge_check_ins_path
+
+          expect(response.body).to include("Check-in photo")
+        end
       end
 
       context "with check-ins from other participants in the same challenge" do

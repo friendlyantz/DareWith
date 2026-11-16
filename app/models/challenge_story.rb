@@ -45,6 +45,10 @@ class ChallengeStory < ApplicationRecord
     active_participants.count(&:checked_in_today?)
   end
 
+  def ranked_participants
+    active_participants.sort_by { -it.challenge_check_ins_count }
+  end
+
   def participant_for(user)
     active_participants.find { it.user_id == user.id }
   end

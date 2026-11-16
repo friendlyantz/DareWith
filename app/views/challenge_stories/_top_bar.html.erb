@@ -1,0 +1,34 @@
+<%# locals: (challenge_story:, participant:) %>
+<div class="flex items-center justify-between -mx-2">
+  <%= link_to current_user ? today_path : challenge_stories_path, class: "btn btn-ghost px-2 gap-1" do %>
+    <%= icon(:chevron_left) %> <%= current_user ? "Today" : "Challenges" %>
+  <% end %>
+
+  <div class="flex items-center">
+    <%= render "challenge_stories/likes", challenge_story: challenge_story %>
+
+    <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_url(challenge_story) %>">
+      <button data-action="share-link#nativeShare" class="btn btn-ghost btn-circle" aria-label="Share invite link">
+        <%= icon(:share) %>
+      </button>
+    </div>
+
+    <% if current_user %>
+      <details class="dropdown dropdown-end">
+        <summary class="btn btn-ghost btn-circle" aria-label="More actions"><%= icon(:dots) %></summary>
+        <ul class="dropdown-content menu z-20 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
+          <li><%= link_to "Edit challenge", edit_challenge_story_path(challenge_story) %></li>
+          <li><%= link_to "All rewards", challenge_story_challenge_rewards_path(challenge_story) %></li>
+          <% if participant %>
+            <li>
+              <%= button_to "Leave challenge", challenge_participant_path(participant),
+                method: :delete,
+                class: "text-error",
+                data: {turbo_confirm: "Are you sure you want to leave this challenge?"} %>
+            </li>
+          <% end %>
+        </ul>
+      </details>
+    <% end %>
+  </div>
+</div>

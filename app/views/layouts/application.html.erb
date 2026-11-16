@@ -21,7 +21,7 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-base-200">
+  <body>
 
     <script>
       // Make the VAPID public key available to the client as a Uint8Array
@@ -35,6 +35,7 @@
     </script>
 
     <%= render "layouts/navbar" %>
+    <%= render "layouts/flash" %>
 
     <% if current_user %>
       <%= render "web_push_notifications/banner" %>

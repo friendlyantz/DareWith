@@ -1,17 +1,10 @@
+<% liked = challenge_story.liked_by?(current_user) %>
 <div id="challenge_story_<%= challenge_story.id %>_likes">
-  <div class="flex items-center gap-1">
-    <% if current_user && challenge_story.liked_by?(current_user) %>
-      <%= button_to challenge_story_challenge_story_like_path(challenge_story), 
-                    method: :delete,
-                    class: "btn btn-sm btn-ghost gap-2 text-secondary" do %>
-        <%= render Button::Component.new(icon: :heart_filled, text: challenge_story.challenge_story_likes_count, link_to: false) %>
-      <% end %>
-    <% else %>
-      <%= button_to challenge_story_challenge_story_like_path(challenge_story), 
-                    method: :post,
-                    class: "btn btn-sm btn-ghost gap-2 hover:text-secondary" do %>
-        <%= render Button::Component.new(icon: :heart_empty, text: challenge_story.challenge_story_likes_count, link_to: false) %>
-      <% end %>
-    <% end %>
-  </div>
+  <%= button_to challenge_story_challenge_story_like_path(challenge_story),
+    method: liked ? :delete : :post,
+    class: class_names("btn btn-ghost gap-1.5 px-2", liked ? "text-primary" : "text-base-content/70"),
+    aria: {label: liked ? "Unlike challenge" : "Like challenge", pressed: liked} do %>
+    <%= icon(:heart, css: class_names("size-5", "fill-current": liked)) %>
+    <%= challenge_story.challenge_story_likes_count %>
+  <% end %>
 </div>

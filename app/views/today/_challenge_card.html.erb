@@ -13,9 +13,9 @@
 
   <div class="flex items-center justify-between gap-3 px-4 pb-4">
     <div class="flex items-center gap-2.5 min-w-0">
-      <div class="flex -space-x-1.5 shrink-0">
+      <div class="flex -space-x-1 shrink-0">
         <% challenge_story.active_participants.each do |participant| %>
-          <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today? %>
+          <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today?, size: "size-7" %>
         <% end %>
       </div>
       <span class="text-sm text-base-content/70 truncate">

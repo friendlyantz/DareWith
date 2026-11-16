@@ -1,7 +1,6 @@
 <%# locals: (name:, checked_in: false, size: "size-8") %>
-<% tint = %w[bg-primary/15 bg-info/15 bg-success/15 bg-warning/30 bg-accent/15 bg-secondary/10][name.sum % 6] %>
 <div class="avatar avatar-placeholder" title="<%= name %>">
-  <div class="<%= class_names(size, tint, "rounded-full ring-2 ring-offset-2 ring-offset-base-100", checked_in ? "ring-info" : "ring-base-100") %>">
-    <span class="text-xs font-bold"><%= name.first.upcase %></span>
+  <div class="<%= class_names(size, avatar_tint(name), "rounded-full text-base-content", checked_in ? "ring-2 ring-info" : "ring-2 ring-base-100") %>">
+    <span class="text-[0.65rem] font-bold tracking-tight"><%= avatar_initials(name) %></span>
   </div>
 </div>

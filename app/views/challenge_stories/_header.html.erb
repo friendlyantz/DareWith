@@ -1,0 +1,31 @@
+<%# locals: (challenge_story:) %>
+<header class="flex flex-col gap-2">
+  <% if challenge_story.completed? %>
+    <span class="badge badge-ghost">Completed</span>
+  <% elsif challenge_story.finished? %>
+    <span class="badge badge-ghost">Time's up</span>
+  <% end %>
+
+  <h1 class="font-display text-3xl font-bold tracking-tight leading-tight"><%= challenge_story.title %></h1>
+  <p class="text-sm text-base-content/70">
+    Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
+  </p>
+  <progress class="progress progress-secondary h-1.5" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"></progress>
+
+  <% if challenge_story.description.present? %>
+    <div class="text-sm text-base-content/80 mt-1"><%= simple_format challenge_story.description %></div>
+  <% end %>
+
+  <% if challenge_story.active_participants.any? %>
+    <div class="flex items-center gap-2.5 mt-1">
+      <div class="flex -space-x-1 shrink-0">
+        <% challenge_story.active_participants.each do |participant| %>
+          <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today? %>
+        <% end %>
+      </div>
+      <span class="text-sm text-base-content/70">
+        <%= challenge_story.checked_in_today_count %> of <%= challenge_story.active_participants.size %> checked in today
+      </span>
+    </div>
+  <% end %>
+</header>

@@ -15,15 +15,15 @@ RSpec.describe "Challenge Check-ins", type: :system do
 
     expect(show_page).to be_displayed
 
-    within "turbo-frame#new_message" do
+    click_on "Check in"
+
+    within "dialog" do
       fill_in "message", with: "Day 1: Completed my workout!"
       click_on "submit"
     end
 
-    expect(page).to have_content("Checked in successfully!")
-    # we don't assert new streamed check in since cloudinary image uploads does not like very fast turbo stream
-    # perhaps we can turbo stream only message without photos.
-    # TODO: something to consider when implementing check in feed
+    expect(page).to have_content("You checked in today")
+    expect(page).to have_content("Day 1: Completed my workout!")
   end
 
   scenario "participant cannot check in twice in one day" do
@@ -31,8 +31,8 @@ RSpec.describe "Challenge Check-ins", type: :system do
 
     show_page.load
 
-    expect(page).to have_content("You've already checked in recently. Come back in about 12 hours!")
-    expect(page).not_to have_css("#new_message")
+    expect(page).to have_content("You checked in today")
+    expect(page).to have_no_link("Check in")
   end
 
   describe "completed challenge" do
@@ -44,7 +44,7 @@ RSpec.describe "Challenge Check-ins", type: :system do
       completed_show_page.load
 
       expect(page).to have_content("This challenge is over. No more check-ins are allowed.")
-      expect(page).not_to have_css("#new_message")
+      expect(page).to have_no_link("Check in")
     end
   end
 end

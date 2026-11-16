@@ -38,18 +38,5 @@
 
   <%= link_to "All challenges", challenge_stories_path, class: "btn btn-ghost" %>
 
-  <dialog class="modal modal-bottom sm:modal-middle" data-sheet-target="dialog" data-action="close->sheet#reset turbo:submit-end->sheet#submitted">
-    <div class="modal-box bg-base-200">
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <h2 class="font-display text-2xl font-bold">Check in</h2>
-        <form method="dialog">
-          <button class="btn btn-circle btn-ghost" aria-label="Close"><%= icon(:x) %></button>
-        </form>
-      </div>
-      <%= turbo_frame_tag "new_message", data: {sheet_target: "frame"} do %>
-        <div class="flex justify-center py-10"><span class="loading loading-spinner"></span></div>
-      <% end %>
-    </div>
-    <form method="dialog" class="modal-backdrop"><button>Close</button></form>
-  </dialog>
+  <%= render "challenge_check_ins/sheet" %>
 </div>

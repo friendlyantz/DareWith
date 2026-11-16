@@ -1,0 +1,19 @@
+<%# locals: (challenge_story:, participant:) %>
+<div class="sticky bottom-16 z-10 -mx-5 border-t border-base-300 bg-base-200 px-5 py-3">
+  <% if participant.checked_in_today? %>
+    <div class="flex h-12 items-center justify-center gap-2 rounded-field bg-info/10 font-semibold text-info">
+      <%= icon(:check) %> You checked in today
+    </div>
+  <% elsif challenge_story.accepting_check_ins? %>
+    <%= link_to new_challenge_story_challenge_check_in_path(challenge_story),
+      class: "btn btn-primary btn-lg btn-block",
+      data: {turbo_frame: "new_message", action: "sheet#open"} do %>
+      <%= icon(:camera) %> Check in · day <%= challenge_story.current_day %>
+    <% end %>
+  <% else %>
+    <div class="flex items-center justify-between gap-3">
+      <p class="text-sm">This challenge is over. No more check-ins are allowed.</p>
+      <%= link_to "New challenge", new_challenge_story_path, class: "btn btn-sm btn-primary shrink-0" %>
+    </div>
+  <% end %>
+</div>

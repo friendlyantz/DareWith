@@ -1,30 +1,22 @@
-<% content_for :title, "Check-In Feed" %>
-<div class="w-full max-w-4xl">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="font-bold text-4xl">Check-In Feed</h1>
-    <%= link_to challenge_stories_path do %>
-      <%= render Button::Component.new(color: "outline", icon: :arrow_left, text: "My Challenges") %>
-    <% end %>
+<% content_for :title, "Feed" %>
+<div class="w-full max-w-md flex flex-col gap-4">
+  <div>
+    <p class="text-sm font-medium text-base-content/70">From your <%= pluralize(@challenge_stories.size, "active challenge") %></p>
+    <h1 class="font-display text-4xl font-bold tracking-tight">Feed</h1>
   </div>
+
   <%= turbo_stream_from current_user, "challenge_check_ins_feed" %>
-  <div id="challenge_check_ins_feed" class="w-full space-y-5">
-    <% if @challenge_check_ins.any? %>
-      <%= render @challenge_check_ins, show_challenge: true %>
-    <% else %>
-      <div class="hero min-h-[30vh]">
-        <div class="hero-content text-center">
-          <div class="max-w-md">
-            <div class="text-8xl mb-6">📝</div>
-            <h2 class="text-3xl font-bold mb-4">No Check-Ins Yet</h2>
-            <p class="text-lg mb-8">
-              Join some challenges and start checking in to see your activity here!
-            </p>
-            <%= link_to challenge_stories_path do %>
-              <%= render Button::Component.new(color: "primary", icon: :plus, text: "Explore Challenges", button_css_options: "btn-lg") %>
-            <% end %>
-          </div>
-        </div>
-      </div>
-    <% end %>
+  <div id="challenge_check_ins_feed" class="flex flex-col gap-3">
+    <%= render @challenge_check_ins, show_challenge: true %>
   </div>
+
+  <% if @challenge_check_ins.empty? %>
+    <div class="card border border-base-300 bg-base-100">
+      <div class="card-body items-center text-center">
+        <h2 class="font-display text-xl font-semibold">No check-ins yet</h2>
+        <p class="text-base-content/70">Check-ins from you and your friends show up here as they happen.</p>
+        <%= link_to "Go to Today", today_path, class: "btn btn-primary rounded-full mt-2" %>
+      </div>
+    </div>
+  <% end %>
 </div>
