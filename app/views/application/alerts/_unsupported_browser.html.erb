@@ -1,64 +1,17 @@
-<%
-  # Use the provided URL or default to current page URL
-  copy_url = local_assigns.fetch(:url, request.original_url)
-%>
-
-<%# <h1 class="text-4xl font-bold mb-4">In-app Browser Detected</h1> %>
-
-<%# <div class="mb-8 pb-4">
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="w-24 h-24 mx-auto text-warning">
-    <path stroke-linecap="round" stroke-linejoin="round" d="m12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374l13.949 3.378c-.866-1.5-3.032-1.5-3.898 0l2.697 16.126zm12 15.75h.007v.008h12v-.008z" />
-  </svg>
-</div>
-
-<p class="text-lg mb-6">
-  you're viewing this page in an in-app browser which doesn't support all advanced security features.
-</p> %>
-
-<div class="alert alert-warning mb-6">
-  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-  </svg>
-  <span>For the best experience, please open this link in another browser.</span>
-</div>
-
-<div class="space-y-4 pb-4">
-  <div class="card bg-base-200">
-    <div class="card-body p-4">
-      <h3 class="font-bold text-left">How to open in your browser:</h3>
-      <ul class="text-left space-y-2 text-sm">
-        <li>• <strong>iOS:</strong> Tap the share button, then "Open in Safari"</li>
-        <li>• <strong>Android:</strong> Tap the menu (⋮), then "Open in Chrome/Browser"</li>
-        <li>• <strong>Or:</strong> Copy the link and paste it in your browser</li>
-      </ul>
-    </div>
+<%# locals: (url:) %>
+<div role="alert" class="flex flex-col gap-3 rounded-box border border-warning/40 bg-warning/15 p-4">
+  <div>
+    <p class="font-semibold">Open this in your browser</p>
+    <p class="text-sm text-base-content/80">
+      Passkeys don't work inside this app's built-in browser. Open the link in Safari or Chrome to sign up, or sign in with email instead.
+    </p>
   </div>
-
-  <button 
-    onclick="copyToClipboard('<%= j copy_url %>'); this.innerHTML='✓ Copied!'; setTimeout(() => this.innerHTML='Copy Link', 2000)"
-    class="btn btn-primary btn-block">
-    Copy Link
-  </button>
-
-  <script>
-    function copyToClipboard(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    }
-
-    function fallbackCopy(text) {
-      const el = document.createElement('textarea');
-      el.value = text;
-      el.setAttribute('readonly', '');
-      el.style.position = 'absolute';
-      el.style.left = '-9999px';
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-    }
-  </script>
+  <ul class="list-disc pl-5 text-sm text-base-content/80">
+    <li>iPhone: tap ⋯ or the share button, then "Open in Safari"</li>
+    <li>Android: tap ⋮, then "Open in Chrome" or "Open in browser"</li>
+  </ul>
+  <div class="flex flex-col gap-2">
+    <button type="button" class="btn btn-primary" data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-action="clipboard#copy">Copy link</button>
+    <%= link_to "Sign in with email instead", new_email_session_path, class: "btn btn-ghost btn-sm" %>
+  </div>
 </div>

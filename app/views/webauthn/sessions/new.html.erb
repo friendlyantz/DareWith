@@ -5,6 +5,10 @@
     <p class="text-sm text-base-content/70 mt-1">Use the passkey saved on this device.</p>
   </div>
 
+  <% if likely_webview? %>
+    <%= render "application/alerts/unsupported_browser", url: browser_handoff_url %>
+  <% end %>
+
   <%= render partial: "webauthn/alerts/feature_detection" %>
 
   <div class="rounded-box border border-base-300 bg-base-100 p-5">
@@ -31,7 +35,4 @@
     <p><%= link_to "Sign in with email instead", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
   </div>
 
-  <% if likely_webview? %>
-    <%= render "application/alerts/unsupported_browser", url: request.original_url %>
-  <% end %>
 </div>

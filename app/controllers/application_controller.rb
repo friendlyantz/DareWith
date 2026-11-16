@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
-  helper_method :current_user, :likely_webview?
+  helper_method :current_user, :likely_webview?, :browser_handoff_url
 
   around_action :use_time_zone
 
@@ -18,11 +18,17 @@ class ApplicationController < ActionController::Base
     Time.use_zone(current_user&.time_zone || browser_zone || "UTC", &)
   end
 
+  # In-app browsers (Telegram, WhatsApp, Instagram...) can't use passkeys
   def likely_webview?
-    ua = request.user_agent.to_s.downcase
-    android_webview = ua.include?("wv")  # Android WebView Lollipop+
-    ios_webview = /iphone|ipad|ipod/.match?(ua) && !/safari/.match?(ua)
+    ua = request.user_agent.to_s
+    android_webview = /; ?wv\)/.match?(ua)
+    ios_webview = /iPhone|iPad|iPod/.match?(ua) && !ua.include?("Safari")
     android_webview || ios_webview || cookies[:telegram_webview] == "true"
+  end
+
+  # The link to reopen in a real browser: the remembered invite if there is one
+  def browser_handoff_url
+    session[:return_to] ? request.base_url + session[:return_to] : request.original_url
   end
 
   def sign_in(user)

@@ -17,6 +17,9 @@
           </span>
         <% end %>
       <% end %>
+    <% elsif likely_webview? %>
+      <h2 class="font-display text-lg font-semibold">Want to join this challenge?</h2>
+      <%= render "application/alerts/unsupported_browser", url: challenge_story_url(challenge_story) %>
     <% else %>
       <h2 class="font-display text-lg font-semibold">Want to join this challenge?</h2>
       <p class="text-sm text-base-content/70">Sign up to start tracking your progress.</p>

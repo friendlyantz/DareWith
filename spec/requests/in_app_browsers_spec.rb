@@ -1,0 +1,35 @@
+require "rails_helper"
+
+RSpec.describe "In-app browsers", type: :request do
+  let(:android_webview) { "Mozilla/5.0 (Linux; Android 14; Pixel 9; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0 Mobile Safari/537.36 Telegram-Android/11.5" }
+  let(:ios_in_app) { "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0" }
+  let(:android_chrome) { "Mozilla/5.0 (Linux; Android 14; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36" }
+  let(:story) { create(:challenge_story) }
+
+  it "guides invited visitors in an Android in-app browser to their real browser" do
+    get challenge_story_path(story), headers: {"User-Agent" => android_webview}
+
+    expect(response.body).to include("Open this in your browser")
+    expect(response.body).to include(%(data-clipboard-text-value="#{challenge_story_url(story)}"))
+  end
+
+  it "guides visitors in an iOS in-app browser too" do
+    get challenge_story_path(story), headers: {"User-Agent" => ios_in_app}
+
+    expect(response.body).to include("Open this in your browser")
+  end
+
+  it "leaves regular browsers alone" do
+    get challenge_story_path(story), headers: {"User-Agent" => android_chrome}
+
+    expect(response.body).not_to include("Open this in your browser")
+    expect(response.body).to include("Sign up to join")
+  end
+
+  it "copies the invite link, not the sign-in page, on the sign-up page" do
+    get challenge_story_path(story), headers: {"User-Agent" => android_webview}
+    get new_webauthn_registration_path, headers: {"User-Agent" => android_webview}
+
+    expect(response.body).to include(%(data-clipboard-text-value="#{challenge_story_url(story)}"))
+  end
+end
