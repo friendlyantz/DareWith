@@ -57,6 +57,9 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :device_sign_in, only: %i[show create]
+  resource :device_sign_in_approval, only: %i[new create], path: "device_sign_in/approve"
+
   resources :credentials, only: %i[index create destroy] do
     post :callback, on: :collection
   end

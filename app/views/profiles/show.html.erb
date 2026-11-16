@@ -58,6 +58,13 @@
       <% end %>
     </li>
     <li>
+      <%= link_to new_device_sign_in_approval_path, class: "flex min-h-14 items-center gap-3 px-4" do %>
+        <%= icon(:phone, css: "size-5 text-base-content/70") %>
+        <span class="flex-1">Sign in another device</span>
+        <%= icon(:chevron_right, css: "size-5 text-base-content/50") %>
+      <% end %>
+    </li>
+    <li>
       <details class="group">
         <summary class="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4">
           <%= icon(:archive, css: "size-5 text-base-content/70") %>

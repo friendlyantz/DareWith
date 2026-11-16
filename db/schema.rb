@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_140000) do
   create_enum "badge_kind", ["first_check_in", "three_day_streak", "week_streak", "three_week_streak", "comeback", "finisher", "flawless", "cheerleader", "good_for_it"]
   create_enum "challenge_participant_status", ["active", "inactive"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
+  create_enum "device_sign_in_state", ["pending", "approved", "used"]
 
   create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
@@ -185,6 +186,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_140000) do
     t.index ["user_id"], name: "index_credentials_on_user_id"
   end
 
+  create_table "device_sign_ins", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id"
+    t.string "code", null: false
+    t.enum "state", default: "pending", null: false, enum_type: "device_sign_in_state"
+    t.string "user_agent"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_device_sign_ins_on_code", unique: true, where: "(state = 'pending'::device_sign_in_state)"
+    t.index ["expires_at"], name: "index_device_sign_ins_on_expires_at"
+    t.index ["user_id"], name: "index_device_sign_ins_on_user_id"
+    t.check_constraint "state = 'pending'::device_sign_in_state OR user_id IS NOT NULL", name: "check_device_sign_in_approved_by_user"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.citext "username", null: false
     t.string "webauthn_id"
@@ -243,5 +258,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_140000) do
   add_foreign_key "challenge_story_likes", "challenge_stories", on_delete: :cascade
   add_foreign_key "challenge_story_likes", "users", on_delete: :cascade
   add_foreign_key "credentials", "users", on_delete: :cascade
+  add_foreign_key "device_sign_ins", "users", on_delete: :cascade
   add_foreign_key "web_push_notifications", "users", on_delete: :cascade
 end

@@ -23,9 +23,18 @@
       </div>
       <%= form.submit "Sign in with passkey", class: "btn btn-primary mt-4 w-full" %>
     <% end %>
+    <p class="text-xs text-base-content/60 mt-3">Passkey on your phone? Choose "Use a phone or tablet" when your browser asks.</p>
 
     <%= render partial: "application/js_error" %>
   </div>
+
+  <%= button_to device_sign_in_path, class: "btn h-auto min-h-14 w-full justify-start gap-3 border-base-300 bg-base-100 py-2 text-left font-normal" do %>
+    <%= icon(:phone, css: "size-5 shrink-0 text-base-content/70") %>
+    <span class="flex-1">
+      <span class="block font-semibold">Sign in with another device</span>
+      <span class="block text-sm text-base-content/70">Approve from a phone or computer where you're signed in</span>
+    </span>
+  <% end %>
 
   <div class="flex flex-col gap-2 text-center text-sm">
     <p>

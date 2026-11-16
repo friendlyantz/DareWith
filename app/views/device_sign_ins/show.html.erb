@@ -1,0 +1,31 @@
+<% content_for :title, "Sign in with another device" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Sign in with another device</h1>
+    <p class="text-sm text-base-content/70 mt-1">Use a phone or computer where you're already signed in to Strivo.</p>
+  </div>
+
+  <% if @device_sign_in.expired? %>
+    <div class="rounded-box border border-base-300 bg-base-100 p-5 flex flex-col gap-3">
+      <p class="font-semibold">This code has expired</p>
+      <p class="text-sm text-base-content/70">Codes work for <%= DeviceSignIn::LIFETIME.inspect %>.</p>
+      <%= button_to "Get a new code", device_sign_in_path, class: "btn btn-primary w-full" %>
+    </div>
+  <% else %>
+    <%= turbo_stream_from @device_sign_in %>
+
+    <div class="rounded-box border border-base-300 bg-base-100 p-5 flex flex-col items-center gap-4 text-center">
+      <%= device_sign_in_qr_code(@device_sign_in) %>
+      <p class="text-sm text-base-content/70">Scan with your phone's camera, or open <strong>Me → Sign in another device</strong> and enter:</p>
+      <p class="font-mono text-3xl font-bold tracking-widest" aria-label="Code <%= @device_sign_in.code.chars.join(" ") %>"><%= spaced_code(@device_sign_in.code) %></p>
+      <p class="flex items-center gap-2 text-sm text-base-content/70">
+        <span class="loading loading-dots loading-sm"></span>
+        Waiting for approval · works until <%= @device_sign_in.expires_at.strftime("%-H:%M") %>
+      </p>
+    </div>
+
+    <%= link_to "Approved it? Continue", device_sign_in_path, class: "btn btn-ghost" %>
+  <% end %>
+
+  <p class="text-center text-sm"><%= link_to "Back to sign in", new_webauthn_session_path, class: "link link-hover text-base-content/70" %></p>
+</div>

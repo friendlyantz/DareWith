@@ -85,3 +85,5 @@ end
 gem "challenge", branch: "main", github: "friendlyantz/take-on-me-challange-engine"
 
 gem "web-push"
+
+gem "rqrcode", "~> 3.2"

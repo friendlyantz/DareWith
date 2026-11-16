@@ -15,6 +15,7 @@ module IconsHelper
     home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l2 2M15 8l2 2"/>',
     lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/>',
     log_in: '<path d="M9 4H5v16h4M14 8l4 4-4 4M18 12H8"/>',
     photo: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
