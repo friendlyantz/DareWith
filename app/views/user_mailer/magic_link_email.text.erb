@@ -2,8 +2,16 @@ Sign In to Strivo
 
 Hi <%= @user.username %>,
 
+<% if @code %>
+Type this code on the sign-in page. It expires in 15 minutes.
+
+<%= @code %>
+
+Or open this link to sign in. It expires in 24 hours.
+<% else %>
 Click the link below to sign in to your Strivo account. This link expires in 24 hours.
+<% end %>
 
 <%= @magic_link_url %>
 
-If you didn't request this link, you can safely ignore this email.
+If you didn't request this, you can safely ignore this email.

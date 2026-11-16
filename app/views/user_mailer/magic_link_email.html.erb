@@ -2,7 +2,13 @@
 
 <p>Hi <%= @user.username %>,</p>
 
-<p>Click the link below to sign in to your Strivo account. This link expires in 24 hours.</p>
+<% if @code %>
+  <p>Type this code on the sign-in page. It expires in 15 minutes.</p>
+  <p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;"><%= @code %></p>
+  <p>Or tap the link below to sign in. It expires in 24 hours.</p>
+<% else %>
+  <p>Click the link below to sign in to your Strivo account. This link expires in 24 hours.</p>
+<% end %>
 <p>
   <%= link_to "Sign In to Strivo", @magic_link_url, style: "display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;" %>
 </p>
@@ -13,5 +19,5 @@
 </p>
 
 <p style="color: #999; font-size: 12px;">
-  If you didn't request this link, you can safely ignore this email.
+  If you didn't request this, you can safely ignore this email.
 </p>

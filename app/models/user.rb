@@ -3,6 +3,8 @@
 class User < ApplicationRecord
   CREDENTIAL_MIN_AMOUNT = 1
   EMAIL_TOKEN_EXPIRY = 24.hours
+  EMAIL_CODE_EXPIRY = 15.minutes
+  MAX_EMAIL_CODE_ATTEMPTS = 5
   RATE_LIMIT_WINDOW = 15.minutes
   MAX_EMAIL_ATTEMPTS = 3
   REMINDER_HOURS = (6..22).to_a
@@ -141,8 +143,27 @@ class User < ApplicationRecord
     hashed_provided == email_login_token
   end
 
+  # A code to type in the same browser, for in-app browsers where the link opens elsewhere
+  def generate_email_login_code!
+    code = format("%06d", SecureRandom.random_number(1_000_000))
+    update!(email_login_code_digest: Digest::SHA256.hexdigest(code), email_login_code_attempts: 0)
+    code
+  end
+
+  # Wrong guesses are counted, so a code can't be brute-forced
+  def verify_email_login_code(code)
+    return false if email_login_code_digest.blank?
+    return false if email_login_code_attempts >= MAX_EMAIL_CODE_ATTEMPTS
+    return false unless last_email_sent_at&.after?(EMAIL_CODE_EXPIRY.ago)
+
+    return true if ActiveSupport::SecurityUtils.secure_compare(Digest::SHA256.hexdigest(code.to_s.gsub(/\D/, "")), email_login_code_digest)
+
+    self.class.update_counters(id, email_login_code_attempts: 1)
+    false
+  end
+
   def clear_email_login_token!
-    update!(email_login_token: nil, email_login_token_expires_at: nil)
+    update!(email_login_token: nil, email_login_token_expires_at: nil, email_login_code_digest: nil)
   end
 
   def self.find_by_email_login_token(raw_token)

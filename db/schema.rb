@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -219,6 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_170000) do
     t.string "payment_details"
     t.integer "badges_count", default: 0, null: false
     t.integer "challenge_check_in_replies_count", default: 0, null: false
+    t.string "email_login_code_digest"
+    t.integer "email_login_code_attempts", default: 0, null: false
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["username"], name: "index_users_on_username", unique: true
     t.check_constraint "challenge_participants_count >= 0", name: "check_user_participants_non_negative"

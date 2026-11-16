@@ -29,7 +29,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       post email_session_path, params: {session: {email: "unknown@example.com"}}
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Check your email for a sign-in link. It expires in 24 hours.")
+      expect(response.body).to include("Check your email for a 6-digit code and a sign-in link.")
     end
 
     it "enforces rate limit (3 emails per 15 minutes)" do
@@ -151,6 +151,75 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       expect(flash[:alert]).to include("Invalid sign-in link")
       expect(session[:user_id]).to be_nil
     end
+  end
+
+  describe "typing the code from the email" do
+    def request_code
+      perform_enqueued_jobs { post email_session_path, params: {session: {email: user.email}} }
+      ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+    end
+
+    it "signs in and returns to the invite without leaving this browser" do
+      story = create(:challenge_story)
+      get challenge_story_path(story)
+      code = request_code
+
+      post confirm_email_session_path, params: {code: "#{code[0, 3]} #{code[3, 3]}"}
+
+      expect(response).to redirect_to(challenge_story_path(story))
+      expect(session[:user_id]).to eq(user.id)
+      expect(user.reload.email_login_code_digest).to be_nil
+    end
+
+    it "locks the code after five wrong tries" do
+      code = request_code
+      wrong = (code == "000000") ? "111111" : "000000"
+
+      5.times { post confirm_email_session_path, params: {code: wrong} }
+      post confirm_email_session_path, params: {code:}
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("That code didn&#39;t work")
+      expect(session[:user_id]).to be_nil
+    end
+
+    it "expires after 15 minutes" do
+      code = request_code
+
+      travel_to(16.minutes.from_now) { post confirm_email_session_path, params: {code:} }
+
+      expect(session[:user_id]).to be_nil
+    end
+
+    it "only works in the browser that asked for it" do
+      code = request_code
+      other_browser = open_session
+
+      other_browser.post confirm_email_session_path, params: {code:}
+
+      expect(other_browser.response.location).to end_with(new_email_session_path)
+      expect(other_browser.session[:user_id]).to be_nil
+    end
+
+    it "keeps the code box when an email was just sent" do
+      request_code
+      post email_session_path, params: {session: {email: user.email}}
+
+      expect(response).to have_http_status(:too_many_requests)
+      expect(response.body).to include("Code from the email")
+    end
+  end
+
+  it "the link carries the invite, so it works when it opens in another browser" do
+    story = create(:challenge_story)
+    get challenge_story_path(story)
+    perform_enqueued_jobs { post email_session_path, params: {session: {email: user.email}} }
+    link = ActionMailer::Base.deliveries.last.text_part.body.to_s[%r{http://\S+/verify\S+}]
+
+    mail_app_browser = open_session
+    mail_app_browser.get link
+
+    expect(mail_app_browser.response.location).to end_with(challenge_story_path(story))
   end
 
   describe "Email mailer integration" do

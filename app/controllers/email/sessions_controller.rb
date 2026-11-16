@@ -2,6 +2,8 @@
 
 module Email
   class SessionsController < ApplicationController
+    rate_limit to: 10, within: 1.minute, only: :confirm
+
     def new
       # GET request - show the email sign-in form
     end
@@ -24,7 +26,9 @@ module Email
 
       # Rate limiting
       if user.persisted? && user.email_login_recently_sent?
-        @error = "An email was recently sent. Please wait before requesting another."
+        session[:email_sign_in_user_id] = user.id
+        @email_sent = true
+        @error = "An email was recently sent. Use the code from it, or wait 15 minutes for a new one."
         render :new, status: :too_many_requests
         return
       end
@@ -32,12 +36,13 @@ module Email
       # Save new users
       user.save! if user.new_record?
 
-      # Generate and send magic link
+      # Generate and send magic link, plus a code to type in this browser
       token = user.generate_email_login_token!
-      UserMailer.magic_link_email(user, token).deliver_later
+      code = user.generate_email_login_code!
+      session[:email_sign_in_user_id] = user.id
+      UserMailer.magic_link_email(user, token, code, session[:return_to]).deliver_later
 
       @email_sent = true
-      @is_new_user = user.previous_changes.key?(:id)
       render :new
     end
 
@@ -61,15 +66,34 @@ module Email
         return
       end
 
-      # Token is valid - sign in the user
+      # The link may open in another browser, so it carries the invite
+      remember_location(params[:return_to]) if params[:return_to].present?
+      complete_sign_in(user)
+    end
+
+    def confirm
+      user = User.find_by(id: session[:email_sign_in_user_id])
+      return redirect_to new_email_session_path, alert: "Ask for a new code" unless user
+
+      unless user.verify_email_login_code(params[:code])
+        @email_sent = true
+        @error = "That code didn't work. Check the email or ask for a new one."
+        return render :new, status: :unprocessable_content
+      end
+
+      session.delete(:email_sign_in_user_id)
+      complete_sign_in(user)
+    end
+
+    private
+
+    def complete_sign_in(user)
       user.clear_email_login_token!
       user.verify_email!
       sign_in(user)
 
       redirect_to after_sign_in_path, notice: "Signed in successfully!"
     end
-
-    private
 
     def session_params
       params.require(:session).permit(:email, :username)
