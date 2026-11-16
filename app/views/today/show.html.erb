@@ -12,6 +12,8 @@
     <% end %>
   </div>
 
+  <%= render partial: "today/round_invite_card", collection: @round_invites, as: :challenge_story %>
+
   <% if @challenge_stories.any? %>
     <div id="today_summary" class="rounded-box bg-neutral text-neutral-content p-4 flex flex-col gap-2.5">
       <div class="flex items-baseline justify-between">

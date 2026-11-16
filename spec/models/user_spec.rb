@@ -283,4 +283,42 @@ RSpec.describe User, type: :model do
       end
     end
   end
+
+  describe "#next_round_invites" do
+    let(:user) { create(:user) }
+    let(:round_one) { create(:challenge_story, :finished, completed: true) }
+    let!(:round_two) { round_one.next_round.tap(&:save!) }
+
+    before do
+      create(:challenge_participant, user:, challenge_story: round_one)
+      create(:challenge_participant, challenge_story: round_two)
+    end
+
+    it "includes the next round of a challenge the user was in" do
+      expect(user.next_round_invites).to eq [round_two]
+    end
+
+    it "skips rounds the user joined or left" do
+      participant = create(:challenge_participant, user:, challenge_story: round_two)
+      expect(user.next_round_invites).to be_empty
+
+      participant.leave!
+      expect(user.next_round_invites).to be_empty
+    end
+
+    it "skips the next round when the user had left the previous one" do
+      user.challenge_participants.find_by!(challenge_story: round_one).leave!
+
+      expect(user.next_round_invites).to be_empty
+    end
+
+    it "skips full and finished rounds" do
+      (ChallengeStory::MAX_PARTICIPANTS - 1).times { create(:challenge_participant, challenge_story: round_two) }
+      expect(user.next_round_invites).to be_empty
+
+      round_two.challenge_participants.last.destroy!
+      round_two.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 2.days)
+      expect(user.next_round_invites).to be_empty
+    end
+  end
 end

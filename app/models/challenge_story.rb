@@ -89,11 +89,11 @@ class ChallengeStory < ApplicationRecord
   end
 
   def at_capacity?
-    active_participants.count >= MAX_PARTICIPANTS
+    active_participants.size >= MAX_PARTICIPANTS
   end
 
   def available_spots
-    MAX_PARTICIPANTS - active_participants.count
+    MAX_PARTICIPANTS - active_participants.size
   end
 
   def mark_complete!(by: nil)

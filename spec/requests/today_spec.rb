@@ -15,6 +15,19 @@ RSpec.describe "Today", type: :request do
 
       before { sign_in_as(user) }
 
+      it "invites the user to the next round of a past challenge" do
+        round_one = create(:challenge_story, :finished, completed: true, title: "Gym")
+        create(:challenge_participant, user:, challenge_story: round_one)
+        round_two = round_one.next_round.tap(&:save!)
+        create(:challenge_participant, challenge_story: round_two, user: create(:user, username: "maria"))
+
+        get today_path
+
+        expect(response.body).to include("Round 2 of Gym")
+        expect(response.body).to include("maria is in")
+        expect(response.body).to include(challenge_participants_path(challenge_story_id: round_two.id))
+      end
+
       it "offers a check-in for each active challenge" do
         get today_path
 

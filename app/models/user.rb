@@ -92,6 +92,16 @@ class User < ApplicationRecord
       .count
   end
 
+  # Next rounds of challenges the user took part in, still open to join
+  def next_round_invites
+    ChallengeStory.active
+      .where(finish: (Time.zone.today - 1.day)..)
+      .where(previous_challenge_story_id: challenge_participants.active.select(:challenge_story_id))
+      .where.not(id: challenge_participants.select(:challenge_story_id))
+      .includes(active_participants: {user: {avatar_attachment: :blob}})
+      .reject(&:at_capacity?)
+  end
+
   def past_challenge_stories
     challenge_stories.merge(ChallengeStory.completed)
   end

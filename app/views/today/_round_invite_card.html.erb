@@ -1,0 +1,17 @@
+<%# locals: (challenge_story:) %>
+<% names = challenge_story.active_participants.map(&:name) %>
+<article id="<%= dom_id(challenge_story, :invite) %>" class="flex items-center gap-3 rounded-box border border-accent/40 bg-accent/10 p-4">
+  <div class="flex -space-x-1 shrink-0">
+    <% challenge_story.active_participants.each do |participant| %>
+      <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-8" %>
+    <% end %>
+  </div>
+  <%= link_to challenge_story, class: "flex-1 min-w-0" do %>
+    <p class="font-semibold truncate">Round <%= challenge_story.round %> of <%= challenge_story.title %></p>
+    <p class="text-sm text-base-content/70 truncate">
+      <%= names.any? ? "#{names.to_sentence} #{names.one? ? "is" : "are"} in" : "Nobody's in yet" %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
+    </p>
+  <% end %>
+  <%= button_to "Join", challenge_participants_path(challenge_story_id: challenge_story.id),
+    class: "btn btn-sm btn-primary rounded-full shrink-0" %>
+</article>
