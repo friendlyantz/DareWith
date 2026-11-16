@@ -7,9 +7,9 @@
 
   <% if likely_webview? %>
     <%= render "application/alerts/unsupported_browser", url: browser_handoff_url %>
+  <% else %>
+    <%= render partial: "webauthn/alerts/feature_detection" %>
   <% end %>
-
-  <%= render partial: "webauthn/alerts/feature_detection" %>
 
   <div class="rounded-box border border-base-300 bg-base-100 p-5">
     <%= form_with scope: :session, url: webauthn_session_path, id: "new-session",
