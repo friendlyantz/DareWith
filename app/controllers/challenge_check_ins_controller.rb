@@ -34,7 +34,7 @@ class ChallengeCheckInsController < ApplicationController
 
     if @challenge_check_in.save
       @challenge_check_in.notify_other_participants
-      BadgeAwardJob.perform_later(current_user)
+      @new_badges = Badge::Awarder.new(current_user).award
       render :success, status: :ok
     else
       render :new, status: :unprocessable_content

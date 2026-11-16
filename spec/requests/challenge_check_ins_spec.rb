@@ -135,10 +135,20 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         }.to have_enqueued_job(PushNotificationJob).exactly(:once)
       end
 
-      it "checks for new badges" do
-        expect {
-          post challenge_story_challenge_check_ins_path(story), params: valid_params
-        }.to have_enqueued_job(BadgeAwardJob).with(user)
+      it "celebrates new badges right away" do
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(user.badges.first_check_in).to exist
+        expect(response.body).to include("New badge")
+        expect(response.body).to include("First step")
+      end
+
+      it "doesn't celebrate badges earned before" do
+        create(:badge, user:)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).not_to include("New badge")
       end
 
       it "shows the streak" do
@@ -146,7 +156,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
         post challenge_story_challenge_check_ins_path(story), params: valid_params
 
-        expect(response.body).to include("That's 2 days in a row.")
+        expect(response.body).to include("2 days in a row")
       end
     end
 

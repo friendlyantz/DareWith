@@ -19,6 +19,10 @@ RSpec.describe "Today", type: :system do
     within "dialog" do
       fill_in "message", with: "5 km before breakfast"
       click_on "submit"
+
+      expect(page).to have_content("NEW BADGE")
+      expect(page).to have_content("First step")
+      click_on "Done"
     end
 
     expect(page).to have_content("1 of 1 done today")

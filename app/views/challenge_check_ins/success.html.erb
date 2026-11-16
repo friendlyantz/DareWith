@@ -1,15 +1,45 @@
+<% challenge_story = @challenge_participant.challenge_story %>
+<% streak = @challenge_participant.streak.current %>
 <%= turbo_frame_tag "new_message" do %>
-  <div class="alert alert-success shadow-lg mb-6">
-    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>
-      Checked in successfully!
-      <% if (days = @challenge_participant.streak.current) > 1 %>
-        That's <%= days %> days in a row.
-      <% end %>
-    </span>
-  </div>
+  <div class="flex flex-col items-center gap-5 pt-2 text-center">
+    <div class="flex flex-col items-center gap-3">
+      <div class="grid size-20 place-items-center rounded-full bg-accent/15 text-accent ring-2 ring-accent/40 motion-safe:animate-pop">
+        <% if streak > 1 %>
+          <%= icon(:flame, css: "size-10") %>
+        <% else %>
+          <%= icon(:check, css: "size-10") %>
+        <% end %>
+      </div>
+      <div>
+        <p class="font-display text-2xl font-bold">
+          <%= streak > 1 ? "#{streak} days in a row" : "Checked in" %>
+        </p>
+        <p class="text-sm text-base-content/70"><%= challenge_story.title %> · day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %></p>
+      </div>
+    </div>
 
-  <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @challenge_participant %>
+    <% if @new_badges.any? %>
+      <ul class="flex w-full flex-col gap-2">
+        <% delays = %w[[animation-delay:300ms] [animation-delay:450ms] [animation-delay:600ms] [animation-delay:750ms]] %>
+        <% @new_badges.each.with_index do |badge, index| %>
+          <li class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 px-4 py-3 text-left motion-safe:animate-pop <%= delays[index] || delays.last %>">
+            <%= render "badges/medallion", badge:, size: "size-12 text-2xl" %>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold uppercase tracking-wide text-accent">New badge</p>
+              <p class="font-semibold"><%= badge.title %></p>
+              <p class="text-sm text-base-content/70"><%= badge.description %></p>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <div class="w-full text-left">
+      <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @challenge_participant %>
+    </div>
+
+    <form method="dialog" class="w-full">
+      <button class="btn btn-primary btn-block rounded-full">Done</button>
+    </form>
+  </div>
 <% end %>

@@ -5,7 +5,7 @@
       <%= challenge_story.title %> · day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %>
     </p>
 
-    <%= form_with(model: [challenge_story, challenge_check_in], class: "flex flex-col gap-4") do |form| %>
+    <%= form_with(model: [challenge_story, challenge_check_in], class: "flex flex-col gap-4", data: {sheet_stay_open: true}) do |form| %>
       <% if challenge_check_in.errors[:base].any? %>
         <div class="alert alert-error">
           <span><%= challenge_check_in.errors[:base].first %></span>

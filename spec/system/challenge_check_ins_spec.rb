@@ -20,6 +20,10 @@ RSpec.describe "Challenge Check-ins", type: :system do
     within "dialog" do
       fill_in "message", with: "Day 1: Completed my workout!"
       click_on "submit"
+
+      expect(page).to have_content("NEW BADGE")
+      expect(page).to have_content("First step")
+      click_on "Done"
     end
 
     expect(page).to have_content("You checked in today")
