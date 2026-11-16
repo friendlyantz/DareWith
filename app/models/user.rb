@@ -45,6 +45,11 @@ class User < ApplicationRecord
     credentials.size > CREDENTIAL_MIN_AMOUNT
   end
 
+  # One passkey that can't sync: losing that device locks them out
+  def needs_backup_passkey?
+    credentials.size == 1 && credentials.first.backed_up == false
+  end
+
   # A paypal.me / revolut.me style link; nil for plain text such as a PayID
   def payment_url
     return unless payment_details.present? && PAYMENT_LINK.match?(payment_details)

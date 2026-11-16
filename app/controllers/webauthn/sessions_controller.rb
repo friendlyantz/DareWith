@@ -38,7 +38,7 @@ module Webauthn
           user_verification: true
         )
 
-        credential.update!(sign_count: webauthn_credential.sign_count)
+        credential.update!(sign_count: webauthn_credential.sign_count, backed_up: webauthn_credential.backed_up?)
         sign_in(user)
 
         render json: {status: "ok", redirect_to: after_sign_in_path}, status: :ok

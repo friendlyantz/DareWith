@@ -30,6 +30,8 @@
     </div>
   </div>
 
+  <%= render "credentials/backup_nudge" if current_user.needs_backup_passkey? %>
+
   <%= render "profiles/badges", badges_by_kind: @badges_by_kind, next_badges: @next_badges %>
 
   <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">

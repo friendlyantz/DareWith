@@ -37,7 +37,8 @@ module Webauthn
           external_id: Base64.urlsafe_encode64(webauthn_credential.raw_id, padding: false),
           nickname: params[:credential_nickname],
           public_key: webauthn_credential.public_key,
-          sign_count: webauthn_credential.sign_count
+          sign_count: webauthn_credential.sign_count,
+          backed_up: webauthn_credential.backed_up?
         )
 
         if user.save
