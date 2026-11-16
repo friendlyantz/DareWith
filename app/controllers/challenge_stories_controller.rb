@@ -25,7 +25,7 @@ class ChallengeStoriesController < ApplicationController
     @challenge_story = ChallengeStory
       .includes(
         active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins],
-        challenge_rewards: [:giver, :receiver],
+        challenge_rewards: [{giver: :user}, {receiver: :user}],
         challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, photo_attachment: :blob]
       )
       .find(params[:id])
@@ -68,8 +68,8 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def complete
-    @challenge_story.mark_complete!
-    redirect_to challenge_stories_path, notice: "Challenge marked as complete! Time to create a new one."
+    @challenge_story.mark_complete!(by: current_user)
+    redirect_to challenge_story_path(@challenge_story), notice: "Challenge completed for everyone"
   end
 
   private

@@ -32,10 +32,45 @@ RSpec.describe "ChallengeRewards", type: :request do
       expect(response.body).to include('href="https://paypal.me/maya"')
     end
 
-    it "doesn't show it while the challenge is running" do
+    it "opens on the last day" do
+      story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today)
+
+      get challenge_story_challenge_rewards_path(story)
+
+      expect(response.body).to include("Settle up with #{receiver.name}")
+    end
+
+    it "doesn't show it earlier in the challenge" do
       get challenge_story_challenge_rewards_path(story)
 
       expect(response.body).not_to include("Settle up with")
+    end
+
+    it "lets the receiver mark it received any time, from the challenge page" do
+      sign_in_as(receiver.user)
+
+      get challenge_story_path(story)
+
+      expect(response.body).to include("Mark as received")
+    end
+  end
+
+  describe "pledge button on the challenge page" do
+    before { sign_in_as(user) }
+
+    it "is offered while someone is left to pledge to" do
+      get challenge_story_path(story)
+
+      expect(response.body).to include("Pledge a reward")
+    end
+
+    it "is replaced by a note once everyone has a pledge" do
+      create(:challenge_reward, giver: giver, receiver: receiver, challenge_story: story)
+
+      get challenge_story_path(story)
+
+      expect(response.body).not_to include(new_challenge_story_challenge_reward_path(story))
+      expect(response.body).to include("pledged a reward to everyone here")
     end
   end
 
@@ -68,6 +103,17 @@ RSpec.describe "ChallengeRewards", type: :request do
         }.to change(ChallengeReward, :count).by(1)
 
         expect(response).to redirect_to(challenge_story_challenge_rewards_path(story))
+      end
+    end
+
+    context "from the sheet on the challenge page" do
+      it "answers with the frame so the sheet can close" do
+        post challenge_story_challenge_rewards_path(story),
+          params: {challenge_reward: {receiver_id: receiver.id, description: "Coffee treat!"}},
+          headers: {"Turbo-Frame" => "new_reward"}
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Reward pledged to #{receiver.name}")
       end
     end
 

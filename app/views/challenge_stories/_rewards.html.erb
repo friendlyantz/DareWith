@@ -1,22 +1,7 @@
 <%# locals: (challenge_story:, participant:) %>
-<div class="flex flex-col gap-3">
-  <% if challenge_story.finished? && challenge_story.challenge_rewards.any? %>
-    <%= link_to challenge_story_challenge_rewards_path(challenge_story), class: "alert alert-warning alert-soft" do %>
-      Time's up: time to fulfil the pledges.
-    <% end %>
-  <% end %>
-
+<div class="flex flex-col gap-3" data-controller="sheet">
   <% challenge_story.challenge_rewards.each do |reward| %>
-    <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-100 p-4">
-      <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
-        <%= icon(:gift) %>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="font-semibold line-clamp-2"><%= reward.description %></p>
-        <p class="text-sm text-base-content/70 mt-0.5"><%= reward.giver.name %> → <%= reward.receiver.name %></p>
-      </div>
-      <span class="badge badge-sm <%= reward_status_class(reward.status) %>"><%= reward.status.capitalize %></span>
-    </div>
+    <%= render "challenge_rewards/reward_card", reward: reward, challenge_story: challenge_story %>
   <% end %>
 
   <% if challenge_story.challenge_rewards.empty? %>
@@ -24,10 +9,19 @@
   <% end %>
 
   <% if participant && challenge_story.accepting_check_ins? %>
-    <% if challenge_story.active_participants.size > 1 %>
-      <%= link_to "Pledge a reward", new_challenge_story_challenge_reward_path(challenge_story), class: "btn bg-base-100" %>
-    <% else %>
+    <% if challenge_story.active_participants.size == 1 %>
       <p class="text-sm text-center text-base-content/70">Invite someone to unlock reward pledging.</p>
+    <% elsif participant.unpledged_participants.any? %>
+      <%= link_to "Pledge a reward", new_challenge_story_challenge_reward_path(challenge_story),
+        class: "btn bg-base-100",
+        data: {turbo_frame: "new_reward", action: "sheet#open"} %>
+      <%= render "shared/sheet", title: "Pledge a reward", frame_id: "new_reward" %>
+    <% else %>
+      <p class="text-sm text-center text-base-content/70">You've pledged a reward to everyone here.</p>
     <% end %>
+  <% end %>
+
+  <% if participant && challenge_story.finished? && !challenge_story.completed? %>
+    <%= render "challenge_rewards/complete_button", challenge_story: challenge_story %>
   <% end %>
 </div>

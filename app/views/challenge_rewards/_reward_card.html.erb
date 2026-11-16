@@ -14,10 +14,13 @@
     <span class="badge badge-sm <%= reward_status_class(reward.status) %>"><%= reward.status.capitalize %></span>
   </div>
 
-  <% if reward.pending? && challenge_story.finished? %>
+  <% if reward.pending? %>
     <% receiver_user = reward.receiver.user %>
-    <% if reward.giver.user == current_user %>
-      <% if receiver_user.payment_details.present? %>
+    <% giving = reward.giver.user == current_user %>
+    <% receiving = receiver_user == current_user %>
+
+    <% if challenge_story.settle_up_open? %>
+      <% if giving && receiver_user.payment_details.present? %>
         <div class="flex items-center gap-3 rounded-field bg-base-200 px-3 py-2">
           <div class="flex-1 min-w-0 text-sm">
             <p class="font-semibold">Settle up with <%= reward.receiver.name %></p>
@@ -29,28 +32,30 @@
             <button type="button" class="btn btn-sm shrink-0" data-controller="clipboard" data-clipboard-text-value="<%= receiver_user.payment_details %>" data-action="clipboard#copy">Copy</button>
           <% end %>
         </div>
-      <% else %>
+      <% elsif giving %>
         <p class="text-sm text-base-content/70"><%= reward.receiver.name %> hasn't added payment details. If this one involves money, sort it out together.</p>
+      <% elsif receiving && current_user.payment_details.blank? %>
+        <p class="text-sm text-base-content/70">
+          If this reward involves money, <%= link_to "add how friends pay you", profile_path, class: "link link-accent" %>.
+        </p>
       <% end %>
-    <% elsif receiver_user == current_user && current_user.payment_details.blank? %>
-      <p class="text-sm text-base-content/70">
-        If this reward involves money, <%= link_to "add how friends pay you", profile_path, class: "link link-accent" %>.
-      </p>
     <% end %>
 
-    <div class="flex justify-end gap-2">
-      <% if reward.giver.user == current_user %>
-        <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),
-          method: :patch,
-          class: "btn btn-sm btn-ghost text-error",
-          data: {turbo_confirm: "Cancel this reward? You can't pledge again during this challenge."} %>
-      <% end %>
-      <% if reward.receiver.user == current_user %>
-        <%= button_to "Mark as received", fulfill_challenge_story_challenge_reward_path(challenge_story, reward),
-          method: :patch,
-          class: "btn btn-sm btn-primary",
-          data: {turbo_confirm: "Have you received this reward from #{reward.giver.name}?"} %>
-      <% end %>
-    </div>
+    <% if receiving || (giving && challenge_story.finished?) %>
+      <div class="flex justify-end gap-2">
+        <% if giving && challenge_story.finished? %>
+          <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),
+            method: :patch,
+            class: "btn btn-sm btn-ghost text-error",
+            data: {turbo_confirm: "Cancel this reward? #{reward.receiver.name} won't get it."} %>
+        <% end %>
+        <% if receiving %>
+          <%= button_to "Mark as received", fulfill_challenge_story_challenge_reward_path(challenge_story, reward),
+            method: :patch,
+            class: "btn btn-sm btn-primary",
+            data: {turbo_confirm: "Have you received this reward from #{reward.giver.name}?"} %>
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
 </div>

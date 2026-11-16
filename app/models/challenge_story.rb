@@ -30,6 +30,11 @@ class ChallengeStory < ApplicationRecord
     finish < Time.zone.today
   end
 
+  # Settling pledges opens on the last day, when people actually settle up
+  def settle_up_open?
+    Time.zone.today >= finish
+  end
+
   def duration_in_days
     (finish - start).to_i + 1
   end
@@ -83,8 +88,19 @@ class ChallengeStory < ApplicationRecord
     MAX_PARTICIPANTS - active_participants.count
   end
 
-  def mark_complete!
+  def mark_complete!(by: nil)
     update!(completed: true)
+    announce_completion(except: by)
+  end
+
+  def announce_completion(except: nil)
+    active_participants.where.not(user: except).includes(:user).find_each do |participant|
+      participant.user.notify(
+        title: "#{title} is complete",
+        body: "It's moved to your past challenges.",
+        path: Rails.application.routes.url_helpers.challenge_story_path(self)
+      )
+    end
   end
 
   def find_or_activate_participant!(user)

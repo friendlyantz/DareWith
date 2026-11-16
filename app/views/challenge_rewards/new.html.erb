@@ -11,32 +11,34 @@
     <p class="text-sm text-base-content/70 mt-1">Promise a friend something for finishing. You settle up when the challenge ends.</p>
   </div>
 
-  <% if @current_challenge_participant.nil? %>
-    <div class="alert alert-warning alert-soft">Join this challenge before you pledge a reward.</div>
-  <% elsif @participants.where.not(id: @current_challenge_participant.id).empty? %>
-    <div class="alert alert-info alert-soft">You've already pledged a reward to everyone in this challenge.</div>
-  <% else %>
-    <%= form_with model: @reward, url: challenge_story_challenge_rewards_path(@challenge_story), class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5" do |form| %>
-      <% if @reward.errors.any? %>
-        <div class="alert alert-error alert-soft"><%= @reward.errors.full_messages.to_sentence %></div>
+  <%= turbo_frame_tag "new_reward", target: "_top" do %>
+    <% if @current_challenge_participant.nil? %>
+      <div class="alert alert-warning alert-soft">Join this challenge before you pledge a reward.</div>
+    <% elsif @participants.where.not(id: @current_challenge_participant.id).empty? %>
+      <div class="alert alert-info alert-soft">You've already pledged a reward to everyone in this challenge.</div>
+    <% else %>
+      <%= form_with model: @reward, url: challenge_story_challenge_rewards_path(@challenge_story), class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5" do |form| %>
+        <% if @reward.errors.any? %>
+          <div class="alert alert-error alert-soft"><%= @reward.errors.full_messages.to_sentence %></div>
+        <% end %>
+
+        <div>
+          <%= form.label :receiver_id, "Who gets the reward?", class: "text-sm font-semibold" %>
+          <%= form.collection_select :receiver_id,
+            @participants.where.not(id: @current_challenge_participant.id),
+            :id,
+            :name,
+            {prompt: "Choose a participant"},
+            {class: "select w-full mt-1.5"} %>
+        </div>
+
+        <div>
+          <%= form.label :description, "What will you give them?", class: "text-sm font-semibold" %>
+          <%= form.text_area :description, rows: 3, class: "textarea w-full mt-1.5 text-base", placeholder: "e.g. Lunch on me if you finish every day" %>
+        </div>
+
+        <%= form.submit "Pledge reward", class: "btn btn-primary btn-block" %>
       <% end %>
-
-      <div>
-        <%= form.label :receiver_id, "Who gets the reward?", class: "text-sm font-semibold" %>
-        <%= form.collection_select :receiver_id,
-          @participants.where.not(id: @current_challenge_participant.id),
-          :id,
-          :name,
-          {prompt: "Choose a participant"},
-          {class: "select w-full mt-1.5"} %>
-      </div>
-
-      <div>
-        <%= form.label :description, "What will you give them?", class: "text-sm font-semibold" %>
-        <%= form.text_area :description, rows: 3, class: "textarea w-full mt-1.5 text-base", placeholder: "e.g. Lunch on me if you finish every day" %>
-      </div>
-
-      <%= form.submit "Pledge reward", class: "btn btn-primary btn-block" %>
     <% end %>
   <% end %>
 </div>

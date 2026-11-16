@@ -24,6 +24,24 @@ RSpec.describe "Challenge Rewards", type: :system do
     end
   end
 
+  describe "pledging from the challenge page" do
+    scenario "participant pledges in a sheet without leaving the challenge" do
+      visit challenge_story_path(challenge)
+      find("input[aria-label^='Rewards']").click
+      click_on "Pledge a reward"
+
+      within "dialog[open]" do
+        select receiver.name, from: "Who gets the reward?"
+        fill_in "What will you give them?", with: "Lunch on me"
+        click_on "Pledge reward"
+      end
+
+      expect(page).to have_current_path(challenge_story_path(challenge))
+      expect(page).to have_content("Lunch on me")
+      expect(page).to have_content("pledged a reward to everyone here")
+    end
+  end
+
   describe "viewing rewards" do
     let!(:reward) do
       create(:challenge_reward,

@@ -14,8 +14,8 @@
     <%= render "challenge_stories/join_card", challenge_story: @challenge_story %>
   <% end %>
 
-  <div role="tablist" class="tabs tabs-box bg-base-300/60">
-    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Check-ins" checked>
+  <div role="tablist" class="tabs tabs-box bg-base-300/60" data-controller="tabs" data-action="change->tabs#remember turbo:morph@window->tabs#restore">
+    <input type="radio" name="challenge_tabs" id="challenge_tab_check_ins" class="tab flex-1" aria-label="Check-ins" checked>
     <div class="tab-content pt-4">
       <div id="challenge_check_ins" class="flex flex-col gap-3">
         <%= render @challenge_story.challenge_check_ins %>
@@ -27,12 +27,12 @@
       <% end %>
     </div>
 
-    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Leaderboard">
+    <input type="radio" name="challenge_tabs" id="challenge_tab_leaderboard" class="tab flex-1" aria-label="Leaderboard">
     <div class="tab-content pt-4">
       <%= render "challenge_stories/leaderboard", challenge_story: @challenge_story %>
     </div>
 
-    <input type="radio" name="challenge_tabs" class="tab flex-1" aria-label="Rewards · <%= @challenge_story.challenge_rewards.size %>">
+    <input type="radio" name="challenge_tabs" id="challenge_tab_rewards" class="tab flex-1" aria-label="Rewards · <%= @challenge_story.challenge_rewards.size %>">
     <div class="tab-content pt-4">
       <%= render "challenge_stories/rewards", challenge_story: @challenge_story, participant: @current_challenge_participant %>
     </div>
@@ -40,6 +40,6 @@
 
   <% if @current_challenge_participant %>
     <%= render "challenge_stories/check_in_bar", challenge_story: @challenge_story, participant: @current_challenge_participant %>
-    <%= render "challenge_check_ins/sheet" %>
+    <%= render "shared/sheet", title: "Check in", frame_id: "new_message" %>
   <% end %>
 </div>

@@ -49,6 +49,8 @@ class ChallengeRewardsController < ApplicationController
 
     if @reward.save
       @reward.notify_receiver
+      return render :pledged if turbo_frame_request?
+
       redirect_to challenge_story_challenge_rewards_path(@challenge_story),
         notice: "You've successfully pledged a reward!"
     else

@@ -1,0 +1,10 @@
+<%# locals: (challenge_story:) %>
+<div class="flex flex-col gap-1.5">
+  <%= button_to "Complete for everyone", complete_challenge_story_path(challenge_story),
+    method: :patch,
+    class: "btn btn-block border-base-300 bg-base-100",
+    data: {turbo_confirm: "Complete \"#{challenge_story.title}\" for all #{pluralize(challenge_story.active_participants.size, "participant")}? Check-ins and pledges close, and it moves to Past challenges for everyone. This can't be undone."} %>
+  <p class="text-center text-xs text-base-content/60">
+    Otherwise it completes by itself once every pledge is settled, or on <%= challenge_story.auto_complete_on.strftime("%-d %b") %>.
+  </p>
+</div>

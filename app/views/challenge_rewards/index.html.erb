@@ -9,24 +9,19 @@
   <div>
     <h1 class="font-display text-3xl font-bold tracking-tight">Rewards</h1>
     <% if @challenge_story.finished? && !@challenge_story.completed? %>
-      <p class="text-sm text-base-content/70 mt-1">
-        Time's up. Settle the pledges, then mark the challenge complete. It completes by itself once every pledge is settled, or on <%= @challenge_story.auto_complete_on.strftime("%-d %b") %>.
-      </p>
+      <p class="text-sm text-base-content/70 mt-1">Time's up. Settle the pledges below.</p>
     <% end %>
   </div>
 
   <% if @current_challenge_participant %>
     <div class="flex flex-col gap-2">
-      <% if @challenge_story.accepting_check_ins? %>
+      <% if @challenge_story.accepting_check_ins? && @current_challenge_participant.unpledged_participants.any? %>
         <%= link_to new_challenge_story_challenge_reward_path(@challenge_story), class: "btn btn-primary" do %>
           <%= icon(:plus, css: "size-4") %> Pledge a reward
         <% end %>
       <% end %>
       <% if @challenge_story.finished? && !@challenge_story.completed? %>
-        <%= button_to "Mark challenge complete", complete_challenge_story_path(@challenge_story),
-          method: :patch,
-          class: "btn btn-block border-base-300 bg-base-100",
-          data: {turbo_confirm: "Mark this challenge as complete? This can't be undone."} %>
+        <%= render "complete_button", challenge_story: @challenge_story %>
       <% end %>
     </div>
   <% end %>

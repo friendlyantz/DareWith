@@ -127,7 +127,18 @@ RSpec.describe "ChallengeStories", type: :request do
       patch complete_challenge_story_path(story)
 
       expect(story.reload).to be_completed
-      expect(response).to redirect_to(challenge_stories_path)
+      expect(response).to redirect_to(challenge_story_path(story))
+    end
+
+    it "lets the other participants know" do
+      create(:challenge_participant, user: user, challenge_story: story)
+      friend = create(:challenge_participant, challenge_story: story)
+      device = create(:web_push_notification, user: friend.user)
+      create(:web_push_notification, user: user)
+
+      expect {
+        patch complete_challenge_story_path(story)
+      }.to have_enqueued_job(PushNotificationJob).with(device, hash_including(title: "#{story.title} is complete")).exactly(:once)
     end
 
     it "does not let non-participants complete it" do
