@@ -2,7 +2,9 @@
 <html>
   <head>
     <title><%= content_for(:title) || "Strivo" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#141518" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
@@ -21,7 +23,7 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body>
+  <body class="pt-[env(safe-area-inset-top)]">
 
     <script>
       // Make the VAPID public key available to the client as a Uint8Array
@@ -34,7 +36,7 @@
       <% end %>
     </script>
 
-    <%= render "layouts/navbar" %>
+    <%= render "layouts/navbar" unless current_user %>
     <%= render "layouts/flash" %>
 
     <% if current_user && !current_page?(profile_path) %>

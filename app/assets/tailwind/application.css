@@ -48,6 +48,46 @@
   --noise: 0;
 }
 
+@plugin "./daisyui-theme.js" {
+  name: "strivo-dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #1e1f23;
+  --color-base-200: #141518;
+  --color-base-300: #2e3036;
+  --color-base-content: #ecebe6;
+  --color-primary: #c2410c;
+  --color-primary-content: #ffffff;
+  --color-secondary: #ecebe6;
+  --color-secondary-content: #141518;
+  --color-accent: #fb923c;
+  --color-accent-content: #141518;
+  --color-neutral: #2a2c31;
+  --color-neutral-content: #ecebe6;
+  --color-info: #60a5fa;
+  --color-info-content: #141518;
+  --color-success: #4ade80;
+  --color-success-content: #141518;
+  --color-warning: #fbbf24;
+  --color-warning-content: #141518;
+  --color-error: #f87171;
+  --color-error-content: #141518;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+
+  --depth: 0;
+  --noise: 0;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;

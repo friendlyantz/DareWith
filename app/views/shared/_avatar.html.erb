@@ -1,6 +1,6 @@
 <%# locals: (name:, checked_in: false, size: "size-8", text: "text-[0.65rem]") %>
 <div class="avatar avatar-placeholder" title="<%= name %>">
-  <div class="<%= class_names(size, avatar_tint(name), "rounded-full text-base-content", checked_in ? "ring-2 ring-info" : "ring-2 ring-base-100") %>">
+  <div class="<%= class_names(size, avatar_tint(name), "rounded-full text-stone-900", checked_in ? "ring-2 ring-info" : "ring-2 ring-base-100") %>">
     <span class="<%= class_names(text, "font-bold tracking-tight") %>"><%= avatar_initials(name) %></span>
   </div>
 </div>
