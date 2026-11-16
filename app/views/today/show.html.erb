@@ -1,0 +1,55 @@
+<% content_for :title, "Today" %>
+<% turbo_refreshes_with method: :morph, scroll: :preserve %>
+
+<div class="w-full max-w-md flex flex-col gap-4" data-controller="sheet">
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <p class="text-sm font-medium text-base-content/70"><%= Time.zone.today.strftime("%A, %-d %B") %></p>
+      <h1 class="font-display text-4xl font-bold tracking-tight">Today</h1>
+    </div>
+    <%= link_to new_challenge_story_path, class: "btn bg-base-100 rounded-full" do %>
+      <%= icon(:plus, css: "size-4") %> New
+    <% end %>
+  </div>
+
+  <% if @challenge_stories.any? %>
+    <div id="today_summary" class="rounded-box bg-neutral text-neutral-content p-4 flex flex-col gap-2.5">
+      <div class="flex items-baseline justify-between">
+        <span class="font-semibold"><%= @checked_in_count %> of <%= @challenge_stories.size %> done today</span>
+        <span class="text-sm opacity-75">
+          <%= @checked_in_count == @challenge_stories.size ? "All done" : "#{@challenge_stories.size - @checked_in_count} to go" %>
+        </span>
+      </div>
+      <progress class="progress progress-primary h-1.5" value="<%= @checked_in_count %>" max="<%= @challenge_stories.size %>"></progress>
+    </div>
+
+    <%= render partial: "today/challenge_card", collection: @challenge_stories, as: :challenge_story %>
+  <% else %>
+    <div class="card bg-base-100 border border-base-300">
+      <div class="card-body items-center text-center">
+        <h2 class="font-display text-xl font-semibold">No active challenges</h2>
+        <p class="text-base-content/70">Start one and invite friends to keep you honest, or open a friend's invite link to join theirs.</p>
+        <%= link_to new_challenge_story_path, class: "btn btn-primary rounded-full mt-2" do %>
+          <%= icon(:plus, css: "size-4") %> New challenge
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%= link_to "All challenges", challenge_stories_path, class: "btn btn-ghost" %>
+
+  <dialog class="modal modal-bottom sm:modal-middle" data-sheet-target="dialog" data-action="close->sheet#reset turbo:submit-end->sheet#submitted">
+    <div class="modal-box bg-base-200">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h2 class="font-display text-2xl font-bold">Check in</h2>
+        <form method="dialog">
+          <button class="btn btn-circle btn-ghost" aria-label="Close"><%= icon(:x) %></button>
+        </form>
+      </div>
+      <%= turbo_frame_tag "new_message", data: {sheet_target: "frame"} do %>
+        <div class="flex justify-center py-10"><span class="loading loading-spinner"></span></div>
+      <% end %>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>Close</button></form>
+  </dialog>
+</div>

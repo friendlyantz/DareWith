@@ -7,6 +7,7 @@ class ChallengeParticipant < ApplicationRecord
   has_many :given_rewards, class_name: "ChallengeReward", foreign_key: "giver_id", dependent: :destroy
   has_many :received_rewards, class_name: "ChallengeReward", foreign_key: "receiver_id", dependent: :destroy
   has_many :challenge_check_ins, dependent: :nullify
+  has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
 
   # Enums
   enum :status, %w[active inactive].index_by(&:itself)
@@ -19,6 +20,10 @@ class ChallengeParticipant < ApplicationRecord
   before_create :set_default_name
 
   # Public methods
+  def checked_in_today?
+    todays_check_ins.any?
+  end
+
   def leave!
     update!(status: :inactive)
   end

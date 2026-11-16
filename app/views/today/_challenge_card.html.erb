@@ -1,0 +1,40 @@
+<%# locals: (challenge_story:) %>
+<article id="<%= dom_id(challenge_story, :today) %>" class="card bg-base-100 border border-base-300">
+  <%= link_to challenge_story, class: "flex items-start gap-3 px-4 pt-4 pb-3" do %>
+    <div class="flex-1 min-w-0">
+      <h2 class="font-display text-lg font-semibold leading-tight"><%= challenge_story.title %></h2>
+      <p class="text-sm text-base-content/70 mt-0.5">
+        Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
+      </p>
+      <progress class="progress progress-secondary h-1 mt-2.5" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"></progress>
+    </div>
+    <%= icon(:chevron_right, css: "size-5 mt-0.5 shrink-0 text-base-content/50") %>
+  <% end %>
+
+  <div class="flex items-center justify-between gap-3 px-4 pb-4">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="flex -space-x-1.5 shrink-0">
+        <% challenge_story.active_participants.each do |participant| %>
+          <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today? %>
+        <% end %>
+      </div>
+      <span class="text-sm text-base-content/70 truncate">
+        <%= challenge_story.checked_in_today_count %>/<%= challenge_story.active_participants.size %> today
+      </span>
+    </div>
+
+    <% if challenge_story.participant_for(current_user).checked_in_today? %>
+      <span class="badge badge-info badge-soft badge-lg font-semibold shrink-0">
+        <%= icon(:check, css: "size-4") %> Done
+      </span>
+    <% elsif challenge_story.accepting_check_ins? %>
+      <%= link_to new_challenge_story_challenge_check_in_path(challenge_story),
+        class: "btn btn-primary rounded-full shrink-0",
+        data: {turbo_frame: "new_message", action: "sheet#open"} do %>
+        <%= icon(:camera) %> Check in
+      <% end %>
+    <% else %>
+      <span class="badge badge-ghost badge-lg shrink-0">Time's up</span>
+    <% end %>
+  </div>
+</article>

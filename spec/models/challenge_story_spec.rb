@@ -30,6 +30,47 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "#current_day" do
+    it "counts the start date as day 1" do
+      story = build(:challenge_story, start: Time.zone.today, finish: Time.zone.today + 6.days)
+
+      expect(story.current_day).to eq(1)
+      expect(story.duration_in_days).to eq(7)
+    end
+
+    it "counts days since the start" do
+      story = build(:challenge_story, start: Time.zone.today - 4.days, finish: Time.zone.today + 2.days)
+
+      expect(story.current_day).to eq(5)
+    end
+
+    it "stays on the last day after the finish" do
+      story = build(:challenge_story, :finished)
+
+      expect(story.current_day).to eq(story.duration_in_days)
+    end
+  end
+
+  describe "#accepting_check_ins?" do
+    it "is true while the challenge runs" do
+      expect(build(:challenge_story)).to be_accepting_check_ins
+    end
+
+    it "allows one extra day after the finish" do
+      story = build(:challenge_story, start: Time.zone.today - 7.days, finish: Time.zone.today - 1.day)
+
+      expect(story).to be_accepting_check_ins
+    end
+
+    it "is false later than a day after the finish" do
+      expect(build(:challenge_story, :finished)).not_to be_accepting_check_ins
+    end
+
+    it "is false once completed" do
+      expect(build(:challenge_story, :completed)).not_to be_accepting_check_ins
+    end
+  end
+
   describe "#at_capacity?" do
     let(:story) { create(:challenge_story) }
 

@@ -17,10 +17,10 @@ RSpec.describe "Home", type: :request do
 
       before { sign_in_as(user) }
 
-      it "renders home page" do
+      it "redirects to Today" do
         get root_path
 
-        expect(response).to have_http_status(:success)
+        expect(response).to redirect_to(today_path)
       end
     end
 
@@ -29,10 +29,10 @@ RSpec.describe "Home", type: :request do
 
       before { sign_in_as(user) }
 
-      it "renders home page" do
+      it "redirects to Today" do
         get root_path
 
-        expect(response).to have_http_status(:success)
+        expect(response).to redirect_to(today_path)
       end
     end
   end

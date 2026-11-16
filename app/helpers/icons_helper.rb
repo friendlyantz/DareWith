@@ -1,0 +1,30 @@
+module IconsHelper
+  ICONS = {
+    camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    chevron_left: '<path d="M15 18l-6-6 6-6"/>',
+    chevron_right: '<path d="M9 6l6 6-6 6"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+    log_in: '<path d="M9 4H5v16h4M14 8l4 4-4 4M18 12H8"/>',
+    photo: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>'
+  }.freeze
+
+  def icon(name, css: "size-5")
+    tag.svg(
+      ICONS.fetch(name).html_safe,
+      class: css,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": 1.9,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      aria: {hidden: true}
+    )
+  end
+end

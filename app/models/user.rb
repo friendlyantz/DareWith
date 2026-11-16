@@ -33,12 +33,10 @@ class User < ApplicationRecord
     credentials.size > CREDENTIAL_MIN_AMOUNT
   end
 
-  def latest_active_participation
-    challenge_participants.active
-      .joins(:challenge_story)
+  def active_challenge_stories
+    challenge_stories
+      .merge(ChallengeParticipant.active)
       .merge(ChallengeStory.active)
-      .order("challenge_stories.updated_at DESC")
-      .first
   end
 
   # Email authentication methods

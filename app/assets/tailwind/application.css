@@ -4,9 +4,51 @@
 @source "../../../app/javascript/**/*.js";
 @source "../../../app/views/**/*";
 
-@plugin "./daisyui.js";
+@plugin "./daisyui.js" {
+  themes: false;
+}
 
-/* Optional for custom themes – Docs: https://daisyui.com/docs/themes/#how-to-add-a-new-custom-theme */
-@plugin "./daisyui-theme.js"{
-  /* custom theme here */
+@plugin "./daisyui-theme.js" {
+  name: "strivo";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f6f5f1;
+  --color-base-300: #e4e2dc;
+  --color-base-content: #17181a;
+  --color-primary: #c2410c;
+  --color-primary-content: #ffffff;
+  --color-secondary: #17181a;
+  --color-secondary-content: #ffffff;
+  --color-accent: #9a3412;
+  --color-accent-content: #ffffff;
+  --color-neutral: #17181a;
+  --color-neutral-content: #ffffff;
+  --color-info: #1d4ed8;
+  --color-info-content: #ffffff;
+  --color-success: #15803d;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #17181a;
+  --color-error: #b42318;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }

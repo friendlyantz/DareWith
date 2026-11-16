@@ -29,6 +29,26 @@ class ChallengeStory < ApplicationRecord
     finish < Time.zone.today
   end
 
+  def duration_in_days
+    (finish - start).to_i + 1
+  end
+
+  def current_day
+    ((Time.zone.today - start).to_i + 1).clamp(1, duration_in_days)
+  end
+
+  def accepting_check_ins?
+    !completed? && Time.zone.today <= finish + 1.day
+  end
+
+  def checked_in_today_count
+    active_participants.count(&:checked_in_today?)
+  end
+
+  def participant_for(user)
+    active_participants.find { it.user_id == user.id }
+  end
+
   def latest_photo_check_in
     challenge_check_ins.joins(:photo_attachment).first
   end

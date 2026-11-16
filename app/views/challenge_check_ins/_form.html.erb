@@ -1,45 +1,53 @@
 <%# locals: (challenge_story:, challenge_check_in:) %>
 <%= turbo_frame_tag "new_message" do %>
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4" data-controller="image-compressor">
-    <%= form_with(model: [challenge_story, challenge_check_in], class: "contents") do |form| %>
+  <div class="flex flex-col gap-4" data-controller="image-compressor">
+    <p class="text-sm text-base-content/70">
+      <%= challenge_story.title %> · day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %>
+    </p>
+
+    <%= form_with(model: [challenge_story, challenge_check_in], class: "flex flex-col gap-4") do |form| %>
       <% if challenge_check_in.errors[:base].any? %>
-        <div class="alert alert-error mb-4">
+        <div class="alert alert-error">
           <span><%= challenge_check_in.errors[:base].first %></span>
         </div>
       <% end %>
 
-      <%= 
-        form.text_area :message,
-        class: ["textarea", {"border-gray-400 focus:outline-blue-600 w-full": challenge_check_in.errors[:message].none?, "border-red-400 focus:outline-red-600": challenge_check_in.errors[:message].any?}],
-        id: "message",
-        placeholder: "check in your progress, this cannot be edited later!",
-        required: true
-      %>
-      <p class="text-xs text-red-300 mt-1">Cannot be changed later!</p>
-
-      <%= 
-        form.file_field :photo,
-        class: "file-input",
-        accept: "image/*",
-        data: { 
-          image_compressor_target: "input",
-          action: "change->image-compressor#compress"
-        }
-       %>
+      <label class="relative flex flex-col items-center justify-center gap-1 h-44 overflow-hidden rounded-box border-2 border-dashed border-base-300 bg-base-100 cursor-pointer">
+        <img data-image-compressor-target="preview" class="hidden absolute inset-0 size-full object-cover" alt="Selected photo">
+        <%= icon(:camera, css: "size-8") %>
+        <span class="font-semibold">Take or choose a photo</span>
+        <span class="text-sm text-base-content/70">Optional, but friends love proof</span>
+        <%= form.file_field :photo,
+          class: "sr-only",
+          accept: "image/*",
+          data: {
+            image_compressor_target: "input",
+            action: "change->image-compressor#compress"
+          } %>
+      </label>
 
       <% if challenge_check_in.errors[:photo].any? %>
-        <div class="alert alert-error mt-2">
+        <div class="alert alert-error">
           <span><%= challenge_check_in.errors[:photo].first %></span>
         </div>
       <% end %>
 
-      <div class="inline">
-        <%= form.submit "Check-In", class: "btn btn-soft btn-lg btn-secondary", id: "submit"%>
-      </div>
-      <div class="alert hidden mt-2" data-image-compressor-target="status">
+      <div class="alert hidden" data-image-compressor-target="status">
         <span></span>
       </div>
 
-    <%end%>
-  </fieldset>
+      <fieldset class="fieldset">
+        <label for="message" class="fieldset-legend text-sm">What did you do?</label>
+        <%= form.text_area :message,
+          id: "message",
+          rows: 3,
+          required: true,
+          placeholder: "e.g. 5 sets of squats, felt strong",
+          class: ["textarea w-full text-base", {"textarea-error": challenge_check_in.errors[:message].any?}] %>
+        <p class="label">Check-ins can't be edited after posting.</p>
+      </fieldset>
+
+      <%= form.submit "Post check-in", class: "btn btn-primary btn-lg btn-block", id: "submit" %>
+    <% end %>
+  </div>
 <% end %>

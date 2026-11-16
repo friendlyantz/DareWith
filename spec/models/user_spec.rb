@@ -17,34 +17,32 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe "#latest_active_participation" do
+  describe "#active_challenge_stories" do
     let(:user) { create(:user) }
 
-    it "returns nil when user has no participations" do
-      expect(user.latest_active_participation).to be_nil
-    end
-
-    it "returns nil when all participations are inactive" do
-      create(:challenge_participant, :inactive, user: user)
-
-      expect(user.latest_active_participation).to be_nil
-    end
-
-    it "returns nil when all stories are completed" do
-      story = create(:challenge_story, :completed)
+    it "returns stories the user actively takes part in" do
+      story = create(:challenge_story)
       create(:challenge_participant, user: user, challenge_story: story)
 
-      expect(user.latest_active_participation).to be_nil
+      expect(user.active_challenge_stories).to eq([story])
     end
 
-    it "returns the most recently updated active participation" do
-      old_story = create(:challenge_story, updated_at: 2.days.ago)
-      new_story = create(:challenge_story, updated_at: 1.day.ago)
+    it "excludes stories the user has left" do
+      create(:challenge_participant, :inactive, user: user)
 
-      create(:challenge_participant, user: user, challenge_story: old_story)
-      latest = create(:challenge_participant, user: user, challenge_story: new_story)
+      expect(user.active_challenge_stories).to be_empty
+    end
 
-      expect(user.latest_active_participation).to eq(latest)
+    it "excludes completed stories" do
+      create(:challenge_participant, user: user, challenge_story: create(:challenge_story, :completed))
+
+      expect(user.active_challenge_stories).to be_empty
+    end
+
+    it "excludes other users' stories" do
+      create(:challenge_participant)
+
+      expect(user.active_challenge_stories).to be_empty
     end
   end
 

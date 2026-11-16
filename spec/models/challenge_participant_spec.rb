@@ -11,6 +11,26 @@ RSpec.describe ChallengeParticipant, type: :model do
     end
   end
 
+  describe "#checked_in_today?" do
+    let(:participant) { create(:challenge_participant) }
+
+    it "is false without check-ins" do
+      expect(participant.checked_in_today?).to be false
+    end
+
+    it "is true after a check-in today" do
+      create(:challenge_check_in, challenge_participant: participant)
+
+      expect(participant.checked_in_today?).to be true
+    end
+
+    it "is false when the last check-in was yesterday" do
+      create(:challenge_check_in, challenge_participant: participant).update_column(:created_at, 1.day.ago)
+
+      expect(participant.checked_in_today?).to be false
+    end
+  end
+
   describe "#rejoin!" do
     let(:participant) { create(:challenge_participant, :inactive) }
 

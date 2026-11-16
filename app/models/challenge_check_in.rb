@@ -13,6 +13,9 @@ class ChallengeCheckIn < ApplicationRecord
   validate :photo_size_validation
   validate :one_check_in_per_day_per_participant
 
+  # Scopes
+  scope :today, -> { where(created_at: Time.zone.today.all_day) }
+
   # Callbacks (broadcasts must be after has_one_attached for Cloudinary compatibility)
   after_create_commit :broadcast_to_story_and_participant_feeds
 

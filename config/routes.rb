@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   # Test-only route for signing in without WebAuthn
   get "test_sign_in/:user_id", to: "webauthn/sessions#test_sign_in", as: :test_sign_in if Rails.env.test?
 
+  resource :today, only: %i[show], controller: "today"
+
   resources :challenge_stories, only: %i[index show new create edit update destroy] do
     member do
       patch :complete

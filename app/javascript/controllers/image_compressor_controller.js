@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="image-compressor"
 export default class extends Controller {
-  static targets = ["input", "status", "originalSize", "compressedSize"]
+  static targets = ["input", "status", "originalSize", "compressedSize", "preview"]
   static values = {
     maxSize: { type: Number, default: 1 }, // Max size in MB
     quality: { type: Number, default: 0.8 }, // JPEG quality (0-1)
@@ -35,6 +35,11 @@ export default class extends Controller {
       const dataTransfer = new DataTransfer()
       compressedFiles.forEach(file => dataTransfer.items.add(file))
       input.files = dataTransfer.files
+
+      if (this.hasPreviewTarget) {
+        this.previewTarget.src = URL.createObjectURL(compressedFiles[0])
+        this.previewTarget.classList.remove("hidden")
+      }
 
       // Update status
       if (this.hasStatusTarget) {
