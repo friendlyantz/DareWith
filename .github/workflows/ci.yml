@@ -33,6 +33,10 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      # db:prepare in bin/setup seeds an empty database; loading the schema first keeps demo seeds out of the test DB
+      - name: Prepare test database
+        run: bin/rails db:create db:schema:load
+
       - name: Run bin/ci
         run: bin/ci
 
