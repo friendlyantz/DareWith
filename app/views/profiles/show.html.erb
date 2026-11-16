@@ -7,7 +7,7 @@
     <div>
       <p class="text-lg font-semibold"><%= current_user.username %></p>
       <p class="text-sm text-base-content/70">
-        <%= pluralize(@active_challenges_count, "active challenge") %> · <%= @past_challenge_stories.size %> finished
+        <%= pluralize(@active_challenges_count, "active challenge") %> · <%= @past_challenge_stories.size + @wrap_up_stories.size %> finished
       </p>
     </div>
   </div>
@@ -42,10 +42,21 @@
         <summary class="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4">
           <%= icon(:archive, css: "size-5 text-base-content/70") %>
           <span class="flex-1">Past challenges</span>
-          <span class="text-sm text-base-content/70"><%= @past_challenge_stories.size %></span>
+          <span class="text-sm text-base-content/70"><%= @past_challenge_stories.size + @wrap_up_stories.size %></span>
           <%= icon(:chevron_right, css: "size-5 text-base-content/50 transition-transform group-open:rotate-90") %>
         </summary>
         <ul class="border-t border-base-300 pb-1">
+          <% @wrap_up_stories.each do |challenge_story| %>
+            <li>
+              <%= link_to challenge_story_challenge_rewards_path(challenge_story), class: "flex items-center gap-3 py-2.5 pl-12 pr-4" do %>
+                <div class="flex-1 min-w-0">
+                  <p class="truncate font-semibold"><%= challenge_story.title %></p>
+                  <p class="text-sm text-base-content/70">Ended <%= challenge_story.finish.strftime("%-d %b %Y") %></p>
+                </div>
+                <span class="badge badge-sm badge-warning shrink-0">Wrap up</span>
+              <% end %>
+            </li>
+          <% end %>
           <% @past_challenge_stories.each do |challenge_story| %>
             <li>
               <%= link_to challenge_story, class: "flex items-center gap-3 py-2.5 pl-12 pr-4" do %>
@@ -56,7 +67,7 @@
               <% end %>
             </li>
           <% end %>
-          <% if @past_challenge_stories.empty? %>
+          <% if @past_challenge_stories.empty? && @wrap_up_stories.empty? %>
             <li class="py-2.5 pl-12 pr-4 text-sm text-base-content/70">None yet</li>
           <% end %>
         </ul>

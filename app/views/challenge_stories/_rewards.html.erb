@@ -23,7 +23,7 @@
     <p class="py-6 text-center text-base-content/70">No rewards yet. Pledge one to raise the stakes.</p>
   <% end %>
 
-  <% if participant %>
+  <% if participant && challenge_story.accepting_check_ins? %>
     <% if challenge_story.active_participants.size > 1 %>
       <%= link_to "Pledge a reward", new_challenge_story_challenge_reward_path(challenge_story), class: "btn bg-base-100" %>
     <% else %>

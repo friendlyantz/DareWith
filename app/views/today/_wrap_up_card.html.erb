@@ -1,0 +1,15 @@
+<%# locals: (challenge_story:) %>
+<% pending_count = challenge_story.challenge_rewards.pending.count %>
+<%= link_to challenge_story_challenge_rewards_path(challenge_story), id: dom_id(challenge_story, :wrap_up), class: "flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-4" do %>
+  <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
+    <%= icon(:gift) %>
+  </div>
+  <div class="flex-1 min-w-0">
+    <p class="font-semibold truncate"><%= challenge_story.title %></p>
+    <p class="text-sm text-base-content/70">
+      Ended <%= challenge_story.finish.strftime("%-d %b") %> ·
+      <%= pending_count.positive? ? "#{pluralize(pending_count, "pledge")} to settle" : "ready to complete" %>
+    </p>
+  </div>
+  <%= icon(:chevron_right, css: "size-5 shrink-0 text-base-content/50") %>
+<% end %>

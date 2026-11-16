@@ -59,6 +59,17 @@ RSpec.describe "ChallengeRewards", type: :request do
       end
     end
 
+    context "after the challenge has ended" do
+      it "does not accept new pledges" do
+        story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 3.days)
+
+        expect {
+          post challenge_story_challenge_rewards_path(story),
+            params: {challenge_reward: {receiver_id: receiver.id, description: "Late coffee"}}
+        }.not_to change(ChallengeReward, :count)
+      end
+    end
+
     context "when posting someone else as the giver" do
       let(:third) { create(:challenge_participant, challenge_story: story) }
 

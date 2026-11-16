@@ -2,6 +2,7 @@
 
 class ChallengeStory < ApplicationRecord
   MAX_PARTICIPANTS = 4
+  AUTO_COMPLETE_AFTER = 14.days
 
   # Associations
   has_many :challenge_check_ins, -> { order(created_at: :desc) }, dependent: :destroy
@@ -39,6 +40,18 @@ class ChallengeStory < ApplicationRecord
 
   def accepting_check_ins?
     !completed? && Time.zone.today <= finish + 1.day
+  end
+
+  def wrapping_up?
+    !completed? && !accepting_check_ins?
+  end
+
+  def auto_complete_on
+    finish + AUTO_COMPLETE_AFTER
+  end
+
+  def ready_to_auto_complete?
+    wrapping_up? && (challenge_rewards.pending.none? || Time.zone.today >= auto_complete_on)
   end
 
   def checked_in_today_count

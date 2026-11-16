@@ -32,6 +32,17 @@ RSpec.describe "Today", type: :request do
         expect(response.body).not_to include(new_challenge_story_challenge_check_in_path(story))
       end
 
+      it "moves ended challenges to wrap up, outside the daily count" do
+        ended = create(:challenge_story, :finished, title: "Old push-ups")
+        create(:challenge_participant, user: user, challenge_story: ended)
+
+        get today_path
+
+        expect(response.body).to include("0 of 1 done today")
+        expect(response.body).to include("Wrap up")
+        expect(response.body).to include(challenge_story_challenge_rewards_path(ended))
+      end
+
       it "leaves out challenges the user has left or that are completed" do
         participant.leave!
         create(:challenge_participant, user: user, challenge_story: create(:challenge_story, :completed, title: "Old one"))

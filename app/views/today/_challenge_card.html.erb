@@ -27,14 +27,12 @@
       <span class="badge badge-info badge-soft badge-lg font-semibold shrink-0">
         <%= icon(:check, css: "size-4") %> Done
       </span>
-    <% elsif challenge_story.accepting_check_ins? %>
+    <% else %>
       <%= link_to new_challenge_story_challenge_check_in_path(challenge_story),
         class: "btn btn-primary rounded-full shrink-0",
         data: {turbo_frame: "new_message", action: "sheet#open"} do %>
         <%= icon(:camera) %> Check in
       <% end %>
-    <% else %>
-      <span class="badge badge-ghost badge-lg shrink-0">Time's up</span>
     <% end %>
   </div>
 </article>

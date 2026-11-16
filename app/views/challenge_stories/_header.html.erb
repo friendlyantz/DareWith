@@ -23,9 +23,11 @@
           <%= render "shared/avatar", name: participant.name, checked_in: participant.checked_in_today? %>
         <% end %>
       </div>
-      <span class="text-sm text-base-content/70">
-        <%= challenge_story.checked_in_today_count %> of <%= challenge_story.active_participants.size %> checked in today
-      </span>
+      <% if challenge_story.accepting_check_ins? %>
+        <span class="text-sm text-base-content/70">
+          <%= challenge_story.checked_in_today_count %> of <%= challenge_story.active_participants.size %> checked in today
+        </span>
+      <% end %>
     </div>
   <% end %>
 </header>

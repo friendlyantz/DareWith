@@ -7,7 +7,9 @@
   <%= render "challenge_stories/header", challenge_story: @challenge_story %>
 
   <% if @current_challenge_participant %>
-    <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @current_challenge_participant %>
+    <% if @challenge_story.accepting_check_ins? %>
+      <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @current_challenge_participant %>
+    <% end %>
   <% else %>
     <%= render "challenge_stories/join_card", challenge_story: @challenge_story %>
   <% end %>
@@ -19,7 +21,9 @@
         <%= render @challenge_story.challenge_check_ins %>
       </div>
       <% if @challenge_story.challenge_check_ins.empty? %>
-        <p class="py-8 text-center text-base-content/70">No check-ins yet. Be the first today.</p>
+        <p class="py-8 text-center text-base-content/70">
+          <%= @challenge_story.accepting_check_ins? ? "No check-ins yet. Be the first today." : "No one checked in during this challenge." %>
+        </p>
       <% end %>
     </div>
 

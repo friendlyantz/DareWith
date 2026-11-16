@@ -2,3 +2,6 @@ production:
   check_in_reminders:
     class: CheckInReminderJob
     schedule: "0 * * * *"
+  challenge_completion:
+    class: ChallengeCompletionJob
+    schedule: "15 0 * * *"

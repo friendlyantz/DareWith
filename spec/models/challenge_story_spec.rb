@@ -71,6 +71,46 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "#wrapping_up?" do
+    it "is false while check-ins are open" do
+      expect(build(:challenge_story)).not_to be_wrapping_up
+    end
+
+    it "is true after check-ins close until completed" do
+      expect(build(:challenge_story, :finished)).to be_wrapping_up
+      expect(build(:challenge_story, :finished, :completed)).not_to be_wrapping_up
+    end
+  end
+
+  describe "#ready_to_auto_complete?" do
+    let(:story) { create(:challenge_story, start: Time.zone.today - 20.days, finish: Time.zone.today - 5.days) }
+    let(:giver) { create(:challenge_participant, challenge_story: story) }
+    let(:receiver) { create(:challenge_participant, challenge_story: story) }
+
+    it "is true once every pledge is settled" do
+      create(:challenge_reward, giver:, receiver:, challenge_story: story, status: "fulfilled")
+
+      expect(story).to be_ready_to_auto_complete
+    end
+
+    it "waits while pledges are pending" do
+      create(:challenge_reward, giver:, receiver:, challenge_story: story)
+
+      expect(story).not_to be_ready_to_auto_complete
+    end
+
+    it "completes anyway 14 days after the end" do
+      create(:challenge_reward, giver:, receiver:, challenge_story: story)
+      story.update!(start: Time.zone.today - 30.days, finish: Time.zone.today - 14.days)
+
+      expect(story).to be_ready_to_auto_complete
+    end
+
+    it "is false while check-ins are still open" do
+      expect(create(:challenge_story)).not_to be_ready_to_auto_complete
+    end
+  end
+
   describe "#at_capacity?" do
     let(:story) { create(:challenge_story) }
 

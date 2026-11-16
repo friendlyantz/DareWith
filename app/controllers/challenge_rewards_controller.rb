@@ -40,6 +40,9 @@ class ChallengeRewardsController < ApplicationController
     unless @current_challenge_participant
       return redirect_to challenge_story_path(@challenge_story), alert: "Join this challenge to pledge a reward."
     end
+    unless @challenge_story.accepting_check_ins?
+      return redirect_to challenge_story_challenge_rewards_path(@challenge_story), alert: "This challenge has ended, so pledging is closed."
+    end
 
     @reward = @challenge_story.challenge_rewards.build(reward_params)
     @reward.giver = @current_challenge_participant
