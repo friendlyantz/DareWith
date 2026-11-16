@@ -1,10 +1,10 @@
 <% if notice.present? || alert.present? %>
   <div class="toast toast-top toast-center z-50" data-controller="dismiss" role="status">
     <% if notice.present? %>
-      <div class="alert bg-neutral text-neutral-content border-0 font-semibold"><%= notice %></div>
+      <div class="alert border-0 bg-base-content font-semibold text-base-100 shadow-lg"><%= notice %></div>
     <% end %>
     <% if alert.present? %>
-      <div class="alert alert-error font-semibold"><%= alert %></div>
+      <div class="alert alert-error font-semibold shadow-lg"><%= alert %></div>
     <% end %>
   </div>
 <% end %>
