@@ -16,6 +16,7 @@ RSpec.describe "WebPushNotifications", type: :request do
 
       expect(WebPushNotification.exists?(device.id)).to be false
       expect(response).to redirect_to(profile_path)
+      expect(cookies[:push_notification_dismissed]).to eq("true")
     end
 
     it "can't remove someone else's device" do

@@ -2,8 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 // Web push for this browser: the opt-in banner, the switch on Me and the list of
 // devices the server sends to (rows with data-endpoint).
+// The server's list (endpointsValue) decides whether this browser counts as on.
 export default class extends Controller {
   static targets = ["banner", "toggle", "device"]
+  static values = { endpoints: Array }
 
   connect() {
     this.isProcessing = false
@@ -12,17 +14,14 @@ export default class extends Controller {
 
   async refresh() {
     const subscription = await this.currentSubscription()
+    const registered = !!subscription && this.endpointsValue.includes(subscription.endpoint)
 
-    if (this.hasToggleTarget) {
-      this.toggleTarget.checked = !!subscription
-      // Keep the server in step with this browser, e.g. after the server dropped it
-      if (subscription) await this.sendSubscriptionToServer(subscription)
-    }
+    if (this.hasToggleTarget) this.toggleTarget.checked = registered
 
     this.markThisDevice(subscription)
 
     // Only offer notifications when the browser supports them and they aren't blocked
-    if (subscription) {
+    if (registered) {
       this.removeBanner()
     } else if (this.canAsk()) {
       this.showBanner()
@@ -36,13 +35,10 @@ export default class extends Controller {
       Notification.permission !== 'denied'
   }
 
-  // The device list can't remove this browser (it would re-register on the next visit),
-  // so its row gets a label and the switch handles it instead
   markThisDevice(subscription) {
     this.deviceTargets.forEach((row) => {
       const isThisDevice = !!subscription && row.dataset.endpoint === subscription.endpoint
       row.querySelector('[data-role="this-device"]')?.classList.toggle('hidden', !isThisDevice)
-      row.querySelector('[data-role="remove"]')?.classList.toggle('hidden', isThisDevice)
     })
   }
 
@@ -162,11 +158,16 @@ export default class extends Controller {
     if (!response.ok) throw new Error(`Server refused to unsubscribe (${response.status})`)
 
     await subscription.unsubscribe()
+    this.hidePromptFor(365)
   }
 
+  // "Later" on the prompt
   dismiss() {
-    // Hide for 7 days
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
+    this.hidePromptFor(7)
+  }
+
+  hidePromptFor(days) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString()
     document.cookie = `push_notification_dismissed=true; expires=${expires}; path=/`
     this.removeBanner()
   }

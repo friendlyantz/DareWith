@@ -32,6 +32,7 @@ RSpec.describe "Profiles", type: :request do
 
         expect(response.body).to include("Notifications go to")
         expect(response.body).to include("Firefox on Android")
+        expect(response.body).to include("data-push-notifications-endpoints-value")
       end
     end
   end

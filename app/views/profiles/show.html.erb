@@ -1,5 +1,5 @@
 <% content_for :title, "Me" %>
-<div class="w-full max-w-md flex flex-col gap-6 pt-2" data-controller="push-notifications">
+<div class="w-full max-w-md flex flex-col gap-6 pt-2" data-controller="push-notifications" data-push-notifications-endpoints-value="<%= @push_devices.map(&:endpoint).to_json %>">
   <h1 class="font-display text-4xl font-bold tracking-tight">Me</h1>
 
   <div class="flex items-center gap-4">
@@ -111,8 +111,7 @@
             <span class="badge badge-sm badge-info badge-soft hidden" data-role="this-device">This browser</span>
             <%= button_to "Remove", web_push_notification_path(device),
               method: :delete,
-              class: "btn btn-ghost btn-sm text-error",
-              form: {data: {role: "remove"}} %>
+              class: "btn btn-ghost btn-sm text-error" %>
           </li>
         <% end %>
       </ul>

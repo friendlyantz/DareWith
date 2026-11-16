@@ -34,6 +34,7 @@ class WebPushNotificationsController < ApplicationController
     return head :unauthorized unless current_user
 
     current_user.web_push_notifications.find(params[:id]).destroy
+    cookies[:push_notification_dismissed] = {value: "true", expires: 1.year}
     redirect_to profile_path, notice: "That device won't get notifications any more"
   end
 end
