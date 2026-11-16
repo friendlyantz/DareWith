@@ -8,6 +8,12 @@ RSpec.describe "Home", type: :request do
 
         expect(response).to have_http_status(:ok)
       end
+
+      it "reloads open tabs when the JavaScript changes" do
+        get root_path
+
+        expect(response.body).to match(/<meta name="importmap-digest" content="\h{40}" data-turbo-track="reload">/)
+      end
     end
 
     context "when signed in with active participation" do

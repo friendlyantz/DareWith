@@ -22,6 +22,8 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%# Turbo does a full reload when this changes, so open tabs pick up new JavaScript after a deploy %>
+    <meta name="importmap-digest" content="<%= Rails.application.importmap.digest(resolver: self) %>" data-turbo-track="reload">
   </head>
   <body class="pt-[env(safe-area-inset-top)]">
 
