@@ -20,6 +20,13 @@ RSpec.describe ChallengeCheckIn, type: :model do
         expect(second_check_in.errors[:base]).to include("You can only check in once per day")
       end
 
+      it "is enforced by the database too" do
+        create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
+        second_check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story, checked_in_on: Time.zone.today)
+
+        expect { second_check_in.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+      end
+
       it "allows check-in on different day" do
         create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story, created_at: 1.day.ago)
         today_check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)

@@ -24,6 +24,8 @@ Capybara.register_driver(:better_cuprite) do |app|
     window_size: [1200, 800],
     # See additional options for Dockerized environment in the respective section of this article
     browser_options: {},
+    # Keep the browser's day in step with the specs, which run in UTC
+    env: {"TZ" => "UTC"},
     # Increase Chrome startup wait time (required for stable CI builds)
     process_timeout: 10,
     # Enable debugging capabilities

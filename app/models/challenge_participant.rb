@@ -8,6 +8,7 @@ class ChallengeParticipant < ApplicationRecord
   has_many :received_rewards, class_name: "ChallengeReward", foreign_key: "receiver_id", dependent: :destroy
   has_many :challenge_check_ins, dependent: :nullify
   has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
+  has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on) }, class_name: "ChallengeCheckIn"
 
   # Enums
   enum :status, %w[active inactive].index_by(&:itself)
@@ -22,6 +23,16 @@ class ChallengeParticipant < ApplicationRecord
   # Public methods
   def checked_in_today?
     todays_check_ins.any?
+  end
+
+  def streak
+    @streak ||= Streak.new(check_in_dates)
+  end
+
+  # Days with a check-in while the challenge ran, counting the grace day after it
+  def days_checked_in
+    (check_in_dates & (challenge_story.start..challenge_story.finish + 1.day).to_a).size
+      .clamp(0, challenge_story.duration_in_days)
   end
 
   def announce_joining
@@ -61,6 +72,10 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   private
+
+  def check_in_dates
+    @check_in_dates ||= check_in_days.map(&:checked_in_on).uniq
+  end
 
   def set_default_name
     self.name = user.username if user.present?

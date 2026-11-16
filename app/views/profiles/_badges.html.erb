@@ -1,0 +1,66 @@
+<%# locals: (badges_by_kind:, next_badges:) %>
+<section class="flex flex-col gap-2">
+  <div class="flex items-baseline justify-between px-1">
+    <h2 class="text-sm font-semibold text-base-content/70">Badges</h2>
+    <span class="text-sm text-base-content/60"><%= badges_by_kind.size %> of <%= Badge::CATALOGUE.size %></span>
+  </div>
+
+  <div class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+    <% if badges_by_kind.any? %>
+      <ul class="flex gap-3 overflow-x-auto px-4 pt-5 pb-4">
+        <% badges_by_kind.each do |kind, badges| %>
+          <li class="flex w-18 shrink-0 flex-col items-center gap-2 text-center">
+            <%= render "badges/medallion", badge: badges.first, count: badges.size %>
+            <span class="text-xs font-semibold leading-tight"><%= badges.first.title %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-4 py-4 text-sm text-base-content/70">Badges celebrate showing up, not winning. Check in to earn your first one.</p>
+    <% end %>
+
+    <% if next_badges.any? %>
+      <div class="flex flex-col gap-3 px-4 py-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Next up</p>
+        <% next_badges.each do |step| %>
+          <div class="flex items-center gap-3">
+            <%= render "badges/medallion", badge: step.badge, earned: false, size: "size-10 text-xl" %>
+            <div class="flex flex-1 min-w-0 flex-col gap-1.5">
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="truncate text-sm font-semibold"><%= step.badge.title %></span>
+                <span class="shrink-0 text-xs text-base-content/70"><%= step.current %> of <%= step.goal %> <%= step.unit %></span>
+              </div>
+              <progress class="progress progress-accent h-1.5 bg-base-300" value="<%= step.current %>" max="<%= step.goal %>"></progress>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <details class="group">
+      <summary class="flex min-h-12 cursor-pointer list-none items-center gap-3 px-4 text-sm font-semibold">
+        <span class="flex-1">All badges</span>
+        <%= icon(:chevron_right, css: "size-5 text-base-content/50 transition-transform group-open:rotate-90") %>
+      </summary>
+      <ul class="border-t border-base-300 divide-y divide-base-300">
+        <% Badge::CATALOGUE.each_key do |kind| %>
+          <% earned = badges_by_kind[kind.to_s] %>
+          <% badge = earned&.first || Badge.new(kind:) %>
+          <li id="badge_<%= kind %>" class="flex items-center gap-3 px-4 py-3" data-earned="<%= earned.present? %>">
+            <%= render "badges/medallion", badge:, earned: earned.present?, count: earned&.size || 1, size: "size-10 text-xl" %>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold <%= "text-base-content/60" unless earned %>"><%= badge.title %></p>
+              <p class="text-xs text-base-content/60"><%= badge.description %></p>
+            </div>
+            <% if earned %>
+              <span class="shrink-0 text-xs text-base-content/60"><%= earned.first.created_at.strftime("%-d %b") %></span>
+            <% else %>
+              <%= icon(:lock, css: "size-4 shrink-0 text-base-content/40") %>
+              <span class="sr-only">Not earned yet</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </details>
+  </div>
+</section>

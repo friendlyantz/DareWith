@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_090100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -18,6 +18,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
+  create_enum "badge_kind", ["first_check_in", "three_day_streak", "week_streak", "three_week_streak", "comeback", "finisher", "flawless", "cheerleader", "good_for_it"]
   create_enum "challenge_participant_status", ["active", "inactive"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
 
@@ -49,6 +50,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "badges", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "challenge_story_id"
+    t.enum "kind", null: false, enum_type: "badge_kind"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["challenge_story_id"], name: "index_badges_on_challenge_story_id"
+    t.index ["user_id", "kind", "challenge_story_id"], name: "index_badges_on_user_id_and_kind_and_challenge_story_id", unique: true, nulls_not_distinct: true
+    t.index ["user_id"], name: "index_badges_on_user_id"
+  end
+
   create_table "challenge_check_in_likes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "challenge_check_in_id", null: false
@@ -66,6 +78,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "challenge_check_in_likes_count", default: 0, null: false
+    t.date "checked_in_on", null: false
+    t.index ["challenge_participant_id", "checked_in_on"], name: "idx_on_challenge_participant_id_checked_in_on_b71ead7892", unique: true
     t.index ["challenge_participant_id"], name: "index_challenge_check_ins_on_challenge_participant_id"
     t.index ["challenge_story_id"], name: "index_challenge_check_ins_on_challenge_story_id"
     t.index ["created_at"], name: "index_challenge_check_ins_on_created_at"
@@ -170,6 +184,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
     t.integer "reminder_hour", default: 19
     t.date "last_reminded_on"
     t.string "payment_details"
+    t.integer "badges_count", default: 0, null: false
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["username"], name: "index_users_on_username", unique: true
     t.check_constraint "challenge_participants_count >= 0", name: "check_user_participants_non_negative"
@@ -193,6 +208,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "badges", "challenge_stories", on_delete: :cascade
+  add_foreign_key "badges", "users", on_delete: :cascade
   add_foreign_key "challenge_check_in_likes", "challenge_check_ins", on_delete: :cascade
   add_foreign_key "challenge_check_in_likes", "users", on_delete: :cascade
   add_foreign_key "challenge_check_ins", "challenge_participants", on_delete: :cascade

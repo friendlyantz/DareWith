@@ -145,6 +145,13 @@ RSpec.describe ChallengeStory, type: :model do
 
       expect(story.reload).to be_completed
     end
+
+    it "checks the active participants for new badges" do
+      participant = create(:challenge_participant, challenge_story: story)
+      create(:challenge_participant, :inactive, challenge_story: story)
+
+      expect { story.mark_complete! }.to have_enqueued_job(BadgeAwardJob).with(participant.user).exactly(:once)
+    end
   end
 
   describe "#find_or_activate_participant!" do

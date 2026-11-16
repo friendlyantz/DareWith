@@ -1,0 +1,9 @@
+<%# locals: (badge:, earned: true, count: 1, size: "size-14 text-3xl") %>
+<div class="indicator shrink-0">
+  <% if count > 1 %>
+    <span class="indicator-item badge badge-xs badge-neutral font-semibold">×<%= count %></span>
+  <% end %>
+  <div class="grid place-items-center rounded-full ring-2 <%= size %> <%= earned ? badge_tint(badge) : "bg-base-200 ring-base-300" %>">
+    <span class="leading-none <%= "grayscale opacity-40" unless earned %>" aria-hidden="true"><%= badge.emoji %></span>
+  </div>
+</div>

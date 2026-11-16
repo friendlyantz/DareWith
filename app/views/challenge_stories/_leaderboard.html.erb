@@ -8,7 +8,10 @@
         <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-9" %>
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <div class="flex justify-between gap-2">
-            <span class="font-semibold truncate"><%= participant.name %></span>
+            <span class="flex min-w-0 items-center gap-1.5">
+              <span class="font-semibold truncate"><%= participant.name %></span>
+              <%= render "shared/streak", days: participant.streak.current %>
+            </span>
             <span class="text-sm text-base-content/70 shrink-0"><%= participant.challenge_check_ins_count %> / <%= challenge_story.current_day %></span>
           </div>
           <progress class="progress progress-secondary h-1.5" value="<%= participant.challenge_check_ins_count %>" max="<%= challenge_story.current_day %>"></progress>

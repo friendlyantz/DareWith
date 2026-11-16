@@ -134,6 +134,20 @@ RSpec.describe "ChallengeCheckIns", type: :request do
           post challenge_story_challenge_check_ins_path(story), params: valid_params
         }.to have_enqueued_job(PushNotificationJob).exactly(:once)
       end
+
+      it "checks for new badges" do
+        expect {
+          post challenge_story_challenge_check_ins_path(story), params: valid_params
+        }.to have_enqueued_job(BadgeAwardJob).with(user)
+      end
+
+      it "shows the streak" do
+        create(:challenge_check_in, challenge_participant: participant, checked_in_on: Date.yesterday)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include("That's 2 days in a row.")
+      end
     end
 
     context "with invalid params" do

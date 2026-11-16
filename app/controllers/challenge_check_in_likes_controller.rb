@@ -6,6 +6,7 @@ class ChallengeCheckInLikesController < ApplicationController
     @like = @challenge_check_in.challenge_check_in_likes.build(user: current_user)
 
     if @like.save
+      BadgeAwardJob.perform_later(current_user)
       respond_to do |format|
         format.html { redirect_back_or_to(challenge_story_path(@challenge_check_in.challenge_story), notice: "You liked this check-in.") }
         format.turbo_stream

@@ -14,9 +14,14 @@ class ChallengeCheckIn < ApplicationRecord
   validate :one_check_in_per_day_per_participant
 
   # Scopes
-  scope :today, -> { where(created_at: Time.zone.today.all_day) }
+  scope :today, -> { where(checked_in_on: Time.zone.today) }
 
-  # Callbacks (broadcasts must be after has_one_attached for Cloudinary compatibility)
+  # Callbacks
+  before_validation on: :create do
+    self.checked_in_on ||= (created_at || Time.current).in_time_zone.to_date
+  end
+
+  # Broadcasts must be after has_one_attached for Cloudinary compatibility)
   after_create_commit :broadcast_to_story_and_participant_feeds
 
   # Public methods
@@ -61,12 +66,8 @@ class ChallengeCheckIn < ApplicationRecord
   def one_check_in_per_day_per_participant
     return if challenge_participant.blank?
 
-    existing_check_in_today = ChallengeCheckIn.unscoped.exists?(
-      challenge_participant_id: challenge_participant_id,
-      created_at: Time.zone.today.all_day
-    )
-
-    return unless existing_check_in_today && new_record?
+    return unless new_record?
+    return unless ChallengeCheckIn.exists?(challenge_participant_id:, checked_in_on:)
 
     errors.add(:base, "You can only check in once per day")
   end

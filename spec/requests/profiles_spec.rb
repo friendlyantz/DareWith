@@ -34,6 +34,18 @@ RSpec.describe "Profiles", type: :request do
         expect(response.body).to include("Firefox on Android")
         expect(response.body).to include("data-push-notifications-endpoints-value")
       end
+
+      it "shows earned and locked badges" do
+        create(:badge, user:, kind: :week_streak)
+        create(:badge, user:, kind: :week_streak, challenge_story: create(:challenge_story))
+
+        get profile_path
+
+        expect(response.body).to include("1 of #{Badge::CATALOGUE.size}")
+        expect(response.body).to match(/id="badge_week_streak"[^>]*data-earned="true"/)
+        expect(response.body).to include("×2")
+        expect(response.body).to match(/id="badge_flawless"[^>]*data-earned="false"/)
+      end
     end
   end
 

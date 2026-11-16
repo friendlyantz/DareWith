@@ -30,6 +30,8 @@
     </div>
   </div>
 
+  <%= render "profiles/badges", badges_by_kind: @badges_by_kind, next_badges: @next_badges %>
+
   <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
     <li class="flex min-h-14 items-center gap-3 px-4">
       <%= icon(:bell, css: "size-5 text-base-content/70") %>

@@ -62,6 +62,7 @@ class ChallengeRewardsController < ApplicationController
   def fulfill
     @reward.fulfill!
     @reward.notify_giver_of_fulfilment
+    BadgeAwardJob.perform_later(@reward.giver.user)
     redirect_to challenge_story_challenge_rewards_path(@challenge_story),
       notice: "Reward has been marked as fulfilled!"
   end

@@ -5,6 +5,7 @@
       <h2 class="font-display text-lg font-semibold leading-tight"><%= challenge_story.title %></h2>
       <p class="text-sm text-base-content/70 mt-0.5">
         Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
+        <%= render "shared/streak", days: challenge_story.participant_for(current_user).streak.current, css: "ml-1" %>
       </p>
       <progress class="progress progress-secondary h-1 mt-2.5" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"></progress>
     </div>

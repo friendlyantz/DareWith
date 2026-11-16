@@ -15,6 +15,7 @@ class User < ApplicationRecord
   has_many :challenge_participants, dependent: :destroy
   has_many :challenge_stories, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
+  has_many :badges, dependent: :destroy
   has_one_attached :avatar
 
   # Normalization
@@ -81,6 +82,14 @@ class User < ApplicationRecord
     web_push_notifications.each do |subscription|
       PushNotificationJob.perform_later(subscription, title:, body:, path:)
     end
+  end
+
+  def liked_friends_check_ins_count
+    ChallengeCheckInLike
+      .where(user: self)
+      .joins(challenge_check_in: :challenge_participant)
+      .where.not(challenge_participants: {user_id: id})
+      .count
   end
 
   def past_challenge_stories

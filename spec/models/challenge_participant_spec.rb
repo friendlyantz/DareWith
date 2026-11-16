@@ -25,7 +25,7 @@ RSpec.describe ChallengeParticipant, type: :model do
     end
 
     it "is false when the last check-in was yesterday" do
-      create(:challenge_check_in, challenge_participant: participant).update_column(:created_at, 1.day.ago)
+      create(:challenge_check_in, challenge_participant: participant, checked_in_on: Date.yesterday)
 
       expect(participant.checked_in_today?).to be false
     end

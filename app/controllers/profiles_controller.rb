@@ -6,6 +6,8 @@ class ProfilesController < ApplicationController
     @active_challenges_count = running.size
     @past_challenge_stories = current_user.past_challenge_stories.order(finish: :desc)
     @push_devices = current_user.web_push_notifications.order(:created_at)
+    @badges_by_kind = current_user.badges.order(:created_at).group_by(&:kind)
+    @next_badges = Badge::Progress.new(current_user, earned_kinds: @badges_by_kind.keys).next_up
   end
 
   def update

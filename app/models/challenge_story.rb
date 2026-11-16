@@ -11,6 +11,7 @@ class ChallengeStory < ApplicationRecord
   has_many :challenge_story_likes, dependent: :destroy
   has_many :active_participants, -> { active }, class_name: "ChallengeParticipant"
   has_many :liking_users, through: :challenge_story_likes, source: :user
+  has_many :badges, dependent: :destroy
 
   # Broadcasts (after associations)
   broadcasts_refreshes
@@ -91,6 +92,11 @@ class ChallengeStory < ApplicationRecord
   def mark_complete!(by: nil)
     update!(completed: true)
     announce_completion(except: by)
+    award_badges
+  end
+
+  def award_badges
+    active_participants.includes(:user).find_each { BadgeAwardJob.perform_later(it.user) }
   end
 
   def announce_completion(except: nil)

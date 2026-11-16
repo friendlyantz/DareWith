@@ -1,0 +1,7 @@
+<%# locals: (days:, css: "") %>
+<% if days > 1 %>
+  <span class="inline-flex shrink-0 items-center gap-0.5 align-text-bottom text-sm font-semibold text-accent <%= css %>" title="<%= days %> days in a row">
+    <%= icon(:flame, css: "size-4") %><%= days %>
+    <span class="sr-only">days in a row</span>
+  </span>
+<% end %>
