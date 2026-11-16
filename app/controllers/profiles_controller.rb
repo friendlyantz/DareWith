@@ -9,13 +9,22 @@ class ProfilesController < ApplicationController
   end
 
   def update
-    current_user.update!(profile_params)
-    redirect_to profile_path, notice: current_user.reminder_hour ? "Reminder set for #{format("%02d:00", current_user.reminder_hour)}" : "Reminder turned off"
+    if current_user.update(profile_params)
+      redirect_to profile_path, notice: update_notice
+    else
+      redirect_to profile_path, alert: current_user.errors.full_messages.to_sentence
+    end
   end
 
   private
 
   def profile_params
-    params.expect(user: [:reminder_hour])
+    params.expect(user: [:reminder_hour, :payment_details])
+  end
+
+  def update_notice
+    return "Payment details saved" if profile_params.key?(:payment_details)
+
+    current_user.reminder_hour ? "Reminder set for #{format("%02d:00", current_user.reminder_hour)}" : "Reminder turned off"
   end
 end

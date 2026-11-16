@@ -17,6 +17,28 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#payment_url" do
+    it "turns a payment link into a URL" do
+      expect(build(:user, payment_details: "paypal.me/anton").payment_url).to eq("https://paypal.me/anton")
+      expect(build(:user, payment_details: "https://revolut.me/anton").payment_url).to eq("https://revolut.me/anton")
+    end
+
+    it "treats other details as plain text" do
+      expect(build(:user, payment_details: "PayID 0412 345 678").payment_url).to be_nil
+      expect(build(:user, payment_details: "javascript:alert(1)").payment_url).to be_nil
+    end
+  end
+
+  describe "payment details" do
+    it "strips blanks to nil" do
+      expect(build(:user, payment_details: "  ").payment_details).to be_nil
+    end
+
+    it "is limited to 120 characters" do
+      expect(build(:user, payment_details: "x" * 121)).not_to be_valid
+    end
+  end
+
   describe "#reminder_due?" do
     let(:user) { build(:user, time_zone: "Australia/Melbourne", reminder_hour: 19) }
 

@@ -98,6 +98,21 @@
     (<%= current_user.time_zone.tr("_", " ") %> time). On iPhone, add Strivo to your Home Screen first.
   </p>
 
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">How friends pay you</h2>
+    <%= form_with model: current_user, url: profile_path, method: :patch, class: "flex flex-col gap-2 rounded-box border border-base-300 bg-base-100 p-4" do |form| %>
+      <%= form.label :payment_details, "Payment link or details", class: "sr-only" %>
+      <div class="flex gap-2">
+        <%= form.text_field :payment_details,
+          maxlength: 120,
+          placeholder: "paypal.me/you or a PayID",
+          class: "input flex-1 min-w-0" %>
+        <%= form.submit "Save", class: "btn btn-primary" %>
+      </div>
+      <p class="text-xs text-base-content/60">Shown to friends who owe you a reward once a challenge ends. Strivo never handles the money.</p>
+    <% end %>
+  </section>
+
   <% if @push_devices.any? %>
     <section class="flex flex-col gap-2">
       <h2 class="text-sm font-semibold text-base-content/70">Notifications go to</h2>

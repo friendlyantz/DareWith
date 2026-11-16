@@ -6,6 +6,7 @@ class User < ApplicationRecord
   RATE_LIMIT_WINDOW = 15.minutes
   MAX_EMAIL_ATTEMPTS = 3
   REMINDER_HOURS = (6..22).to_a
+  PAYMENT_LINK = %r{\A(https?://)?([\w-]+\.)+[a-z]{2,}/\S+\z}i
 
   # Associations
   has_many :credentials, dependent: :destroy
@@ -15,6 +16,9 @@ class User < ApplicationRecord
   has_many :challenge_stories, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
   has_one_attached :avatar
+
+  # Normalization
+  normalizes :payment_details, with: ->(details) { details.strip.presence }
 
   # Validations
   validates :username, presence: true, uniqueness: true,
@@ -26,6 +30,7 @@ class User < ApplicationRecord
   validates :email, presence: false, uniqueness: {allow_nil: true}, format: {with: URI::MailTo::EMAIL_REGEXP, allow_nil: true}
   validates :reminder_hour, inclusion: {in: 0..23}, allow_nil: true
   validates :time_zone, presence: true
+  validates :payment_details, length: {maximum: 120}
   validate :avatar_is_a_small_image
 
   # Callbacks
@@ -36,6 +41,13 @@ class User < ApplicationRecord
   # Public methods
   def can_delete_credentials?
     credentials.size > CREDENTIAL_MIN_AMOUNT
+  end
+
+  # A paypal.me / revolut.me style link; nil for plain text such as a PayID
+  def payment_url
+    return unless payment_details.present? && PAYMENT_LINK.match?(payment_details)
+
+    payment_details.start_with?("http") ? payment_details : "https://#{payment_details}"
   end
 
   def reminder_due?(now = Time.current)

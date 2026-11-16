@@ -16,6 +16,29 @@ RSpec.describe "ChallengeRewards", type: :request do
     end
   end
 
+  describe "settling up" do
+    before do
+      receiver.user.update!(payment_details: "paypal.me/maya")
+      create(:challenge_reward, giver: giver, receiver: receiver, challenge_story: story)
+      sign_in_as(user)
+    end
+
+    it "shows the giver how to pay once time is up" do
+      story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 1.day)
+
+      get challenge_story_challenge_rewards_path(story)
+
+      expect(response.body).to include("Settle up with #{receiver.name}")
+      expect(response.body).to include('href="https://paypal.me/maya"')
+    end
+
+    it "doesn't show it while the challenge is running" do
+      get challenge_story_challenge_rewards_path(story)
+
+      expect(response.body).not_to include("Settle up with")
+    end
+  end
+
   describe "GET /challenge_stories/:challenge_story_id/challenge_rewards/new" do
     before { sign_in_as(user) }
 

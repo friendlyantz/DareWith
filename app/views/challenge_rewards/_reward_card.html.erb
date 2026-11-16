@@ -15,6 +15,29 @@
   </div>
 
   <% if reward.pending? && challenge_story.finished? %>
+    <% receiver_user = reward.receiver.user %>
+    <% if reward.giver.user == current_user %>
+      <% if receiver_user.payment_details.present? %>
+        <div class="flex items-center gap-3 rounded-field bg-base-200 px-3 py-2">
+          <div class="flex-1 min-w-0 text-sm">
+            <p class="font-semibold">Settle up with <%= reward.receiver.name %></p>
+            <p class="truncate text-base-content/70"><%= receiver_user.payment_details %></p>
+          </div>
+          <% if receiver_user.payment_url %>
+            <%= link_to "Pay", receiver_user.payment_url, target: "_blank", rel: "noopener noreferrer", class: "btn btn-sm btn-primary shrink-0" %>
+          <% else %>
+            <button type="button" class="btn btn-sm shrink-0" data-controller="clipboard" data-clipboard-text-value="<%= receiver_user.payment_details %>" data-action="clipboard#copy">Copy</button>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-base-content/70"><%= reward.receiver.name %> hasn't added payment details. If this one involves money, sort it out together.</p>
+      <% end %>
+    <% elsif receiver_user == current_user && current_user.payment_details.blank? %>
+      <p class="text-sm text-base-content/70">
+        If this reward involves money, <%= link_to "add how friends pay you", profile_path, class: "link link-accent" %>.
+      </p>
+    <% end %>
+
     <div class="flex justify-end gap-2">
       <% if reward.giver.user == current_user %>
         <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),

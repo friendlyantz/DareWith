@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_16_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -169,10 +169,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_130000) do
     t.string "time_zone", default: "UTC", null: false
     t.integer "reminder_hour", default: 19
     t.date "last_reminded_on"
+    t.string "payment_details"
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["username"], name: "index_users_on_username", unique: true
     t.check_constraint "challenge_participants_count >= 0", name: "check_user_participants_non_negative"
     t.check_constraint "challenge_story_likes_count >= 0", name: "check_user_likes_non_negative"
+    t.check_constraint "char_length(payment_details::text) <= 120", name: "check_user_payment_details_length"
     t.check_constraint "reminder_hour >= 0 AND reminder_hour <= 23", name: "check_user_reminder_hour_range"
   end
 

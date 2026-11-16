@@ -49,6 +49,13 @@ RSpec.describe "Profiles", type: :request do
       expect(flash[:notice]).to eq("Reminder set for 08:00")
     end
 
+    it "saves payment details" do
+      patch profile_path, params: {user: {payment_details: " paypal.me/anton "}}
+
+      expect(user.reload.payment_details).to eq("paypal.me/anton")
+      expect(flash[:notice]).to eq("Payment details saved")
+    end
+
     it "turns the reminder off" do
       patch profile_path, params: {user: {reminder_hour: ""}}
 
