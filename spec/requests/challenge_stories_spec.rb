@@ -179,4 +179,64 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response).to redirect_to(challenge_stories_path)
     end
   end
+
+  describe "next rounds" do
+    let(:user) { create(:user) }
+    let(:round_one) { create(:challenge_story, :finished, title: "Gym") }
+    let(:params) do
+      {previous_challenge_story_id: round_one.id, challenge_story: {title: "Gym", description: "Again", start: Time.zone.today, finish: Time.zone.today + 6.days}}
+    end
+
+    before do
+      create(:challenge_participant, user:, challenge_story: round_one)
+      sign_in_as(user)
+    end
+
+    it "offers the next round on a finished challenge" do
+      get challenge_story_path(round_one)
+
+      expect(response.body).to include("Start round 2")
+      expect(response.body).to include(new_challenge_story_path(previous_challenge_story_id: round_one.id))
+    end
+
+    it "prefills the form from the previous round" do
+      get new_challenge_story_path(previous_challenge_story_id: round_one.id)
+
+      expect(response.body).to include("Round 2")
+      expect(response.body).to include('value="Gym"')
+      expect(response.body).to match(/name="previous_challenge_story_id"[^>]*value="#{round_one.id}"/)
+    end
+
+    it "starts the next round and invites the others" do
+      friend = create(:challenge_participant, challenge_story: round_one)
+      create(:web_push_notification, user: friend.user)
+
+      expect { post challenge_stories_path, params: }
+        .to change(ChallengeStory, :count).by(1)
+        .and have_enqueued_job(PushNotificationJob).exactly(:once)
+
+      round_two = round_one.reload.next_challenge_story
+      expect(round_two.round).to eq 2
+      expect(round_two.active_participants.map(&:user)).to eq [user]
+      expect(response).to redirect_to(round_two)
+    end
+
+    it "sends everyone to the round that already started" do
+      round_two = round_one.next_round.tap(&:save!)
+
+      expect { post challenge_stories_path, params: }.not_to change(ChallengeStory, :count)
+      expect(response).to redirect_to(round_two)
+
+      get challenge_story_path(round_one)
+      expect(response.body).to include("Round 2 is on")
+    end
+
+    it "doesn't link a challenge the user wasn't in" do
+      stranger_story = create(:challenge_story, :finished)
+
+      get new_challenge_story_path(previous_challenge_story_id: stranger_story.id)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end

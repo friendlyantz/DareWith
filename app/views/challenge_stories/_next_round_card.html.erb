@@ -1,0 +1,22 @@
+<%# locals: (challenge_story:) %>
+<% next_round = challenge_story.next_challenge_story %>
+<div id="<%= dom_id(challenge_story, :next_round) %>" class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-4">
+  <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
+    <%= icon(:flame) %>
+  </div>
+  <% if next_round %>
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold">Round <%= next_round.round %> is on</p>
+      <p class="text-sm text-base-content/70">
+        <%= pluralize(next_round.active_participants.size, "person") %> in · started <%= next_round.start.strftime("%-d %b") %>
+      </p>
+    </div>
+    <%= link_to "Open", next_round, class: "btn btn-sm btn-primary shrink-0" %>
+  <% else %>
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold">Up for another round?</p>
+      <p class="text-sm text-base-content/70">Same rules, new dates.</p>
+    </div>
+    <%= link_to "Start round #{challenge_story.round + 1}", new_challenge_story_path(previous_challenge_story_id: challenge_story.id), class: "btn btn-sm btn-primary shrink-0" %>
+  <% end %>
+</div>

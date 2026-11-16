@@ -7,9 +7,15 @@
   </div>
 
   <div>
-    <h1 class="font-display text-3xl font-bold tracking-tight">New challenge</h1>
-    <p class="text-sm text-base-content/70 mt-1">Set the rules and dates, then share the link with up to <%= ChallengeStory::MAX_PARTICIPANTS - 1 %> friends.</p>
+    <% if (previous = @challenge_story.previous_challenge_story) %>
+      <h1 class="font-display text-3xl font-bold tracking-tight">Round <%= previous.round + 1 %></h1>
+      <p class="text-sm text-base-content/70 mt-1">Same rules and length as last time. Change anything you like; everyone from round <%= previous.round %> gets an invite.</p>
+    <% else %>
+      <h1 class="font-display text-3xl font-bold tracking-tight">New challenge</h1>
+      <p class="text-sm text-base-content/70 mt-1">Set the rules and dates, then share the link with up to <%= ChallengeStory::MAX_PARTICIPANTS - 1 %> friends.</p>
+    <% end %>
   </div>
 
-  <%= render "form", challenge_story: @challenge_story, submit_text: "Start challenge" %>
+  <%= render "form", challenge_story: @challenge_story,
+    submit_text: @challenge_story.previous_challenge_story ? "Start round #{@challenge_story.previous_challenge_story.round + 1}" : "Start challenge" %>
 </div>

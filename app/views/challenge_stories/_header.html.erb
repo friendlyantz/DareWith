@@ -1,9 +1,20 @@
 <%# locals: (challenge_story:) %>
 <header class="flex flex-col gap-2">
-  <% if challenge_story.completed? %>
-    <span class="badge badge-ghost">Completed</span>
-  <% elsif challenge_story.finished? %>
-    <span class="badge badge-ghost">Time's up</span>
+  <% if challenge_story.completed? || challenge_story.finished? || challenge_story.round > 1 %>
+    <div class="flex gap-2">
+      <% if challenge_story.round > 1 %>
+        <% if challenge_story.previous_challenge_story %>
+          <%= link_to "Round #{challenge_story.round}", challenge_story.previous_challenge_story, class: "badge badge-accent badge-soft", title: "See round #{challenge_story.round - 1}" %>
+        <% else %>
+          <span class="badge badge-accent badge-soft">Round <%= challenge_story.round %></span>
+        <% end %>
+      <% end %>
+      <% if challenge_story.completed? %>
+        <span class="badge badge-ghost">Completed</span>
+      <% elsif challenge_story.finished? %>
+        <span class="badge badge-ghost">Time's up</span>
+      <% end %>
+    </div>
   <% end %>
 
   <h1 class="font-display text-3xl font-bold tracking-tight leading-tight"><%= challenge_story.title %></h1>

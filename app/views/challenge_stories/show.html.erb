@@ -10,6 +10,9 @@
     <% if @challenge_story.accepting_check_ins? %>
       <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @current_challenge_participant %>
     <% end %>
+    <% if @challenge_story.finished? %>
+      <%= render "challenge_stories/next_round_card", challenge_story: @challenge_story %>
+    <% end %>
   <% else %>
     <%= render "challenge_stories/join_card", challenge_story: @challenge_story %>
   <% end %>

@@ -1,5 +1,9 @@
 <%# locals: (challenge_story:, submit_text:) %>
 <%= form_with(model: challenge_story, class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5") do |form| %>
+  <% if challenge_story.new_record? && challenge_story.previous_challenge_story_id %>
+    <%= hidden_field_tag :previous_challenge_story_id, challenge_story.previous_challenge_story_id %>
+  <% end %>
+
   <% if challenge_story.errors[:base].any? %>
     <div class="alert alert-error alert-soft"><%= challenge_story.errors[:base].to_sentence %></div>
   <% end %>

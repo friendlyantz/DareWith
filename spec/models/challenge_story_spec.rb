@@ -228,4 +228,43 @@ RSpec.describe ChallengeStory, type: :model do
       end
     end
   end
+
+  describe "rounds" do
+    let(:round_one) { create(:challenge_story, :finished, title: "Gym", description: "Any workout counts") }
+
+    it "starts the next round today with the same rules and length" do
+      travel_to(Time.zone.local(2026, 11, 17, 9)) do
+        next_round = round_one.next_round
+
+        expect(next_round).to have_attributes(title: "Gym", description: "Any workout counts", start: Date.new(2026, 11, 17), previous_challenge_story: round_one)
+        expect(next_round.duration_in_days).to eq(round_one.duration_in_days)
+      end
+    end
+
+    it "numbers the rounds" do
+      round_two = round_one.next_round.tap(&:save!)
+
+      expect(round_two.round).to eq 2
+      expect(round_two.next_round.tap(&:save!).round).to eq 3
+    end
+
+    it "allows only one next round" do
+      round_one.next_round.save!
+
+      expect { round_one.next_round.save! }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+
+    it "invites everyone else from the previous round" do
+      starter = create(:challenge_participant, challenge_story: round_one)
+      friend = create(:challenge_participant, challenge_story: round_one)
+      create(:challenge_participant, :inactive, challenge_story: round_one)
+      friend_device = create(:web_push_notification, user: friend.user)
+      create(:web_push_notification, user: starter.user)
+      round_two = round_one.next_round.tap(&:save!)
+
+      expect { round_two.invite_to_next_round(by: starter.user) }
+        .to have_enqueued_job(PushNotificationJob).exactly(:once)
+        .with(friend_device, title: "#{starter.user.username} started round 2 of Gym", body: "Same rules, new dates. Tap to join.", path: "/challenge_stories/#{round_two.id}")
+    end
+  end
 end

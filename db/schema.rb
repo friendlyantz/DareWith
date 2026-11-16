@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_090100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -134,9 +134,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_090100) do
     t.integer "challenge_check_ins_count", default: 0, null: false
     t.integer "challenge_participants_count", default: 0, null: false
     t.integer "challenge_rewards_count", default: 0, null: false
+    t.uuid "previous_challenge_story_id"
+    t.integer "round", default: 1, null: false
     t.index ["completed"], name: "index_challenge_stories_on_completed"
     t.index ["created_at"], name: "index_challenge_stories_on_created_at"
     t.index ["finish"], name: "index_challenge_stories_on_finish"
+    t.index ["previous_challenge_story_id"], name: "index_challenge_stories_on_previous_challenge_story_id", unique: true
     t.index ["start"], name: "index_challenge_stories_on_start"
     t.check_constraint "challenge_check_ins_count >= 0", name: "check_story_comments_non_negative"
     t.check_constraint "challenge_participants_count >= 0", name: "check_participants_non_negative"
@@ -144,6 +147,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_090100) do
     t.check_constraint "challenge_story_likes_count >= 0", name: "check_story_likes_non_negative"
     t.check_constraint "char_length(description) <= 500", name: "check_description_length"
     t.check_constraint "finish >= start", name: "check_finish_after_start"
+    t.check_constraint "round >= 1", name: "check_round_positive"
   end
 
   create_table "challenge_story_likes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -219,6 +223,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_090100) do
   add_foreign_key "challenge_rewards", "challenge_participants", column: "giver_id", on_delete: :cascade
   add_foreign_key "challenge_rewards", "challenge_participants", column: "receiver_id", on_delete: :cascade
   add_foreign_key "challenge_rewards", "challenge_stories", on_delete: :cascade
+  add_foreign_key "challenge_stories", "challenge_stories", column: "previous_challenge_story_id", on_delete: :nullify
   add_foreign_key "challenge_story_likes", "challenge_stories", on_delete: :cascade
   add_foreign_key "challenge_story_likes", "users", on_delete: :cascade
   add_foreign_key "credentials", "users", on_delete: :cascade

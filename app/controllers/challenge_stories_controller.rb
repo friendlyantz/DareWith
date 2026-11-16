@@ -1,6 +1,8 @@
 class ChallengeStoriesController < ApplicationController
   before_action :set_challenge_story, only: %i[edit update destroy complete]
   before_action :require_current_user!, except: %i[index show]
+  before_action :set_previous_challenge_story, only: %i[new create]
+  before_action :redirect_to_existing_next_round, only: %i[new create]
 
   def index
     return @challenge_stories = ChallengeStory.none unless current_user
@@ -34,10 +36,8 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def new
-    @challenge_story = ChallengeStory.new(
-      start: Time.zone.today,
-      finish: Time.zone.today + 7.days
-    )
+    @challenge_story = @previous_challenge_story&.next_round ||
+      ChallengeStory.new(start: Time.zone.today, finish: Time.zone.today + 7.days)
   end
 
   def edit
@@ -45,9 +45,11 @@ class ChallengeStoriesController < ApplicationController
 
   def create
     @challenge_story = ChallengeStory.new(challenge_story_params)
+    @challenge_story.previous_challenge_story = @previous_challenge_story
 
     if @challenge_story.save
       @challenge_story.find_or_activate_participant!(current_user)
+      @challenge_story.invite_to_next_round(by: current_user) if @previous_challenge_story
       redirect_to @challenge_story, notice: "Challenge story was successfully created."
     else
       render :new, status: :unprocessable_content
@@ -76,6 +78,18 @@ class ChallengeStoriesController < ApplicationController
 
   def set_challenge_story
     @challenge_story = current_user.challenge_stories.merge(ChallengeParticipant.active).find(params.expect(:id))
+  end
+
+  # Only someone who took part can start the next round
+  def set_previous_challenge_story
+    return if params[:previous_challenge_story_id].blank?
+
+    @previous_challenge_story = current_user.challenge_stories.find(params[:previous_challenge_story_id])
+  end
+
+  def redirect_to_existing_next_round
+    next_round = @previous_challenge_story&.next_challenge_story
+    redirect_to next_round, notice: "Round #{next_round.round} has already started" if next_round
   end
 
   def challenge_story_params

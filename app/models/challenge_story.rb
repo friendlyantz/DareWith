@@ -5,6 +5,8 @@ class ChallengeStory < ApplicationRecord
   AUTO_COMPLETE_AFTER = 14.days
 
   # Associations
+  belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
+  has_one :next_challenge_story, class_name: "ChallengeStory", foreign_key: :previous_challenge_story_id, dependent: :nullify, inverse_of: :previous_challenge_story
   has_many :challenge_check_ins, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :challenge_participants, dependent: :destroy
   has_many :challenge_rewards, dependent: :destroy
@@ -21,6 +23,11 @@ class ChallengeStory < ApplicationRecord
   validates :description, presence: true, length: {maximum: 500}
   validates :start, :finish, presence: true
   validate :finish_cannot_be_earlier_than_start
+
+  # Callbacks
+  before_create do
+    self.round = previous_challenge_story.round + 1 if previous_challenge_story
+  end
 
   # Scopes
   scope :active, -> { where(completed: false) }
@@ -104,6 +111,27 @@ class ChallengeStory < ApplicationRecord
       participant.user.notify(
         title: "#{title} is complete",
         body: "It's moved to your past challenges.",
+        path: Rails.application.routes.url_helpers.challenge_story_path(self)
+      )
+    end
+  end
+
+  # Same rules and length, starting today
+  def next_round
+    ChallengeStory.new(
+      previous_challenge_story: self,
+      title:,
+      description:,
+      start: Time.zone.today,
+      finish: Time.zone.today + (duration_in_days - 1).days
+    )
+  end
+
+  def invite_to_next_round(by:)
+    previous_challenge_story.active_participants.where.not(user: by).includes(:user).find_each do |participant|
+      participant.user.notify(
+        title: "#{by.username} started round #{round} of #{title}",
+        body: "Same rules, new dates. Tap to join.",
         path: Rails.application.routes.url_helpers.challenge_story_path(self)
       )
     end

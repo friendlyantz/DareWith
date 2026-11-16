@@ -15,9 +15,6 @@
       <%= icon(:gift) %> Time's up · wrap up
     <% end %>
   <% else %>
-    <div class="flex items-center justify-between gap-3">
-      <p class="text-sm">This challenge is over. No more check-ins are allowed.</p>
-      <%= link_to "New challenge", new_challenge_story_path, class: "btn btn-sm btn-primary shrink-0" %>
-    </div>
+    <p class="py-1 text-center text-sm">This challenge is over. No more check-ins are allowed.</p>
   <% end %>
 </div>
