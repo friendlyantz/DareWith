@@ -96,6 +96,37 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "#send_weekly_recap" do
+    let(:user) { create(:user, time_zone: "Australia/Melbourne") }
+    let!(:device) { create(:web_push_notification, user:) }
+    let(:sunday_evening_in_melbourne) { Time.utc(2026, 11, 22, 7, 0) }
+
+    before do
+      story = create(:challenge_story, title: "Morning run", start: Date.new(2026, 11, 10), finish: Date.new(2026, 11, 30))
+      create(:challenge_participant, user:, challenge_story: story)
+    end
+
+    it "sends once on Sunday evening in the user's time zone" do
+      expect { user.send_weekly_recap(sunday_evening_in_melbourne) }
+        .to have_enqueued_job(PushNotificationJob)
+        .with(device, title: "Your week: 0 of 7 days", body: "A new week starts tomorrow", path: "/today")
+      expect(user.reload.last_recapped_on).to eq(Date.new(2026, 11, 22))
+
+      expect { user.send_weekly_recap(sunday_evening_in_melbourne + 10.minutes) }.not_to have_enqueued_job(PushNotificationJob)
+    end
+
+    it "waits for Sunday evening" do
+      expect { user.send_weekly_recap(sunday_evening_in_melbourne - 1.day) }.not_to have_enqueued_job(PushNotificationJob)
+      expect { user.send_weekly_recap(sunday_evening_in_melbourne + 1.hour) }.not_to have_enqueued_job(PushNotificationJob)
+    end
+
+    it "skips users without a challenge this week" do
+      user.challenge_participants.delete_all
+
+      expect { user.send_weekly_recap(sunday_evening_in_melbourne) }.not_to have_enqueued_job(PushNotificationJob)
+    end
+  end
+
   describe "#notify" do
     let(:user) { create(:user) }
 

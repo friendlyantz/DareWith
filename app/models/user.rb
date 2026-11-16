@@ -8,6 +8,7 @@ class User < ApplicationRecord
   RATE_LIMIT_WINDOW = 15.minutes
   MAX_EMAIL_ATTEMPTS = 3
   REMINDER_HOURS = (6..22).to_a
+  WEEKLY_RECAP_HOUR = 18
   PAYMENT_LINK = %r{\A(https?://)?([\w-]+\.)+[a-z]{2,}/\S+\z}i
 
   # Associations
@@ -84,6 +85,22 @@ class User < ApplicationRecord
     return if challenge_stories.empty?
 
     notify(title: "Still time to check in", body: challenge_stories.map(&:title).to_sentence, path: "/today")
+  end
+
+  def weekly_recap_due?(now = Time.current)
+    local_now = now.in_time_zone(time_zone)
+    local_now.sunday? && local_now.hour == WEEKLY_RECAP_HOUR && last_recapped_on != local_now.to_date
+  end
+
+  def send_weekly_recap(now = Time.current)
+    return unless weekly_recap_due?(now)
+
+    today = now.in_time_zone(time_zone).to_date
+    update!(last_recapped_on: today)
+    recap = WeeklyRecap.new(self, today)
+    return unless recap.any?
+
+    notify(title: recap.title, body: recap.body, path: "/today")
   end
 
   def notify(title:, body: nil, path: "/")
