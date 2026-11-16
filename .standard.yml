@@ -1,2 +1,7 @@
 plugins:
   - standard-rails
+ignore:
+  - "db/seeds.rb":
+      - Rails/Output
+  - "db/migrate/20251231050650_add_database_constraints.rb":
+      - Rails/ReversibleMigration

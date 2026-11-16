@@ -121,7 +121,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
           post challenge_story_challenge_check_ins_path(story), params: invalid_params
         end.not_to change(ChallengeCheckIn, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
