@@ -65,6 +65,14 @@ RSpec.describe "Passkeys", type: :request do
       end
     end
 
+    it "suggests a first passkey to email-only users in a real browser" do
+      get profile_path
+      expect(response.body).to include("Sign in faster next time")
+
+      get profile_path, headers: {"User-Agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0"}
+      expect(response.body).not_to include("Sign in faster next time")
+    end
+
     it "labels each passkey" do
       create(:credential, user:, nickname: "iPhone", backed_up: true)
       create(:credential, user:, nickname: "YubiKey", backed_up: false)

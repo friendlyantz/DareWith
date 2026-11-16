@@ -3,15 +3,25 @@
   <div>
     <p class="font-semibold">Open this in your browser</p>
     <p class="text-sm text-base-content/80">
-      Passkeys don't work inside this app's built-in browser. Open the link in Safari or Chrome to sign up, or sign in with email instead.
+      Passkeys don't work inside this app's built-in browser. Open the link in <%= real_browser_name || "Safari or Chrome" %> to sign up, or sign in with email instead.
     </p>
   </div>
-  <ul class="list-disc pl-5 text-sm text-base-content/80">
-    <li>iPhone: tap ⋯ or the share button, then "Open in Safari"</li>
-    <li>Android: tap ⋮, then "Open in Chrome" or "Open in browser"</li>
-  </ul>
   <div class="flex flex-col gap-2">
-    <button type="button" class="btn btn-primary" data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-action="clipboard#copy">Copy link</button>
+    <% if (browser_url = open_in_browser_url(url)) %>
+      <%= link_to "Open in #{real_browser_name}", browser_url, class: "btn btn-primary" %>
+    <% end %>
+    <button type="button" class="btn <%= browser_url ? "btn-soft" : "btn-primary" %>" data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-action="clipboard#copy">Copy link</button>
+  </div>
+  <details class="text-sm text-base-content/80">
+    <summary class="cursor-pointer">Button didn't work?</summary>
+    <ul class="list-disc pl-5 mt-1">
+      <li>iPhone: tap ⋯ or the share button, then "Open in Safari"</li>
+      <li>Android: tap ⋮, then "Open in Chrome" or "Open in browser"</li>
+      <li>Or copy the link and paste it into your browser</li>
+    </ul>
+  </details>
+  <div class="flex flex-col gap-1 border-t border-warning/30 pt-3">
     <%= link_to "Sign in with email instead", new_email_session_path, class: "btn btn-ghost btn-sm" %>
+    <p class="text-center text-xs text-base-content/70">You'll get a code to type here, so you stay on this page.</p>
   </div>
 </div>
