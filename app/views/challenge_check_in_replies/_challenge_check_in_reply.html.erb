@@ -1,0 +1,9 @@
+<%# locals: (challenge_check_in_reply:) %>
+<div id="<%= dom_id(challenge_check_in_reply) %>" class="flex items-start gap-2">
+  <%= render "shared/avatar", name: challenge_check_in_reply.user.username, user: challenge_check_in_reply.user, size: "size-6", text: "text-[0.55rem]" %>
+  <p class="min-w-0 flex-1 rounded-box bg-base-200 px-3 py-1.5 text-sm">
+    <span class="font-semibold"><%= challenge_check_in_reply.user.username %></span>
+    <span class="break-words"><%= challenge_check_in_reply.body %></span>
+    <time class="ml-1 text-xs text-base-content/60" datetime="<%= challenge_check_in_reply.created_at.iso8601 %>"><%= short_time_ago(challenge_check_in_reply.created_at) %></time>
+  </p>
+</div>

@@ -13,7 +13,7 @@ class ChallengeCheckInsController < ApplicationController
     @challenge_check_ins = ChallengeCheckIn
       .joins(:challenge_story)
       .where(challenge_story_id: @challenge_stories.select(:id))
-      .includes(:challenge_story, {challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, photo_attachment: :blob)
+      .includes(:challenge_story, {challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, {challenge_check_in_replies: {user: {avatar_attachment: :blob}}}, photo_attachment: :blob)
       .order(created_at: :desc)
       .limit(20)
   end

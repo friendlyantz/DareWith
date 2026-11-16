@@ -1,0 +1,15 @@
+<%# locals: (challenge_check_in:) %>
+<%= form_with model: ChallengeCheckInReply.new, url: challenge_check_in_challenge_check_in_replies_path(challenge_check_in),
+  id: dom_id(challenge_check_in, :reply_form), class: "flex items-center gap-2" do |form| %>
+  <%= form.text_field :body,
+    placeholder: "Add a reply…",
+    maxlength: ChallengeCheckInReply::MAX_LENGTH,
+    required: true,
+    autocomplete: "off",
+    aria: {label: "Reply"},
+    id: dom_id(challenge_check_in, :reply_body),
+    class: "input input-sm flex-1 min-w-0 rounded-full" %>
+  <%= form.button type: "submit", class: "btn btn-sm btn-circle btn-ghost text-primary", aria: {label: "Send reply"} do %>
+    <%= icon(:send, css: "size-4") %>
+  <% end %>
+<% end %>

@@ -16,6 +16,7 @@ class User < ApplicationRecord
   has_many :challenge_stories, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
   has_many :badges, dependent: :destroy
+  has_many :challenge_check_in_replies, dependent: :destroy
   has_one_attached :avatar
 
   # Normalization

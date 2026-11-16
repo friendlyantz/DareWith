@@ -7,6 +7,7 @@ class ChallengeCheckIn < ApplicationRecord
   has_one_attached :photo
   has_many :challenge_check_in_likes, dependent: :destroy
   has_many :liking_users, through: :challenge_check_in_likes, source: :user
+  has_many :challenge_check_in_replies, -> { order(:created_at) }, dependent: :destroy
 
   # Validations
   validates :message, presence: true

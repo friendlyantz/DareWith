@@ -28,7 +28,7 @@ class ChallengeStoriesController < ApplicationController
       .includes(
         active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins, :check_in_days],
         challenge_rewards: [{giver: :user}, {receiver: :user}],
-        challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, photo_attachment: :blob]
+        challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, {challenge_check_in_replies: {user: {avatar_attachment: :blob}}}, photo_attachment: :blob]
       )
       .find(params[:id])
 

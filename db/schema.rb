@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -71,6 +71,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
     t.index ["user_id"], name: "index_challenge_check_in_likes_on_user_id"
   end
 
+  create_table "challenge_check_in_replies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "challenge_check_in_id", null: false
+    t.uuid "user_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["challenge_check_in_id", "created_at"], name: "idx_on_challenge_check_in_id_created_at_44c6211b2d"
+    t.index ["challenge_check_in_id"], name: "index_challenge_check_in_replies_on_challenge_check_in_id"
+    t.index ["user_id"], name: "index_challenge_check_in_replies_on_user_id"
+    t.check_constraint "char_length(body) >= 1 AND char_length(body) <= 280", name: "check_reply_body_length"
+  end
+
   create_table "challenge_check_ins", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "message", null: false
     t.uuid "challenge_participant_id", null: false
@@ -79,6 +91,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
     t.datetime "updated_at", null: false
     t.integer "challenge_check_in_likes_count", default: 0, null: false
     t.date "checked_in_on", null: false
+    t.integer "challenge_check_in_replies_count", default: 0, null: false
     t.index ["challenge_participant_id", "checked_in_on"], name: "idx_on_challenge_participant_id_checked_in_on_b71ead7892", unique: true
     t.index ["challenge_participant_id"], name: "index_challenge_check_ins_on_challenge_participant_id"
     t.index ["challenge_story_id"], name: "index_challenge_check_ins_on_challenge_story_id"
@@ -189,6 +202,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
     t.date "last_reminded_on"
     t.string "payment_details"
     t.integer "badges_count", default: 0, null: false
+    t.integer "challenge_check_in_replies_count", default: 0, null: false
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["username"], name: "index_users_on_username", unique: true
     t.check_constraint "challenge_participants_count >= 0", name: "check_user_participants_non_negative"
@@ -216,6 +230,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_120000) do
   add_foreign_key "badges", "users", on_delete: :cascade
   add_foreign_key "challenge_check_in_likes", "challenge_check_ins", on_delete: :cascade
   add_foreign_key "challenge_check_in_likes", "users", on_delete: :cascade
+  add_foreign_key "challenge_check_in_replies", "challenge_check_ins", on_delete: :cascade
+  add_foreign_key "challenge_check_in_replies", "users", on_delete: :cascade
   add_foreign_key "challenge_check_ins", "challenge_participants", on_delete: :cascade
   add_foreign_key "challenge_check_ins", "challenge_stories", on_delete: :cascade
   add_foreign_key "challenge_participants", "challenge_stories", on_delete: :cascade

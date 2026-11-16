@@ -1,0 +1,2 @@
+<%= turbo_stream.append dom_id(@challenge_check_in, :replies), @challenge_check_in_reply %>
+<%= turbo_stream.replace dom_id(@challenge_check_in, :reply_form), partial: "challenge_check_in_replies/form", locals: {challenge_check_in: @challenge_check_in} %>

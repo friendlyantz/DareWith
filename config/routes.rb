@@ -28,6 +28,7 @@ Rails.application.routes.draw do
 
   resources :challenge_check_ins, only: %i[index] do
     resource :challenge_check_in_like, only: %i[create destroy]
+    resources :challenge_check_in_replies, only: %i[create]
   end
 
   resources :challenge_participants, only: %i[create destroy]
