@@ -1,5 +1,5 @@
 class ChallengeStoriesController < ApplicationController
-  before_action :set_challenge_story, only: %i[edit update destroy complete]
+  before_action :set_challenge_story, only: %i[edit update complete]
   before_action :require_current_user!, except: %i[index show]
   before_action :set_previous_challenge_story, only: %i[new create]
   before_action :redirect_to_existing_next_round, only: %i[new create]
@@ -62,11 +62,6 @@ class ChallengeStoriesController < ApplicationController
     else
       render :edit, status: :unprocessable_content
     end
-  end
-
-  def destroy
-    @challenge_story.destroy!
-    redirect_to challenge_stories_path, status: :see_other, notice: "Challenge story was successfully destroyed."
   end
 
   def complete

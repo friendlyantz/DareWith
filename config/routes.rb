@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   resource :profile, only: %i[show update], path: "me"
   resource :avatar, only: %i[update destroy]
 
-  resources :challenge_stories, only: %i[index show new create edit update destroy] do
+  resources :challenge_stories, only: %i[index show new create edit update] do
     member do
       patch :complete
     end
@@ -56,6 +56,15 @@ Rails.application.routes.draw do
       get :verify, on: :collection
       post :confirm, on: :collection
     end
+  end
+
+  namespace :admin do
+    root "dashboards#show"
+    resources :users, only: %i[show destroy] do
+      resource :sign_in_link, only: %i[create]
+      resource :notification, only: %i[create]
+    end
+    resources :challenge_stories, only: %i[destroy]
   end
 
   resource :device_sign_in, only: %i[show create]

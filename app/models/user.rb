@@ -9,6 +9,7 @@ class User < ApplicationRecord
   MAX_EMAIL_ATTEMPTS = 3
   REMINDER_HOURS = (6..22).to_a
   WEEKLY_RECAP_HOUR = 18
+  ADMIN_USERNAMES = %w[friendlyantz].freeze
   PAYMENT_LINK = %r{\A(https?://)?([\w-]+\.)+[a-z]{2,}/\S+\z}i
 
   # Associations
@@ -44,6 +45,10 @@ class User < ApplicationRecord
   end
 
   # Public methods
+  def admin?
+    ADMIN_USERNAMES.include?(username.downcase)
+  end
+
   def can_delete_credentials?
     credentials.size > CREDENTIAL_MIN_AMOUNT
   end
@@ -138,14 +143,13 @@ class User < ApplicationRecord
   end
 
   # Email authentication methods
-  def generate_email_login_token!
+  def generate_email_login_token!(emailed: true)
     raw_token = SecureRandom.urlsafe_base64(32)
-    hashed_token = Digest::SHA256.hexdigest(raw_token)
 
     update!(
-      email_login_token: hashed_token,
+      email_login_token: Digest::SHA256.hexdigest(raw_token),
       email_login_token_expires_at: EMAIL_TOKEN_EXPIRY.from_now,
-      last_email_sent_at: Time.current
+      last_email_sent_at: emailed ? Time.current : last_email_sent_at
     )
 
     raw_token

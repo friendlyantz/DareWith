@@ -1,0 +1,157 @@
+<% content_for :title, "Admin" %>
+
+<div class="w-full max-w-2xl flex flex-col gap-6 pt-2">
+  <div>
+    <p class="text-sm font-medium text-base-content/70"><%= Time.zone.now.strftime("%A, %-d %B · %H:%M") %></p>
+    <h1 class="font-display text-4xl font-bold tracking-tight">Admin</h1>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <%= render "admin/dashboards/stat", label: "Users", value: @overview.users_count, note: "+#{@overview.new_users_count} this week" %>
+    <%= render "admin/dashboards/stat", label: "Checked in this week", value: @overview.active_users_count, note: "users" %>
+    <%= render "admin/dashboards/stat", label: "Running challenges", value: @overview.running_challenges.size, note: "#{@overview.upcoming_challenges_count} upcoming" %>
+    <%= render "admin/dashboards/stat", label: "Push devices", value: @overview.devices_count, note: "#{@overview.users_with_push_count} users" %>
+  </div>
+
+  <% days = @overview.check_ins_per_day %>
+  <% peak = days.map(&:last).max %>
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Check-ins per day</h2>
+    <div class="rounded-box border border-base-300 bg-base-100 p-4">
+      <p class="text-xs text-base-content/60 mb-2">Peak <%= peak %> · <%= days.sum(&:last) %> in <%= days.size %> days</p>
+      <div class="flex h-28 items-end gap-0.5 border-b border-base-300" role="img" aria-label="Check-ins per day for the last <%= days.size %> days">
+        <% days.each do |day, count| %>
+          <div class="group relative flex h-full flex-1 items-end" title="<%= day.strftime("%a %-d %b") %>: <%= pluralize(count, "check-in") %>">
+            <div class="w-full rounded-t bg-primary group-hover:opacity-80" style="height: <%= peak.zero? ? 0 : (count * 100.0 / peak).round %>%"></div>
+          </div>
+        <% end %>
+      </div>
+      <div class="mt-1 flex justify-between text-xs text-base-content/60">
+        <span><%= days.first.first.strftime("%-d %b") %></span>
+        <span>Today</span>
+      </div>
+      <table class="sr-only">
+        <% days.each do |day, count| %>
+          <tr><th><%= day.strftime("%-d %b") %></th><td><%= count %></td></tr>
+        <% end %>
+      </table>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Last 7 days</h2>
+    <dl class="grid grid-cols-2 sm:grid-cols-3 rounded-box border border-base-300 bg-base-100">
+      <% @overview.weekly_activity.each do |label, count| %>
+        <div class="px-4 py-3">
+          <dt class="text-xs text-base-content/70"><%= label %></dt>
+          <dd class="font-display text-xl font-semibold"><%= count %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Running challenges</h2>
+    <% if @overview.running_challenges.any? %>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% @overview.running_challenges.each do |challenge_story| %>
+          <li>
+            <%= link_to challenge_story_path(challenge_story), class: "flex min-h-14 items-center gap-3 px-4 py-2 hover:bg-base-200" do %>
+              <div class="flex-1 min-w-0">
+                <p class="truncate font-medium"><%= challenge_story.title %></p>
+                <p class="text-sm text-base-content/70">
+                  Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %> ·
+                  <%= pluralize(challenge_story.challenge_participants_count, "person") %> ·
+                  <%= pluralize(challenge_story.challenge_check_ins_count, "check-in") %>
+                </p>
+              </div>
+              <% if challenge_story.round > 1 %>
+                <span class="badge badge-sm badge-soft">Round <%= challenge_story.round %></span>
+              <% end %>
+              <%= icon(:chevron_right, css: "size-4 text-base-content/50") %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-1 text-sm text-base-content/60">No challenges running right now.</p>
+    <% end %>
+    <p class="px-1 text-xs text-base-content/60">
+      <%= @overview.upcoming_challenges_count %> upcoming ·
+      <%= @overview.wrapping_up_challenges_count %> wrapping up ·
+      <%= @overview.completed_challenges_count %> completed
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Push notifications</h2>
+    <div class="rounded-box border border-base-300 bg-base-100 p-4 flex flex-col gap-3">
+      <p>
+        <%= @overview.users_with_push_count %> of <%= pluralize(@overview.users_count, "user") %> have push on,
+        <%= @overview.reminders_on_count %> with the daily reminder.
+      </p>
+      <% if @overview.devices_by_label.any? %>
+        <ul class="flex flex-wrap gap-2">
+          <% @overview.devices_by_label.each do |label, count| %>
+            <li class="badge badge-soft"><%= label %> · <%= count %></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <% if @overview.jobs_available? %>
+        <p class="text-sm text-base-content/70">
+          <%= pluralize(@overview.pushes_sent_count, "push", plural: "pushes") %> sent in the last day ·
+          <%= pluralize(@overview.failed_jobs_count, "failed job") %>
+        </p>
+      <% else %>
+        <p class="text-sm text-base-content/60">Job stats show in production only.</p>
+      <% end %>
+    </div>
+  </section>
+
+  <% if @overview.jobs_available? && @overview.failed_jobs_count.positive? %>
+    <section class="flex flex-col gap-2">
+      <h2 class="text-sm font-semibold text-base-content/70">Latest failed jobs</h2>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% @overview.recent_failed_jobs.each do |failure| %>
+          <li class="px-4 py-2">
+            <p class="font-medium"><%= failure.job.class_name %> <span class="text-sm font-normal text-base-content/60"><%= time_ago_in_words(failure.created_at) %> ago</span></p>
+            <p class="text-sm text-error break-words"><%= failure.exception_class %>: <%= failure.message.to_s.truncate(160) %></p>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Newest users</h2>
+    <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+      <% @overview.recent_users.each do |user| %>
+        <% last_check_in = @overview.last_check_in_by_user[user.id] %>
+        <li>
+          <%= link_to admin_user_path(user), class: "flex min-h-14 items-center gap-3 px-4 py-2 hover:bg-base-200" do %>
+            <%= render "shared/avatar", name: user.username, user: %>
+            <div class="flex-1 min-w-0">
+              <p class="truncate font-medium"><%= user.username %></p>
+              <p class="text-sm text-base-content/70">
+                Joined <%= user.created_at.strftime("%-d %b") %> ·
+                <%= pluralize(user.challenge_participants_count, "challenge") %> ·
+                <%= last_check_in ? "last check-in #{last_check_in.strftime("%-d %b")}" : "no check-ins" %>
+              </p>
+            </div>
+            <div class="flex flex-wrap justify-end gap-1">
+              <% if (passkeys = @overview.passkeys_by_user[user.id]) %>
+                <span class="badge badge-sm badge-soft"><%= pluralize(passkeys, "passkey") %></span>
+              <% end %>
+              <% if user.email.present? %>
+                <span class="badge badge-sm badge-soft">email</span>
+              <% end %>
+              <% if (devices = @overview.devices_by_user[user.id]) %>
+                <span class="badge badge-sm badge-soft badge-info"><%= icon(:bell, css: "size-3") %> <%= pluralize(devices, "push device") %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+</div>

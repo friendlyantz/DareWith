@@ -148,5 +148,11 @@
     </section>
   <% end %>
 
+  <% if current_user.admin? %>
+    <%= link_to admin_root_path, class: "btn btn-block h-12 border-base-300 bg-base-100" do %>
+      <%= icon(:compass, css: "size-4") %> Admin
+    <% end %>
+  <% end %>
+
   <%= button_to "Sign out", webauthn_session_path, method: :delete, class: "btn btn-block h-12 border-base-300 bg-base-100 text-error" %>
 </div>

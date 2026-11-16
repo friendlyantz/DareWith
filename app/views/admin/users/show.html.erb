@@ -1,0 +1,123 @@
+<% content_for :title, "#{@user.username} · Admin" %>
+
+<div class="w-full max-w-2xl flex flex-col gap-6 pt-2">
+  <%= link_to admin_root_path, class: "btn btn-ghost btn-sm self-start -ml-3" do %>
+    <%= icon(:chevron_left, css: "size-4") %> Admin
+  <% end %>
+
+  <div class="flex items-center gap-4">
+    <%= render "shared/avatar", name: @user.username, user: @user, size: "size-16", text: "font-display text-xl" %>
+    <div class="min-w-0">
+      <h1 class="font-display text-3xl font-bold tracking-tight truncate"><%= @user.username %></h1>
+      <p class="text-sm text-base-content/70 truncate">
+        <%= @user.email || "No email" %><%= " (verified)" if @user.email && @user.email_verified? %>
+      </p>
+      <p class="text-sm text-base-content/70">
+        Joined <%= @user.created_at.strftime("%-d %b %Y") %> · <%= @user.time_zone.tr("_", " ") %> ·
+        <%= @user.reminder_hour ? "reminder at #{format("%02d:00", @user.reminder_hour)}" : "reminder off" %>
+      </p>
+    </div>
+  </div>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Sign-in link</h2>
+    <div class="rounded-box border border-base-300 bg-base-100 p-4 flex flex-col gap-3">
+      <% if @sign_in_url %>
+        <div class="flex gap-2">
+          <input type="text" readonly value="<%= @sign_in_url %>" class="input flex-1 min-w-0 font-mono text-xs" aria-label="Sign-in link">
+          <button type="button" class="btn btn-primary" data-controller="clipboard" data-clipboard-text-value="<%= @sign_in_url %>" data-action="clipboard#copy">Copy</button>
+        </div>
+        <p class="text-xs text-base-content/60">
+          Works once, for 24 hours, in any browser, and replaces any link they were emailed. Opening it yourself signs you in as <%= @user.username %>.
+        </p>
+      <% else %>
+        <p class="text-sm text-base-content/70">Make a link that signs <%= @user.username %> in, to send them by hand. It works like the one in the sign-in email.</p>
+        <%# Turbo ignores a 200 reply to a form, and the link is rendered rather than redirected to, so it never sits in the flash %>
+        <%= button_to "Make sign-in link", admin_user_sign_in_link_path(@user), class: "btn self-start", form: {data: {turbo: false}} %>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Push devices</h2>
+    <% devices = @user.web_push_notifications.order(:created_at) %>
+    <% if devices.any? %>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% devices.each do |device| %>
+          <li class="px-4 py-2">
+            <p class="truncate"><%= device.label %></p>
+            <p class="text-sm text-base-content/70 truncate">Added <%= device.created_at.strftime("%-d %b %Y") %> · <%= URI(device.endpoint).host %></p>
+          </li>
+        <% end %>
+      </ul>
+      <%= form_with scope: :notification, url: admin_user_notification_path(@user), class: "rounded-box border border-base-300 bg-base-100 p-4 flex flex-col gap-2" do |form| %>
+        <%= form.text_field :title, required: true, maxlength: 80, placeholder: "Title", class: "input w-full" %>
+        <%= form.text_area :body, maxlength: 200, rows: 2, placeholder: "Message (optional)", class: "textarea w-full" %>
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-xs text-base-content/60">Goes to every device above and opens Today.</p>
+          <%= form.submit "Send push", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="px-1 text-sm text-base-content/60">No push devices.</p>
+    <% end %>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Passkeys</h2>
+    <% if @user.credentials.any? %>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% @user.credentials.order(:created_at).each do |credential| %>
+          <li class="flex items-center gap-3 px-4 py-2">
+            <div class="flex-1 min-w-0">
+              <p class="truncate"><%= credential.nickname.presence || "Passkey" %></p>
+              <p class="text-sm text-base-content/70">Added <%= credential.created_at.strftime("%-d %b %Y") %></p>
+            </div>
+            <% unless credential.backed_up.nil? %>
+              <span class="badge badge-sm badge-soft"><%= credential.backed_up ? "Synced" : "Not synced" %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-1 text-sm text-base-content/60">No passkeys; signs in by email only.</p>
+    <% end %>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Challenges</h2>
+    <% participations = @user.challenge_participants.includes(:challenge_story).order(created_at: :desc) %>
+    <% if participations.any? %>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% participations.each do |participant| %>
+          <li>
+            <%= link_to challenge_story_path(participant.challenge_story), class: "flex min-h-14 items-center gap-3 px-4 py-2 hover:bg-base-200" do %>
+              <div class="flex-1 min-w-0">
+                <p class="truncate font-medium"><%= participant.challenge_story.title %></p>
+                <p class="text-sm text-base-content/70">
+                  <%= participant.challenge_story.start.strftime("%-d %b") %>–<%= participant.challenge_story.finish.strftime("%-d %b") %> ·
+                  <%= pluralize(participant.challenge_check_ins_count, "check-in") %>
+                </p>
+              </div>
+              <% if participant.inactive? %>
+                <span class="badge badge-sm badge-soft">Left</span>
+              <% elsif participant.challenge_story.completed? %>
+                <span class="badge badge-sm badge-soft">Completed</span>
+              <% end %>
+              <%= icon(:chevron_right, css: "size-4 text-base-content/50") %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-1 text-sm text-base-content/60">Not in any challenge.</p>
+    <% end %>
+  </section>
+
+  <% unless @user == current_user %>
+    <%= button_to "Delete #{@user.username}", admin_user_path(@user),
+      method: :delete,
+      class: "btn btn-block h-12 border-base-300 bg-base-100 text-error",
+      data: {turbo_confirm: "Delete #{@user.username}? Their check-ins, replies, likes, pledges, badges, passkeys and devices go too. This can't be undone."} %>
+  <% end %>
+</div>

@@ -6,7 +6,7 @@ class ChallengeParticipant < ApplicationRecord
   belongs_to :challenge_story, counter_cache: true
   has_many :given_rewards, class_name: "ChallengeReward", foreign_key: "giver_id", dependent: :destroy
   has_many :received_rewards, class_name: "ChallengeReward", foreign_key: "receiver_id", dependent: :destroy
-  has_many :challenge_check_ins, dependent: :nullify
+  has_many :challenge_check_ins, dependent: :destroy
   has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
   has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on) }, class_name: "ChallengeCheckIn"
 

@@ -163,23 +163,6 @@ RSpec.describe "ChallengeStories", type: :request do
     end
   end
 
-  describe "DELETE /challenge_stories/:id" do
-    let(:user) { create(:user) }
-    let!(:story) { create(:challenge_story) }
-
-    before { sign_in_as(user) }
-
-    it "destroys the challenge story" do
-      create(:challenge_participant, user: user, challenge_story: story)
-
-      expect {
-        delete challenge_story_path(story)
-      }.to change(ChallengeStory, :count).by(-1)
-
-      expect(response).to redirect_to(challenge_stories_path)
-    end
-  end
-
   describe "next rounds" do
     let(:user) { create(:user) }
     let(:round_one) { create(:challenge_story, :finished, title: "Gym") }
