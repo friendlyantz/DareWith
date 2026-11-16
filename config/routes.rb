@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :web_push_notifications, only: %i[create] do
+  resources :web_push_notifications, only: %i[create destroy] do
     delete :unsubscribe, on: :collection
   end
   # Development email preview

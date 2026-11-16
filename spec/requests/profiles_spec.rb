@@ -24,6 +24,15 @@ RSpec.describe "Profiles", type: :request do
         expect(response.body).to include("Old one")
         expect(response.body).not_to include("Running one")
       end
+
+      it "lists the devices that get notifications" do
+        create(:web_push_notification, user: user, user_agent: "Mozilla/5.0 (Android 14; Mobile; rv:133.0) Gecko/133.0 Firefox/133.0")
+
+        get profile_path
+
+        expect(response.body).to include("Notifications go to")
+        expect(response.body).to include("Firefox on Android")
+      end
     end
   end
 

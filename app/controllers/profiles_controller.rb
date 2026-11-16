@@ -5,6 +5,7 @@ class ProfilesController < ApplicationController
     running, @wrap_up_stories = current_user.active_challenge_stories.order(finish: :desc).partition(&:accepting_check_ins?)
     @active_challenges_count = running.size
     @past_challenge_stories = current_user.past_challenge_stories.order(finish: :desc)
+    @push_devices = current_user.web_push_notifications.order(:created_at)
   end
 
   def update

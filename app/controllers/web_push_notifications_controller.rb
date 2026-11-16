@@ -10,7 +10,7 @@ class WebPushNotificationsController < ApplicationController
     notification.update!(
       auth_key: subscription.dig("keys", "auth"),
       p256dh_key: subscription.dig("keys", "p256dh"),
-      device_name: detect_device_name,
+      device_name: WebPushNotification.describe_device(request.user_agent),
       user_agent: request.user_agent
     )
 
@@ -30,28 +30,10 @@ class WebPushNotificationsController < ApplicationController
     head :ok
   end
 
-  private
+  def destroy
+    return head :unauthorized unless current_user
 
-  def detect_device_name
-    ua = request.user_agent.to_s.downcase
-
-    # Mobile devices first
-    return "iPhone" if ua.include?("iphone")
-    return "iPad" if ua.include?("ipad")
-    return "Android Phone" if ua.include?("android") && ua.include?("mobile")
-    return "Android Tablet" if ua.include?("android")
-
-    # Desktop browsers (order matters - check specific before generic)
-    return "Chrome Desktop" if ua.include?("chrome")
-    return "Brave Desktop" if ua.include?("brave")
-    return "Firefox Desktop" if ua.include?("firefox")
-    return "Safari Desktop" if ua.include?("safari") && !ua.include?("chrome")
-    return "Edge Desktop" if ua.include?("edg")
-    return "Arc Desktop" if ua.include?("arc")
-    return "Opera Desktop" if ua.include?("opr") || ua.include?("opera")
-    return "Vivaldi Desktop" if ua.include?("vivaldi")
-    return "Tor Browser" if ua.include?("tor")
-
-    "Unknown Device"
+    current_user.web_push_notifications.find(params[:id]).destroy
+    redirect_to profile_path, notice: "That device won't get notifications any more"
   end
 end

@@ -1,5 +1,5 @@
 <% content_for :title, "Me" %>
-<div class="w-full max-w-md flex flex-col gap-6 pt-2">
+<div class="w-full max-w-md flex flex-col gap-6 pt-2" data-controller="push-notifications">
   <h1 class="font-display text-4xl font-bold tracking-tight">Me</h1>
 
   <div class="flex items-center gap-4">
@@ -31,9 +31,9 @@
   </div>
 
   <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
-    <li class="flex min-h-14 items-center gap-3 px-4" data-controller="push-notifications">
+    <li class="flex min-h-14 items-center gap-3 px-4">
       <%= icon(:bell, css: "size-5 text-base-content/70") %>
-      <label for="push_toggle" class="flex-1">Notifications on this device</label>
+      <label for="push_toggle" class="flex-1">Notifications in this browser</label>
       <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
     </li>
     <li class="flex min-h-14 items-center gap-3 px-4">
@@ -97,6 +97,27 @@
     Get notified when friends check in, join, or pledge you a reward, plus a daily reminder if you haven't checked in yet
     (<%= current_user.time_zone.tr("_", " ") %> time). On iPhone, add Strivo to your Home Screen first.
   </p>
+
+  <% if @push_devices.any? %>
+    <section class="flex flex-col gap-2">
+      <h2 class="text-sm font-semibold text-base-content/70">Notifications go to</h2>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% @push_devices.each do |device| %>
+          <li class="flex min-h-14 items-center gap-3 px-4 py-2" data-push-notifications-target="device" data-endpoint="<%= device.endpoint %>">
+            <div class="flex-1 min-w-0">
+              <p class="truncate"><%= device.label %></p>
+              <p class="text-sm text-base-content/70">Added <%= device.created_at.strftime("%-d %b %Y") %></p>
+            </div>
+            <span class="badge badge-sm badge-info badge-soft hidden" data-role="this-device">This browser</span>
+            <%= button_to "Remove", web_push_notification_path(device),
+              method: :delete,
+              class: "btn btn-ghost btn-sm text-error",
+              form: {data: {role: "remove"}} %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
 
   <%= button_to "Sign out", webauthn_session_path, method: :delete, class: "btn btn-block h-12 border-base-300 bg-base-100 text-error" %>
 </div>

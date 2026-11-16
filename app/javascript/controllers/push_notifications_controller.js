@@ -1,24 +1,28 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Web push for this browser: the opt-in banner, the switch on Me and the list of
+// devices the server sends to (rows with data-endpoint).
 export default class extends Controller {
-  static targets = ["banner", "toggle"]
+  static targets = ["banner", "toggle", "device"]
 
   connect() {
     this.isProcessing = false
-    this.initialize()
+    this.refresh()
   }
 
-  async initialize() {
-    // Check if this device is already subscribed
-    const isSubscribed = await this.checkIfThisDeviceIsSubscribed()
-    
-    // Update toggle state if present
+  async refresh() {
+    const subscription = await this.currentSubscription()
+
     if (this.hasToggleTarget) {
-      this.toggleTarget.checked = isSubscribed
+      this.toggleTarget.checked = !!subscription
+      // Keep the server in step with this browser, e.g. after the server dropped it
+      if (subscription) await this.sendSubscriptionToServer(subscription)
     }
-    
+
+    this.markThisDevice(subscription)
+
     // Only offer notifications when the browser supports them and they aren't blocked
-    if (isSubscribed) {
+    if (subscription) {
       this.removeBanner()
     } else if (this.canAsk()) {
       this.showBanner()
@@ -32,70 +36,55 @@ export default class extends Controller {
       Notification.permission !== 'denied'
   }
 
+  // The device list can't remove this browser (it would re-register on the next visit),
+  // so its row gets a label and the switch handles it instead
+  markThisDevice(subscription) {
+    this.deviceTargets.forEach((row) => {
+      const isThisDevice = !!subscription && row.dataset.endpoint === subscription.endpoint
+      row.querySelector('[data-role="this-device"]')?.classList.toggle('hidden', !isThisDevice)
+      row.querySelector('[data-role="remove"]')?.classList.toggle('hidden', isThisDevice)
+    })
+  }
+
   async toggle(event) {
-    // Prevent rapid toggling
     if (this.isProcessing) {
-      console.log('Already processing, ignoring toggle')
       event.preventDefault()
-      event.target.checked = !event.target.checked // Revert the checkbox
+      event.target.checked = !event.target.checked
       return
     }
 
     this.isProcessing = true
     const checkbox = event.target
     const wasChecked = checkbox.checked
-    
-    // Disable checkbox during processing
-    if (this.hasToggleTarget) {
-      this.toggleTarget.disabled = true
-    }
-    
+    checkbox.disabled = true
+
     try {
       if (wasChecked) {
-        console.log('Toggle: subscribing...')
         const subscribed = await this.subscribe()
         if (!subscribed) checkbox.checked = false
       } else {
-        console.log('Toggle: unsubscribing...')
         await this.unsubscribe()
       }
+      // Reload so the device list on Me matches
+      Turbo.visit(window.location.href, { action: "replace" })
     } catch (error) {
       console.error('Toggle error:', error)
-      // Revert checkbox state on error
       checkbox.checked = !wasChecked
     } finally {
       this.isProcessing = false
-      // Re-enable checkbox
-      if (this.hasToggleTarget) {
-        this.toggleTarget.disabled = false
-      }
+      checkbox.disabled = false
     }
   }
 
-  async checkIfThisDeviceIsSubscribed() {
-    if (!('serviceWorker' in navigator)) return false
-    
+  async currentSubscription() {
+    if (!('serviceWorker' in navigator)) return null
+
     try {
       const registration = await navigator.serviceWorker.getRegistration()
-      if (!registration) return false
-      
-      const subscription = await registration.pushManager.getSubscription()
-      return !!subscription
+      return registration ? await registration.pushManager.getSubscription() : null
     } catch (error) {
       console.error('Error checking subscription:', error)
-      return false
-    }
-  }
-
-  showBanner() {
-    if (this.hasBannerTarget) {
-      this.bannerTarget.classList.remove('hidden')
-    }
-  }
-
-  removeBanner() {
-    if (this.hasBannerTarget) {
-      this.bannerTarget.remove()
+      return null
     }
   }
 
@@ -111,11 +100,9 @@ export default class extends Controller {
     }
 
     try {
-      // Register service worker
       const registration = await navigator.serviceWorker.register('/service-worker.js')
       await navigator.serviceWorker.ready
 
-      // Check for existing subscription
       const existingSub = await registration.pushManager.getSubscription()
       if (existingSub) {
         await this.sendSubscriptionToServer(existingSub)
@@ -123,23 +110,17 @@ export default class extends Controller {
         return true
       }
 
-      // Request permission
       const permission = await Notification.requestPermission()
-      console.log('Notification permission:', permission)
-      
       if (permission !== 'granted') {
-        console.warn('Notification permission denied')
         this.removeBanner()
         return false
       }
 
-      // Subscribe
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: window.vapidPublicKey
       })
-      
-      console.log('Subscription successful:', sub)
+
       await this.sendSubscriptionToServer(sub)
       this.removeBanner()
       return true
@@ -152,7 +133,7 @@ export default class extends Controller {
 
   async sendSubscriptionToServer(sub) {
     try {
-      const response = await fetch('/web_push_notifications', {
+      await fetch('/web_push_notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,39 +141,27 @@ export default class extends Controller {
         },
         body: JSON.stringify(sub)
       })
-
-      if (response.ok) {
-        console.log('Subscription sent to server')
-      }
     } catch (error) {
       console.error('Failed to send subscription to server:', error)
     }
   }
 
+  // Tell the server first, so it stops sending even if the browser step fails
   async unsubscribe() {
-    try {
-      const registration = await navigator.serviceWorker.getRegistration()
-      if (!registration) return
+    const subscription = await this.currentSubscription()
+    if (!subscription) return
 
-      const subscription = await registration.pushManager.getSubscription()
-      if (!subscription) return
+    const response = await fetch('/web_push_notifications/unsubscribe', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify(subscription)
+    })
+    if (!response.ok) throw new Error(`Server refused to unsubscribe (${response.status})`)
 
-      // Unsubscribe from browser
-      await subscription.unsubscribe()
-      console.log('Unsubscribed from push notifications')
-
-      // Remove from server
-      await fetch('/web_push_notifications/unsubscribe', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(subscription)
-      })
-    } catch (error) {
-      console.error('Unsubscribe error:', error)
-    }
+    await subscription.unsubscribe()
   }
 
   dismiss() {
@@ -202,15 +171,15 @@ export default class extends Controller {
     this.removeBanner()
   }
 
-  removeBanner() {
-    if (this.hasBannerTarget) {
-      this.bannerTarget.remove()
-    }
-  }
-
   showBanner() {
     if (this.hasBannerTarget) {
       this.bannerTarget.classList.remove('hidden')
+    }
+  }
+
+  removeBanner() {
+    if (this.hasBannerTarget) {
+      this.bannerTarget.remove()
     }
   }
 }
