@@ -7,7 +7,7 @@ export default class extends Controller {
 
   async nativeShare() {
     if (navigator.share) {
-      navigator.share({ title: "Join my challenge on Strivo", url: this.urlValue }).catch(() => {})
+      navigator.share({ title: "Join my challenge on DareWith", url: this.urlValue }).catch(() => {})
       return
     }
 

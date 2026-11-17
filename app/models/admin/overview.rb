@@ -19,7 +19,7 @@ class Admin::Overview
     User.order(created_at: :desc).limit(RECENT_USERS)
   end
 
-  def passkeys_by_user = @passkeys_by_user ||= Credential.group(:user_id).count
+  def passkeys_by_user = @passkeys_by_user ||= Credential.on_this_domain.group(:user_id).count
 
   def devices_by_user = @devices_by_user ||= WebPushNotification.group(:user_id).count
 

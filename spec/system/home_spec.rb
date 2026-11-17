@@ -7,7 +7,7 @@ RSpec.describe "Home Page", type: :system do
     home_page.load
 
     expect(page).to have_content("Bet on Yourself")
-    expect(page).to have_content("Strivo")
+    expect(page).to have_content("DareWith")
   end
 
   scenario "visitor can navigate to sign in" do

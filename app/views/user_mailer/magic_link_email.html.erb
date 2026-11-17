@@ -1,4 +1,4 @@
-<h1>Sign In to Strivo</h1>
+<h1>Sign In to DareWith</h1>
 
 <p>Hi <%= @user.username %>,</p>
 
@@ -7,10 +7,10 @@
   <p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;"><%= @code %></p>
   <p>Or tap the link below to sign in. It expires in 24 hours.</p>
 <% else %>
-  <p>Click the link below to sign in to your Strivo account. This link expires in 24 hours.</p>
+  <p>Click the link below to sign in to your DareWith account. This link expires in 24 hours.</p>
 <% end %>
 <p>
-  <%= link_to "Sign In to Strivo", @magic_link_url, style: "display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;" %>
+  <%= link_to "Sign In to DareWith", @magic_link_url, style: "display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;" %>
 </p>
 
 <p style="color: #666;">

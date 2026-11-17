@@ -86,7 +86,7 @@ export default class extends Controller {
 
   async subscribe() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      alert('Notifications are not supported in this browser. On iPhone, add Strivo to your Home Screen first.')
+      alert('Notifications are not supported in this browser. On iPhone, add DareWith to your Home Screen first.')
       return false
     }
 

@@ -40,6 +40,48 @@ RSpec.describe "Passkeys", type: :request do
     end
   end
 
+  describe "after moving to a new domain" do
+    let!(:old_passkey) { create(:credential, user:, rp_id: "strivo.me", nickname: "Old iPhone") }
+
+    it "hides passkeys made on the old domain" do
+      sign_in_as(user)
+
+      get credentials_path
+
+      expect(response.body).not_to include("Old iPhone")
+      expect(response.body).to include("We moved to #{Rails.configuration.app_host}")
+    end
+
+    it "tells them to sign in with email instead of offering a passkey that can't work" do
+      user.update!(email: "old-passkey@example.com")
+
+      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body["errors"].first).to include("Sign in with email once")
+    end
+
+    it "tells people without an email to ask for a sign-in link" do
+      user.update!(email: nil)
+
+      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
+
+      expect(response.parsed_body["errors"].first).to include("ask whoever invited you")
+    end
+
+    it "sends them to add a new passkey once they sign in by email" do
+      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+
+      expect(response).to redirect_to(credentials_path)
+    end
+
+    it "stops once they have a passkey here" do
+      create(:credential, user:)
+
+      expect(user.passkeys_left_on_old_domain?).to be false
+    end
+  end
+
   describe "the backup nudge" do
     before { sign_in_as(user) }
 
@@ -71,6 +113,16 @@ RSpec.describe "Passkeys", type: :request do
 
       get profile_path, headers: {"User-Agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0"}
       expect(response.body).not_to include("Sign in faster next time")
+    end
+
+    it "shows when each passkey was added, oldest first" do
+      create(:credential, user:, nickname: "New laptop", created_at: Time.zone.local(2026, 11, 18))
+      create(:credential, user:, nickname: "Old phone", created_at: Time.zone.local(2025, 3, 4))
+
+      get credentials_path
+
+      expect(response.body).to include("Added 4 Mar 2025", "Added 18 Nov 2026")
+      expect(response.body.index("Old phone")).to be < response.body.index("New laptop")
     end
 
     it "labels each passkey" do
