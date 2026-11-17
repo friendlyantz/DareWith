@@ -13,7 +13,7 @@
   </div>
 
   <div class="relative mx-auto w-full max-w-md flex-1">
-    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-6 overflow-y-auto px-6 pb-12">
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-6 overflow-y-auto px-6 pb-12">
       <p class="text-sm font-semibold uppercase tracking-widest opacity-80">That's a wrap</p>
       <p class="text-7xl" aria-hidden="true">🎉</p>
       <div class="flex flex-col gap-2">
@@ -37,7 +37,7 @@
     </section>
 
     <% if collage.any? %>
-      <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-4 overflow-y-auto px-6 pb-12" hidden>
+      <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-4 overflow-y-auto px-6 pb-12" hidden>
         <h2 class="font-display text-3xl font-bold">The highlights</h2>
         <div class="grid grid-cols-2 gap-2">
           <% collage.each.with_index(1) do |check_in, index| %>
@@ -51,7 +51,7 @@
       </section>
     <% end %>
 
-    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-5 overflow-y-auto px-6 pb-12" hidden>
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-5 overflow-y-auto px-6 pb-12" hidden>
       <div>
         <h2 class="font-display text-3xl font-bold"><%= @finale.participants.size > 1 ? "How everyone did" : "How you did" %></h2>
         <% if goal.measured? && @finale.participants.size > 1 %>
@@ -78,7 +78,7 @@
     </section>
 
     <% if @finale.highlights? %>
-      <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-4 overflow-y-auto px-6 pb-12" hidden>
+      <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-4 overflow-y-auto px-6 pb-12" hidden>
         <h2 class="font-display text-3xl font-bold">Who stood out</h2>
         <% if (participant = @finale.longest_streaker) %>
           <%= render "challenge_finales/highlight", emoji: "🔥", label: "Longest streak", participant:, detail: streak_phrase(participant.streak.longest, @challenge_story) %>
@@ -89,6 +89,15 @@
         <% if (participant = @finale.night_owl) %>
           <%= render "challenge_finales/highlight", emoji: "🦉", label: "Night owl", participant:, detail: "Most check-ins after 9pm" %>
         <% end %>
+        <% if (participant = @finale.cheerleader) %>
+          <%= render "challenge_finales/highlight", emoji: "📣", label: "Cheerleader", participant:, detail: "Most likes and replies for friends" %>
+        <% end %>
+        <% if (participant = @finale.photographer) %>
+          <%= render "challenge_finales/highlight", emoji: "📸", label: "Photographer", participant:, detail: "Most photos posted" %>
+        <% end %>
+        <% if (participant = @finale.comeback_kid) %>
+          <%= render "challenge_finales/highlight", emoji: "🔁", label: "Comeback", participant:, detail: "Missed a few #{@challenge_story.goal.period_name.pluralize} and came back" %>
+        <% end %>
         <% if (check_in = @finale.most_liked_check_in) %>
           <%= render "challenge_finales/highlight", emoji: "❤️", label: "Most liked post", participant: check_in.challenge_participant,
             detail: "#{pluralize(check_in.challenge_check_in_likes_count, "like")} · “#{check_in.message.truncate(60)}”" %>
@@ -97,7 +106,7 @@
     <% end %>
 
     <% if @finale.rewards? %>
-      <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-5 overflow-y-auto px-6 pb-12" hidden>
+      <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-5 overflow-y-auto px-6 pb-12" hidden>
         <h2 class="font-display text-3xl font-bold">🎁 The rewards</h2>
         <% @finale.participants.each do |participant| %>
           <% rewards = @finale.rewards_for(participant) %>
@@ -120,7 +129,7 @@
       </section>
     <% end %>
 
-    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-6 overflow-y-auto px-6 pb-12" hidden>
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col [&>:first-child]:mt-auto [&>:last-child]:mb-auto gap-6 overflow-y-auto px-6 pb-12" hidden>
       <% if mine %>
         <p class="text-sm font-semibold uppercase tracking-widest opacity-80">You did it, <%= mine.name %></p>
         <div>

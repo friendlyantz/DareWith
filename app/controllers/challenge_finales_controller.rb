@@ -4,7 +4,7 @@ class ChallengeFinalesController < ApplicationController
       .includes(
         active_participants: [{user: {avatar_attachment: :blob}}, :check_in_days],
         challenge_rewards: {giver: {user: {avatar_attachment: :blob}}},
-        challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, photo_attachment: :blob]
+        challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, :challenge_check_in_replies, photo_attachment: :blob]
       )
       .find(params[:challenge_story_id])
     return redirect_to @challenge_story unless @challenge_story.finished?

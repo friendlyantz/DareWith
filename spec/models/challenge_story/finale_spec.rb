@@ -88,6 +88,52 @@ RSpec.describe ChallengeStory::Finale do
     end
   end
 
+  describe "#cheerleader" do
+    it "picks who liked and replied most on friends' check-ins, not their own" do
+      annas = check_in(anna, 0)
+      bobs = check_in(bob, 0)
+      create(:challenge_check_in_like, challenge_check_in: annas, user: bob.user)
+      create(:challenge_check_in_reply, challenge_check_in: annas, user: bob.user)
+      create(:challenge_check_in_like, challenge_check_in: bobs, user: anna.user)
+      create(:challenge_check_in_like, challenge_check_in: annas, user: anna.user)
+      create(:challenge_check_in_reply, challenge_check_in: annas, user: anna.user)
+
+      expect(finale.cheerleader.name).to eq "bob"
+    end
+
+    it "is nobody without likes or replies" do
+      check_in(anna, 0)
+
+      expect(finale.cheerleader).to be_nil
+    end
+  end
+
+  describe "#photographer" do
+    it "needs at least two photos" do
+      check_in(anna, 0, :with_photo)
+
+      expect(finale.photographer).to be_nil
+    end
+
+    it "picks who posted the most photos" do
+      check_in(anna, 0, :with_photo)
+      check_in(bob, 0, :with_photo)
+      check_in(bob, 1, :with_photo)
+
+      expect(finale.photographer.name).to eq "bob"
+    end
+  end
+
+  describe "#comeback_kid" do
+    it "picks someone who came back after missing a few days" do
+      check_in(anna, 0)
+      check_in(anna, 1)
+      [0, 4].each { check_in(bob, it) }
+
+      expect(finale.comeback_kid.name).to eq "bob"
+    end
+  end
+
   describe "#rewards_for" do
     it "lists what someone gets, settled or not, but not withdrawn pledges" do
       pending_reward = create(:challenge_reward, giver: anna, receiver: bob, challenge_story: story, description: "A coffee")

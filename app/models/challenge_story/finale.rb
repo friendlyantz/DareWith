@@ -55,8 +55,7 @@ class ChallengeStory::Finale
   end
 
   def longest_streaker
-    participant = participants.max_by { it.streak.longest }
-    participant if participant && participant.streak.longest > 1
+    top_participant(minimum: 2) { it.streak.longest }
   end
 
   def most_liked_check_in
@@ -72,6 +71,24 @@ class ChallengeStory::Finale
     most_check_ins_where { it >= NIGHT_OWL_FROM_HOUR }
   end
 
+  # Most likes and replies on friends' check-ins
+  def cheerleader
+    cheers = check_ins.flat_map do |check_in|
+      (check_in.challenge_check_in_likes + check_in.challenge_check_in_replies)
+        .map(&:user_id).reject { it == check_in.challenge_participant.user_id }
+    end.tally
+    top_participant { cheers.fetch(it.user_id, 0) }
+  end
+
+  def photographer
+    photos = check_ins.select { it.photo.attached? }.map(&:challenge_participant_id).tally
+    top_participant(minimum: 2) { photos.fetch(it.id, 0) }
+  end
+
+  def comeback_kid
+    participants.find { it.streak.comeback? }
+  end
+
   # Settled or not, what each person is getting; withdrawn pledges are left out
   def rewards_for(participant)
     challenge_story.challenge_rewards.select { it.receiver_id == participant.id && !it.canceled? }
@@ -82,16 +99,20 @@ class ChallengeStory::Finale
   end
 
   def highlights?
-    [longest_streaker, most_liked_check_in, early_bird, night_owl].any?
+    [longest_streaker, most_liked_check_in, early_bird, night_owl, cheerleader, photographer, comeback_kid].any?
   end
 
   private
 
-  # The participant with the most check-ins at a local hour matching the block, if anyone has one
+  # Whoever scores highest, if they reach the minimum; ties go to the higher ranked
+  def top_participant(minimum: 1, &score)
+    participant = participants.max_by(&score)
+    participant if participant && score.call(participant) >= minimum
+  end
+
   def most_check_ins_where(&hour_matches)
     counts = check_ins.select { hour_matches.call(local_hour(it)) }.map(&:challenge_participant_id).tally
-    participant = participants.max_by { counts.fetch(it.id, 0) }
-    participant if participant && counts.key?(participant.id)
+    top_participant { counts.fetch(it.id, 0) }
   end
 
   def local_hour(check_in)
