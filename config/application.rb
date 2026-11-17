@@ -26,7 +26,7 @@ module TakeOnMe
     # The app's domain. Passkeys, emails, push and redirects all follow it
     config.app_host = "darewith.app"
     # Old domains: still accepted, and sent on to app_host
-    config.legacy_hosts = ["strivo.me", "app.strivo.me", "take-on.me"]
+    config.legacy_hosts = ["www.darewith.app", "strivo.me", "app.strivo.me", "take-on.me"]
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

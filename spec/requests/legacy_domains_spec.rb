@@ -11,7 +11,7 @@ RSpec.describe "Old domains", type: :request do
   end
 
   it "forwards every old domain the tunnel still serves" do
-    %w[app.strivo.me take-on.me].each do |old_host|
+    %w[www.darewith.app app.strivo.me take-on.me].each do |old_host|
       host! old_host
 
       get "/today"
