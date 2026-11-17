@@ -38,9 +38,9 @@ export default class extends Controller {
     return null
   }
 
+  // Every iOS browser and in-app view, including iPads that report themselves as Macs
   isIOS() {
-    return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    return 'ongesturechange' in window
   }
 
   markThisDevice(subscription) {
@@ -65,7 +65,10 @@ export default class extends Controller {
     try {
       if (wasChecked) {
         const subscribed = await this.subscribe()
-        if (!subscribed) checkbox.checked = false
+        if (!subscribed) {
+          checkbox.checked = false
+          return
+        }
       } else {
         await this.unsubscribe()
       }
@@ -94,7 +97,11 @@ export default class extends Controller {
 
   async subscribe() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      alert('Notifications are not supported in this browser. On iPhone, add DareWith to your Home Screen first.')
+      if (this.hasInstallTarget) {
+        this.bannerTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      } else {
+        alert('Notifications are not supported in this browser. On iPhone, add DareWith to your Home Screen first.')
+      }
       return false
     }
 
@@ -187,6 +194,8 @@ export default class extends Controller {
     if (!state) return this.removeBanner()
 
     const stateTargets = { ask: this.askTargets, install: this.installTargets, blocked: this.blockedTargets }
+    if (stateTargets[state].length === 0) return this.removeBanner()
+
     stateTargets[state].forEach((element) => element.hidden = false)
     if (state !== 'ask') this.closeTargets.forEach((element) => element.hidden = false)
     this.bannerTarget.classList.remove('hidden')
