@@ -3,6 +3,8 @@
 # What a challenge asks for: how often to check in (cadence) and, optionally,
 # what to count (unit) and how much (target)
 class ChallengeStory::Goal
+  DECIMAL_UNITS = %w[hours km].freeze
+
   private attr_reader :challenge_story
 
   delegate :cadence, :times_per_period, :unit, :target_amount, :target_scope,
@@ -64,9 +66,9 @@ class ChallengeStory::Goal
     target_amount.present?
   end
 
-  # Nobody does half a push-up, but 5.2 km is a normal run
+  # Nobody does half a push-up, but 5.2 km is a normal run and 1.5 hours a normal session
   def whole_numbers?
-    measured? && unit != "km"
+    measured? && DECIMAL_UNITS.exclude?(unit)
   end
 
   # Pre-fills the check-in so hitting the target is one tap

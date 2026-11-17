@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_010000) do
   create_enum "challenge_participant_status", ["active", "inactive"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
   create_enum "challenge_target_scope", ["each_time", "total"]
-  create_enum "challenge_unit", ["reps", "minutes", "km", "pages"]
+  create_enum "challenge_unit", ["reps", "minutes", "hours", "km", "pages"]
   create_enum "device_sign_in_state", ["pending", "approved", "used"]
 
   create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

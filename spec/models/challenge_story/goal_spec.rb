@@ -40,6 +40,21 @@ RSpec.describe ChallengeStory::Goal do
     it "never pluralises km" do
       expect(build(:challenge_story, unit: :km).goal.format_amount(12)).to eq "12 km"
     end
+
+    it "counts hours, singular for one" do
+      goal = build(:challenge_story, unit: :hours).goal
+
+      expect(goal.format_amount(1)).to eq "1 hour"
+      expect(goal.format_amount(BigDecimal("1.50"))).to eq "1.5 hours"
+    end
+  end
+
+  describe "#whole_numbers?" do
+    it "takes decimals for hours and km, but whole numbers for the rest" do
+      expect(build(:challenge_story, unit: :hours).goal).not_to be_whole_numbers
+      expect(build(:challenge_story, unit: :km).goal).not_to be_whole_numbers
+      expect(build(:challenge_story, unit: :minutes).goal).to be_whole_numbers
+    end
   end
 end
 

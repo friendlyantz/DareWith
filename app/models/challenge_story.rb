@@ -20,7 +20,7 @@ class ChallengeStory < ApplicationRecord
 
   # Enums
   enum :cadence, %w[daily weekly].index_by(&:itself), validate: true
-  enum :unit, %w[reps minutes km pages].index_by(&:itself), prefix: :counts, validate: {allow_nil: true}
+  enum :unit, %w[reps minutes hours km pages].index_by(&:itself), prefix: :counts, validate: {allow_nil: true}
   enum :target_scope, %w[each_time total].index_by(&:itself), validate: {allow_nil: true}
 
   # Validations
