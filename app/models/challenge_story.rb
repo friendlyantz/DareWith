@@ -56,6 +56,10 @@ class ChallengeStory < ApplicationRecord
     @goal ||= Goal.new(self)
   end
 
+  def finale
+    Finale.new(self)
+  end
+
   def goal_editable?
     new_record? || challenge_check_ins_count.zero?
   end
@@ -140,8 +144,8 @@ class ChallengeStory < ApplicationRecord
     active_participants.where.not(user: except).includes(:user).find_each do |participant|
       participant.user.notify(
         title: "#{title} is complete",
-        body: "It's moved to your past challenges.",
-        path: Rails.application.routes.url_helpers.challenge_story_path(self)
+        body: "See how it went: photos, streaks and who stood out.",
+        path: Rails.application.routes.url_helpers.challenge_story_challenge_finale_path(self)
       )
     end
   end

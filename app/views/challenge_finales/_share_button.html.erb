@@ -1,0 +1,9 @@
+<%# locals: (participant:, finale:, css: "") %>
+<%= tag.button type: "button", class: css,
+  data: {
+    controller: "finale-card",
+    action: "finale-card#share",
+    **finale_card_values(participant, finale).transform_keys { "finale_card_#{it}_value" }
+  } do %>
+  <%= icon(:share, css: "size-5") %> Share my finish
+<% end %>

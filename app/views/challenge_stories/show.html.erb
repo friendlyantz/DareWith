@@ -6,6 +6,9 @@
   <%= render "challenge_stories/top_bar", challenge_story: @challenge_story, participant: @current_challenge_participant %>
   <% can_invite = @current_challenge_participant && @challenge_story.accepting_check_ins? && !@challenge_story.at_capacity? %>
   <%= render "challenge_stories/header", challenge_story: @challenge_story, can_invite: %>
+  <% if @challenge_story.finished? %>
+    <%= render "challenge_stories/finale_card", challenge_story: @challenge_story %>
+  <% end %>
 
   <% if @current_challenge_participant %>
     <% if can_invite && @challenge_story.active_participants.size == 1 %>

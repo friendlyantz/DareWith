@@ -1,0 +1,10 @@
+<%# locals: (challenge_story:) %>
+<%= link_to challenge_story_challenge_finale_path(challenge_story), id: dom_id(challenge_story, :finale),
+  class: "flex items-center gap-3 rounded-box bg-linear-to-r from-primary to-neutral p-4 text-neutral-content" do %>
+  <span class="text-3xl" aria-hidden="true">🎉</span>
+  <div class="flex-1 min-w-0">
+    <p class="font-semibold">That's a wrap</p>
+    <p class="text-sm opacity-80">Photos, streaks and who stood out</p>
+  </div>
+  <%= icon(:chevron_right, css: "size-5 shrink-0 opacity-70") %>
+<% end %>

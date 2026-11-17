@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       end
     end
     resource :challenge_story_like, only: %i[create destroy]
+    resource :challenge_finale, only: %i[show], path: "finale"
   end
 
   resources :challenge_check_ins, only: %i[index] do

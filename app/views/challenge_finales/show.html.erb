@@ -1,0 +1,118 @@
+<% content_for :title, "#{@challenge_story.title}: that's a wrap" %>
+<% goal = @challenge_story.goal %>
+<% collage = @finale.collage %>
+<% mine = @current_challenge_participant %>
+
+<%= tag.div class: "fixed inset-0 z-50 flex flex-col bg-linear-to-b from-primary to-neutral text-neutral-content pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
+  data: {controller: "slides", action: "click->slides#tap keydown@window->slides#key"} do %>
+  <div class="flex items-center gap-3 px-4 pt-3">
+    <div class="flex flex-1 gap-1.5" data-slides-target="ticks"></div>
+    <%= link_to @challenge_story, class: "btn btn-ghost btn-sm btn-circle text-neutral-content", aria: {label: "Close"} do %>
+      <%= icon(:x) %>
+    <% end %>
+  </div>
+
+  <div class="relative mx-auto w-full max-w-md flex-1">
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-6 overflow-y-auto px-6 pb-12">
+      <p class="text-sm font-semibold uppercase tracking-widest opacity-80">That's a wrap</p>
+      <p class="text-7xl" aria-hidden="true">🎉</p>
+      <div class="flex flex-col gap-2">
+        <h1 class="font-display text-4xl font-bold leading-tight tracking-tight"><%= @challenge_story.title %></h1>
+        <p class="opacity-80">
+          <%= finale_dates(@challenge_story) %><% if @challenge_story.round > 1 %> · Round <%= @challenge_story.round %><% end %>
+        </p>
+      </div>
+      <div class="flex -space-x-1">
+        <% @finale.participants.each do |participant| %>
+          <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-12", text: "text-sm" %>
+        <% end %>
+      </div>
+      <div>
+        <p class="font-display text-6xl font-bold"><%= @finale.check_ins.size %></p>
+        <p class="text-lg font-semibold"><%= @finale.participants.size > 1 ? "check-ins together" : "check-ins".pluralize(@finale.check_ins.size) %></p>
+        <p class="mt-1 opacity-80">
+          <%= [pluralize(@finale.photos_count, "photo"), pluralize(@finale.likes_count, "like"), pluralize(@finale.replies_count, "reply")].join(" · ") %>
+        </p>
+      </div>
+    </section>
+
+    <% if collage.any? %>
+      <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-4 overflow-y-auto px-6 pb-12" hidden>
+        <h2 class="font-display text-3xl font-bold">The highlights</h2>
+        <div class="grid grid-cols-2 gap-2">
+          <% collage.each.with_index(1) do |check_in, index| %>
+            <% wide = collage.size.odd? && index == collage.size %>
+            <figure class="<%= class_names("relative overflow-hidden rounded-box bg-neutral", "col-span-2": wide) %>">
+              <%= cl_image_tag(check_in.photo.key, width: wide ? 800 : 400, height: 400, crop: :fill, class: class_names("w-full object-cover", wide ? "aspect-2/1" : "aspect-square"), alt: check_in.message.truncate(80)) %>
+              <figcaption class="absolute bottom-1.5 left-1.5 badge badge-sm badge-neutral"><%= check_in.challenge_participant.name %></figcaption>
+            </figure>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-5 overflow-y-auto px-6 pb-12" hidden>
+      <div>
+        <h2 class="font-display text-3xl font-bold"><%= @finale.participants.size > 1 ? "How everyone did" : "How you did" %></h2>
+        <% if goal.measured? && @finale.participants.size > 1 %>
+          <p class="mt-1 opacity-80">Together: <%= goal.format_amount(@finale.total_amount) %></p>
+        <% end %>
+      </div>
+      <ol class="flex flex-col gap-4">
+        <% @finale.participants.each do |participant| %>
+          <li class="flex items-center gap-3">
+            <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-10", text: "text-xs" %>
+            <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="truncate font-semibold"><%= participant.name %></span>
+                <span class="shrink-0 whitespace-nowrap text-sm opacity-80"><%= finale_score(participant) %></span>
+              </div>
+              <progress class="progress progress-accent h-2" value="<%= finale_fraction(participant) %>" max="1"></progress>
+              <% if @finale.flawless?(participant) %>
+                <p class="text-xs font-semibold">✨ Every <%= goal.period_name %>, no misses</p>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    </section>
+
+    <% if @finale.highlights? %>
+      <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-4 overflow-y-auto px-6 pb-12" hidden>
+        <h2 class="font-display text-3xl font-bold">Who stood out</h2>
+        <% if (participant = @finale.longest_streaker) %>
+          <%= render "challenge_finales/highlight", emoji: "🔥", label: "Longest streak", participant:, detail: streak_phrase(participant.streak.longest, @challenge_story) %>
+        <% end %>
+        <% if (participant = @finale.early_bird) %>
+          <%= render "challenge_finales/highlight", emoji: "🌅", label: "Early bird", participant:, detail: "Most check-ins before 8am" %>
+        <% end %>
+        <% if (participant = @finale.night_owl) %>
+          <%= render "challenge_finales/highlight", emoji: "🦉", label: "Night owl", participant:, detail: "Most check-ins after 9pm" %>
+        <% end %>
+        <% if (check_in = @finale.most_liked_check_in) %>
+          <%= render "challenge_finales/highlight", emoji: "❤️", label: "Most liked post", participant: check_in.challenge_participant,
+            detail: "#{pluralize(check_in.challenge_check_in_likes_count, "like")} · “#{check_in.message.truncate(60)}”" %>
+        <% end %>
+      </section>
+    <% end %>
+
+    <section data-slides-target="slide" class="absolute inset-0 flex flex-col justify-center gap-6 overflow-y-auto px-6 pb-12" hidden>
+      <% if mine %>
+        <p class="text-sm font-semibold uppercase tracking-widest opacity-80">You did it, <%= mine.name %></p>
+        <div>
+          <p class="font-display text-6xl font-bold"><%= finale_score(mine) %></p>
+          <% unless @challenge_story.total? %><p class="text-lg font-semibold">kept</p><% end %>
+        </div>
+        <%= render "challenge_finales/share_button", participant: mine, finale: @finale, css: "btn btn-lg btn-accent" %>
+        <div class="text-base-content"><%= render "challenge_stories/next_round_card", challenge_story: @challenge_story %></div>
+      <% else %>
+        <p class="font-display text-3xl font-bold">Fancy a challenge like this?</p>
+        <p class="opacity-80">Dare your friends to keep a habit with you.</p>
+        <%= link_to "Start a challenge", new_challenge_story_path, class: "btn btn-lg btn-accent" %>
+      <% end %>
+      <%= link_to "Back to the challenge", @challenge_story, class: "btn btn-ghost text-neutral-content" %>
+    </section>
+  </div>
+
+  <p class="pb-4 text-center text-xs opacity-60" data-slides-target="hint">Tap to continue</p>
+<% end %>

@@ -1,13 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 import { copyText } from "controllers/clipboard_controller"
 
-const WIDTH = 1080
-const HEIGHT = 1920
-const PADDING = 96
-const PRIMARY = "#c2410c"
-const NEUTRAL = "#17181a"
-const DISPLAY = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif'
-const SANS = '"Inter", ui-sans-serif, system-ui, sans-serif'
+export const WIDTH = 1080
+export const HEIGHT = 1920
+export const PADDING = 96
+export const PRIMARY = "#c2410c"
+export const NEUTRAL = "#17181a"
+export const DISPLAY = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif'
+export const SANS = '"Inter", ui-sans-serif, system-ui, sans-serif'
 
 // Draws a story-sized progress card and opens the share sheet with it, or downloads it.
 // The card is drawn on connect, because iOS only shares straight from the tap.
@@ -25,13 +25,21 @@ export default class extends Controller {
   async share() {
     copyText(this.urlValue)
     this.confirmCopied()
-    const file = new File([await this.card], "darewith-progress.png", { type: "image/png" })
+    const file = new File([await this.card], this.fileName, { type: "image/png" })
 
     if (navigator.canShare?.({ files: [file] })) {
-      navigator.share({ files: [file], text: `${this.titleValue}: join me ${this.urlValue}` }).catch(() => {})
+      navigator.share({ files: [file], text: this.shareText }).catch(() => {})
     } else {
       this.download(file)
     }
+  }
+
+  get fileName() {
+    return "darewith-progress.png"
+  }
+
+  get shareText() {
+    return `${this.titleValue}: join me ${this.urlValue}`
   }
 
   confirmCopied() {
