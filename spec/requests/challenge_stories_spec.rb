@@ -206,6 +206,20 @@ RSpec.describe "ChallengeStories", type: :request do
         expect(response.body).to include("50 reps each time")
       end
 
+      it "saves a penalty and shows it as a rule" do
+        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(penalty_mode: "per_miss", penalty: " a coffee ")}
+
+        expect(ChallengeStory.last).to have_attributes(penalty_mode: "per_miss", penalty: "a coffee")
+        follow_redirect!
+        expect(response.body).to include("Each miss: owe everyone a coffee")
+      end
+
+      it "drops the penalty when nothing happens on a miss" do
+        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(penalty_mode: "", penalty: "a coffee")}
+
+        expect(ChallengeStory.last.penalty).to be_nil
+      end
+
       it "creates a weekly challenge" do
         post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(cadence: "weekly", times_per_period: "3", finish: Time.zone.today + 27.days)}
 

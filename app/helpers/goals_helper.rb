@@ -16,6 +16,23 @@ module GoalsHelper
     "Check in · #{participant.check_ins_this_period + 1} of #{challenge_story.times_per_period} this week"
   end
 
+  # "Each miss: owe everyone a coffee"
+  def penalty_summary(challenge_story)
+    return unless challenge_story.penalty_mode
+
+    "#{challenge_story.per_miss? ? "Each miss" : "Most misses"}: owe everyone #{challenge_story.penalty}"
+  end
+
+  # "2 misses · owes a coffee × 2". Most misses can still change hands until check-ins close.
+  def misses_line(participant)
+    challenge_story = participant.challenge_story
+    owed = challenge_story.penalty_rule&.owed_by(participant)
+    return unless owed
+
+    still_open = challenge_story.most_misses? && challenge_story.accepting_check_ins?
+    "#{pluralize(participant.misses, "miss")} · #{still_open ? "most so far" : "owes #{owed}"}"
+  end
+
   # "At this pace: 100 km by 3 Dec", for "by the end" targets
   def forecast_line(participant)
     forecast = participant.forecast

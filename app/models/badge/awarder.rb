@@ -32,7 +32,7 @@ class Badge::Awarder
     kinds = []
     kinds << :first_check_in if user.challenge_participants.sum(:challenge_check_ins_count).positive?
     kinds << :cheerleader if user.liked_friends_check_ins_count >= CHEERLEADER_LIKES
-    kinds << :good_for_it if ChallengeReward.fulfilled.exists?(giver: user.challenge_participants)
+    kinds << :good_for_it if ChallengeReward.pledge.fulfilled.exists?(giver: user.challenge_participants)
     kinds
   end
 

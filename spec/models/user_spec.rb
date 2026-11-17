@@ -79,6 +79,16 @@ RSpec.describe User, type: :model do
       end
     end
 
+    it "warns that it's a miss when the challenge has a penalty" do
+      story.update!(penalty_mode: :per_miss, penalty: "a coffee")
+
+      travel_to(seven_pm_in_melbourne) do
+        expect { user.remind_to_check_in }
+          .to have_enqueued_job(PushNotificationJob)
+          .with(device, title: "Check in today or it's a miss", body: "Morning run", path: "/today")
+      end
+    end
+
     it "counts a check-in from earlier in the local day, even if it was yesterday in UTC" do
       travel_to(seven_pm_in_melbourne) do
         create(:challenge_check_in, challenge_participant: participant).update_column(:created_at, Time.utc(2026, 11, 15, 20, 0))

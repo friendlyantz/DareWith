@@ -39,6 +39,12 @@ class ChallengeParticipant < ApplicationRecord
     challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }
   end
 
+  # Days, or weeks short of the weekly count, that are over and that no freeze covered
+  def misses
+    goal = challenge_story.goal
+    (goal.closed_period_indexes - goal.kept_period_indexes(check_in_dates) - streak.frozen_indexes).size
+  end
+
   def total_amount
     check_in_days.sum { it.amount || 0 }
   end
@@ -118,7 +124,7 @@ class ChallengeParticipant < ApplicationRecord
     other_active_ids = challenge_story.active_participants.where.not(id: id).pluck(:id)
     return true if other_active_ids.empty?
 
-    pledged_ids = given_rewards.pluck(:receiver_id)
+    pledged_ids = given_rewards.pledge.pluck(:receiver_id)
     (other_active_ids - pledged_ids).empty?
   end
 
@@ -127,7 +133,7 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   def unpledged_participants
-    pledged_ids = given_rewards.pluck(:receiver_id)
+    pledged_ids = given_rewards.pledge.pluck(:receiver_id)
     challenge_story.active_participants
       .where.not(id: id)
       .where.not(id: pledged_ids)

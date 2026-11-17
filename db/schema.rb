@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -21,6 +21,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
   create_enum "badge_kind", ["first_check_in", "three_day_streak", "week_streak", "three_week_streak", "comeback", "finisher", "flawless", "cheerleader", "good_for_it"]
   create_enum "challenge_cadence", ["daily", "weekly"]
   create_enum "challenge_participant_status", ["active", "inactive"]
+  create_enum "challenge_penalty_mode", ["per_miss", "most_misses"]
+  create_enum "challenge_reward_kind", ["pledge", "penalty"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
   create_enum "challenge_target_scope", ["each_time", "total"]
   create_enum "challenge_unit", ["reps", "minutes", "hours", "km", "pages"]
@@ -146,10 +148,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.enum "status", default: "pending", null: false, enum_type: "challenge_reward_status"
+    t.enum "kind", default: "pledge", null: false, enum_type: "challenge_reward_kind"
     t.index ["challenge_story_id"], name: "index_challenge_rewards_on_challenge_story_id"
     t.index ["fulfilled_at"], name: "index_challenge_rewards_on_fulfilled_at"
-    t.index ["giver_id", "receiver_id", "challenge_story_id"], name: "index_challenge_rewards_on_participants_and_story", unique: true
+    t.index ["giver_id", "receiver_id", "challenge_story_id", "kind"], name: "index_challenge_rewards_on_participants_story_and_kind", unique: true
     t.index ["giver_id"], name: "index_challenge_rewards_on_giver_id"
+    t.index ["kind"], name: "index_challenge_rewards_on_kind"
     t.index ["receiver_id"], name: "index_challenge_rewards_on_receiver_id"
     t.index ["status"], name: "index_challenge_rewards_on_status"
   end
@@ -173,11 +177,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
     t.enum "unit", enum_type: "challenge_unit"
     t.decimal "target_amount", precision: 10, scale: 2
     t.enum "target_scope", enum_type: "challenge_target_scope"
+    t.enum "penalty_mode", enum_type: "challenge_penalty_mode"
+    t.string "penalty"
     t.index ["completed"], name: "index_challenge_stories_on_completed"
     t.index ["created_at"], name: "index_challenge_stories_on_created_at"
     t.index ["finish"], name: "index_challenge_stories_on_finish"
     t.index ["previous_challenge_story_id"], name: "index_challenge_stories_on_previous_challenge_story_id", unique: true
     t.index ["start"], name: "index_challenge_stories_on_start"
+    t.check_constraint "(penalty_mode IS NULL) = (penalty IS NULL)", name: "check_penalty_complete"
     t.check_constraint "(target_amount IS NULL) = (target_scope IS NULL)", name: "check_target_complete"
     t.check_constraint "cadence = 'daily'::challenge_cadence AND times_per_period = 1 OR cadence = 'weekly'::challenge_cadence AND times_per_period >= 1 AND times_per_period <= 6", name: "check_times_per_period"
     t.check_constraint "challenge_check_ins_count >= 0", name: "check_story_comments_non_negative"
@@ -185,6 +192,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
     t.check_constraint "challenge_rewards_count >= 0", name: "check_rewards_non_negative"
     t.check_constraint "challenge_story_likes_count >= 0", name: "check_story_likes_non_negative"
     t.check_constraint "char_length(description) <= 500", name: "check_description_length"
+    t.check_constraint "char_length(penalty::text) <= 100", name: "check_penalty_length"
     t.check_constraint "finish >= start", name: "check_finish_after_start"
     t.check_constraint "round >= 1", name: "check_round_positive"
     t.check_constraint "target_amount IS NULL OR unit IS NOT NULL AND target_amount > 0::numeric", name: "check_target_needs_unit"

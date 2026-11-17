@@ -281,6 +281,10 @@ RSpec.describe ChallengeStory, type: :model do
       expect(story.update(title: "Renamed")).to be true
     end
 
+    it "needs to say what a penalty costs" do
+      expect(build(:challenge_story, penalty_mode: :per_miss, penalty: " ")).not_to be_valid
+    end
+
     it "rejects a target that isn't positive" do
       expect(build(:challenge_story, unit: :reps, target_amount: 0, target_scope: :each_time)).not_to be_valid
     end
@@ -290,7 +294,7 @@ RSpec.describe ChallengeStory, type: :model do
       create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story), amount: 10)
 
       expect(story.reload.update(unit: :minutes)).to be false
-      expect(story.errors[:base]).to include("The goal can't change once someone has checked in")
+      expect(story.errors[:base]).to include("The goal and penalty can't change once someone has checked in")
       expect(story.reload.update(title: "Renamed")).to be true
     end
   end
@@ -323,6 +327,12 @@ RSpec.describe ChallengeStory, type: :model do
       round_one.update!(finish: round_one.start + 13.days, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_time)
 
       expect(round_one.next_round).to have_attributes(cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_time")
+    end
+
+    it "keeps the penalty in the next round" do
+      round_one.update!(penalty_mode: :most_misses, penalty: "buys lunch")
+
+      expect(round_one.next_round).to have_attributes(penalty_mode: "most_misses", penalty: "buys lunch")
     end
 
     it "starts the next round today with the same rules and length" do

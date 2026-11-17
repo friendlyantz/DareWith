@@ -47,11 +47,13 @@
           <% details << "#{participant.check_ins_this_period} of #{challenge_story.times_per_period} this week" if challenge_story.weekly? %>
           <% details << "#{goal.format_amount(participant.total_amount)} in total" if goal.measured? && !challenge_story.total? %>
           <% forecast = forecast_line(participant) if participant == mine %>
-          <% if participant.streak.current > 1 || details.any? || forecast %>
+          <% misses = misses_line(participant) %>
+          <% if participant.streak.current > 1 || details.any? || forecast || misses %>
             <p class="flex flex-wrap items-center gap-x-1.5 text-xs text-base-content/70">
               <%= render "shared/streak", challenge_story:, count: participant.streak.current, freezes: participant.streak.freezes, css: "text-xs" %>
               <%= details.join(" · ") %>
               <% if forecast %><span class="font-semibold text-secondary"><%= forecast %></span><% end %>
+              <% if misses %><span class="font-semibold text-error"><%= misses %></span><% end %>
             </p>
           <% end %>
         </div>

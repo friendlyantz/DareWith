@@ -23,7 +23,7 @@
     <%= form.text_area :description,
       rows: 5,
       class: class_names("textarea w-full mt-1.5 text-base", "textarea-error": challenge_story.errors[:description].any?),
-      placeholder: "What counts as a check-in? What happens if someone misses a day?\n\ne.g. Any workout of 30+ minutes counts. Post a photo. Whoever misses the most days buys lunch." %>
+      placeholder: "What counts as a check-in?\n\ne.g. Any workout of 30+ minutes counts. Post a photo." %>
     <% challenge_story.errors.full_messages_for(:description).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>
     <% end %>
@@ -87,6 +87,27 @@
   <% (challenge_story.errors.full_messages_for(:start) + challenge_story.errors.full_messages_for(:finish)).each do |message| %>
     <p class="-mt-2 text-sm text-error"><%= message %></p>
   <% end %>
+
+  <fieldset class="group/penalty flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
+    <div>
+      <%= form.label :penalty_mode, "If someone misses…", class: "text-sm font-semibold" %>
+      <%= form.select :penalty_mode,
+        [["Nothing happens", ""], ["They owe everyone, every miss", "per_miss"], ["Whoever misses most owes everyone", "most_misses"]],
+        {},
+        class: "select w-full mt-1.5" %>
+    </div>
+    <div class="group-has-[option[value='']:checked]/penalty:hidden">
+      <%= form.label :penalty, "What do they owe?", class: "text-sm font-semibold" %>
+      <%= form.text_field :penalty,
+        maxlength: 100,
+        class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
+        placeholder: "e.g. a coffee, $5, buys lunch" %>
+      <p class="mt-1.5 text-sm text-base-content/70">The app counts the misses. Streak freezes cover a day. It's settled between you at the end, like rewards.</p>
+      <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>
+        <p class="mt-1 text-sm text-error"><%= message %></p>
+      <% end %>
+    </div>
+  </fieldset>
 
   <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block mt-2" %>
 <% end %>

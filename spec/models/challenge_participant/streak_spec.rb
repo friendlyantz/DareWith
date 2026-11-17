@@ -109,6 +109,14 @@ RSpec.describe ChallengeParticipant::Streak do
       expect(streak(*0..13).days_to_next_freeze(today)).to be_nil
     end
 
+    it "lists the missed days a freeze covered" do
+      expect(streak(0, *2..8).frozen_indexes(today)).to eq [29]
+    end
+
+    it "uses the freezes on the first days of a gap too long to save the streak" do
+      expect(streak(0, *4..10).frozen_indexes(today)).to eq [27]
+    end
+
     it "isn't frozen yesterday when yesterday was kept or the streak starts today" do
       expect(streak(*0..7)).not_to be_frozen_yesterday(today)
       expect(streak(0)).not_to be_frozen_yesterday(today)

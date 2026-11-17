@@ -24,6 +24,9 @@
   <% if (goal_summary = challenge_story.goal.summary) %>
     <p class="flex items-center gap-1.5 text-sm font-semibold"><%= icon(:target, css: "size-4 text-secondary") %><%= goal_summary.upcase_first %></p>
   <% end %>
+  <% if (penalty = penalty_summary(challenge_story)) %>
+    <p class="flex items-center gap-1.5 text-sm font-semibold"><%= icon(:x, css: "size-4 text-error") %><%= penalty %></p>
+  <% end %>
   <progress class="progress progress-secondary h-1.5" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"></progress>
 
   <% if challenge_story.description.present? %>

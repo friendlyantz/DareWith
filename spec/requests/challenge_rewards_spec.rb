@@ -241,6 +241,18 @@ RSpec.describe "ChallengeRewards", type: :request do
       end
     end
 
+    context "when someone tries to cancel a penalty they owe" do
+      let!(:reward) { create(:challenge_reward, giver: giver, receiver: receiver, challenge_story: story, kind: :penalty) }
+
+      before { sign_in_as(user) }
+
+      it "leaves it pending" do
+        patch cancel_challenge_story_challenge_reward_path(story, reward)
+
+        expect(reward.reload).to be_pending
+      end
+    end
+
     context "when non-giver tries to cancel" do
       before { sign_in_as(receiver.user) }
 

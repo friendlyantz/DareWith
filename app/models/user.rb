@@ -97,7 +97,8 @@ class User < ApplicationRecord
     challenge_stories = challenges_to_check_in_today
     return if challenge_stories.empty?
 
-    notify(title: "Still time to check in", body: challenge_stories.map(&:title).to_sentence, path: "/today")
+    title = challenge_stories.any?(&:penalty_mode) ? "Check in today or it's a miss" : "Still time to check in"
+    notify(title:, body: challenge_stories.map(&:title).to_sentence, path: "/today")
   end
 
   def weekly_recap_due?(now = Time.current)

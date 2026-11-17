@@ -47,6 +47,15 @@ class ChallengeParticipant::Streak
     FREEZE_EVERY - current(today) % FREEZE_EVERY
   end
 
+  # Missed periods a freeze covered. A gap longer than the freezes left still breaks the streak,
+  # but its first days use them up, so those aren't misses either.
+  def frozen_indexes(today = Time.zone.today)
+    runs.each_with_index.flat_map do |run, i|
+      gap_end = runs[i + 1]&.first || goal.period_index(today)
+      ((run.first..run.last).to_a - kept_indexes) + ((run.last + 1)...gap_end).first(run.freezes)
+    end
+  end
+
   # Counts real misses, even ones a freeze covered
   def comeback?
     kept_indexes.each_cons(2).any? { |index, next_index| next_index - index - 1 >= COMEBACK_AFTER_MISSED_PERIODS }

@@ -54,6 +54,12 @@ class ChallengeStory::Goal
       .keys.sort
   end
 
+  # Periods that are over. The last one stays open through the grace day after the end.
+  def closed_period_indexes(today = Time.zone.today)
+    closed = (challenge_story.completed? || today > finish + 1) ? period_count : [period_index(today), period_count - 1].min
+    (0...closed).to_a
+  end
+
   def check_ins_in_period(dates, today = Time.zone.today)
     dates.uniq.count { period_index(it) == period_index(today) }
   end

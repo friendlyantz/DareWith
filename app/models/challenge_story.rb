@@ -22,6 +22,9 @@ class ChallengeStory < ApplicationRecord
   enum :cadence, %w[daily weekly].index_by(&:itself), validate: true
   enum :unit, %w[reps minutes hours km pages].index_by(&:itself), prefix: :counts, validate: {allow_nil: true}
   enum :target_scope, %w[each_time total].index_by(&:itself), validate: {allow_nil: true}
+  enum :penalty_mode, %w[per_miss most_misses].index_by(&:itself), validate: {allow_nil: true}
+
+  normalizes :penalty, with: -> { it.strip.presence }
 
   # Validations
   validates :title, presence: true
@@ -33,6 +36,7 @@ class ChallengeStory < ApplicationRecord
   validates :target_amount, numericality: {greater_than: 0, less_than: 100_000_000}, allow_nil: true
   validate :whole_number_target, if: -> { goal.whole_numbers? }
   validates :target_scope, presence: true, if: -> { target_amount.present? }
+  validates :penalty, presence: true, length: {maximum: 100}, if: :penalty_mode
   validate :goal_locked_after_first_check_in, on: :update
 
   # Callbacks
@@ -41,6 +45,7 @@ class ChallengeStory < ApplicationRecord
     self.times_per_period = 1 if daily?
     self.target_amount = nil if unit.blank?
     self.target_scope = nil if target_amount.blank?
+    self.penalty = nil if penalty_mode.blank?
   end
 
   before_create do
@@ -58,6 +63,14 @@ class ChallengeStory < ApplicationRecord
 
   def finale
     Finale.new(self)
+  end
+
+  def penalty_rule
+    @penalty_rule ||= Penalty.new(self) if penalty_mode
+  end
+
+  def charge_penalties!
+    penalty_rule&.charge!&.each(&:notify_receiver)
   end
 
   def goal_editable?
@@ -132,6 +145,7 @@ class ChallengeStory < ApplicationRecord
 
   def mark_complete!(by: nil)
     update!(completed: true)
+    charge_penalties!
     announce_completion(except: by)
     award_badges
   end
@@ -161,6 +175,8 @@ class ChallengeStory < ApplicationRecord
       unit:,
       target_amount:,
       target_scope:,
+      penalty_mode:,
+      penalty:,
       start: Time.zone.today,
       finish: Time.zone.today + (duration_in_days - 1).days
     )
@@ -211,8 +227,8 @@ class ChallengeStory < ApplicationRecord
   # Check-ins already count toward the old goal, so changing it would rewrite history
   def goal_locked_after_first_check_in
     return if challenge_check_ins_count.zero?
-    return unless (changed & %w[cadence times_per_period unit target_amount target_scope]).any?
+    return unless (changed & %w[cadence times_per_period unit target_amount target_scope penalty_mode penalty]).any?
 
-    errors.add(:base, "The goal can't change once someone has checked in")
+    errors.add(:base, "The goal and penalty can't change once someone has checked in")
   end
 end

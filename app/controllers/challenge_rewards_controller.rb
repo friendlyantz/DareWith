@@ -85,7 +85,7 @@ class ChallengeRewardsController < ApplicationController
   end
 
   def verify_giver
-    return if @reward.giver.user == current_user
+    return if @reward.pledge? && @reward.giver.user == current_user
 
     redirect_to challenge_story_challenge_rewards_path(@challenge_story),
       alert: "You can only cancel rewards you've pledged."
@@ -117,7 +117,7 @@ class ChallengeRewardsController < ApplicationController
     current_challenge_participant = current_challenge_participant_for_story
     return [] unless current_challenge_participant
 
-    existing_receiver_ids = ChallengeReward.where(
+    existing_receiver_ids = ChallengeReward.pledge.where(
       giver_id: current_challenge_participant.id,
       challenge_story_id: @challenge_story.id
     ).pluck(:receiver_id)

@@ -8,10 +8,12 @@ class ChallengeReward < ApplicationRecord
 
   # Enums
   enum :status, %w[pending fulfilled canceled].index_by(&:itself)
+  # A pledge is promised during the challenge; a penalty is owed for misses once it closes
+  enum :kind, %w[pledge penalty].index_by(&:itself)
 
   # Validations
   validates :description, presence: true
-  validates :giver_id, uniqueness: {scope: [:receiver_id, :challenge_story_id], message: "has already pledged a reward to this participant"}
+  validates :giver_id, uniqueness: {scope: [:receiver_id, :challenge_story_id, :kind], message: "has already pledged a reward to this participant"}
   validate :cannot_reward_self
   validate :participants_in_same_challenge
 
@@ -31,7 +33,7 @@ class ChallengeReward < ApplicationRecord
 
   def notify_receiver
     receiver.user.notify(
-      title: "#{giver.name} pledged you a reward",
+      title: penalty? ? "#{giver.name} owes you for missing" : "#{giver.name} pledged you a reward",
       body: description.truncate(80),
       path: rewards_path
     )

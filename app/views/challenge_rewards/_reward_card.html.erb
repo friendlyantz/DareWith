@@ -2,11 +2,11 @@
 <div class="flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-4">
   <div class="flex items-start gap-3">
     <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
-      <%= icon(:gift) %>
+      <%= icon(reward.penalty? ? :x : :gift) %>
     </div>
     <div class="flex-1 min-w-0">
       <p class="font-semibold"><%= reward.description %></p>
-      <p class="text-sm text-base-content/70 mt-0.5"><%= reward.giver.name %> → <%= reward.receiver.name %></p>
+      <p class="text-sm text-base-content/70 mt-0.5"><%= reward.giver.name %> → <%= reward.receiver.name %><%= " · penalty for missing" if reward.penalty? %></p>
       <% if reward.fulfilled_at.present? %>
         <p class="text-sm text-base-content/70">Received <%= reward.fulfilled_at.strftime("%-d %b %Y") %></p>
       <% end %>
@@ -41,9 +41,10 @@
       <% end %>
     <% end %>
 
-    <% if (receiving && challenge_story.settle_up_open?) || (giving && challenge_story.finished?) %>
+    <% cancelable = giving && reward.pledge? && challenge_story.finished? %>
+    <% if (receiving && challenge_story.settle_up_open?) || cancelable %>
       <div class="flex justify-end gap-2">
-        <% if giving && challenge_story.finished? %>
+        <% if cancelable %>
           <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),
             method: :patch,
             class: "btn btn-sm btn-ghost text-error",
