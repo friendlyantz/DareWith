@@ -115,6 +115,16 @@ RSpec.describe "Passkeys", type: :request do
       expect(response.body).not_to include("Sign in faster next time")
     end
 
+    it "shows when each passkey was added, oldest first" do
+      create(:credential, user:, nickname: "New laptop", created_at: Time.zone.local(2026, 11, 18))
+      create(:credential, user:, nickname: "Old phone", created_at: Time.zone.local(2025, 3, 4))
+
+      get credentials_path
+
+      expect(response.body).to include("Added 4 Mar 2025", "Added 18 Nov 2026")
+      expect(response.body.index("Old phone")).to be < response.body.index("New laptop")
+    end
+
     it "labels each passkey" do
       create(:credential, user:, nickname: "iPhone", backed_up: true)
       create(:credential, user:, nickname: "YubiKey", backed_up: false)
