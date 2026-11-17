@@ -25,7 +25,7 @@ export default class extends Controller {
   async share() {
     copyText(this.urlValue)
     this.confirmCopied()
-    const file = new File([await this.card], "strivo-progress.png", { type: "image/png" })
+    const file = new File([await this.card], "darewith-progress.png", { type: "image/png" })
 
     if (navigator.canShare?.({ files: [file] })) {
       navigator.share({ files: [file], text: `${this.titleValue}: join me ${this.urlValue}` }).catch(() => {})
@@ -98,13 +98,13 @@ export default class extends Controller {
     context.textBaseline = "alphabetic"
 
     context.font = `700 60px ${DISPLAY}`
-    context.fillText("strivo", PADDING, 190)
+    context.fillText("darewith", PADDING, 190)
 
     // Built from the bottom up, so a long title pushes upwards
     let y = HEIGHT - 150
     context.font = `600 44px ${SANS}`
     context.globalAlpha = 0.85
-    context.fillText("Join me on strivo.me", PADDING, y)
+    context.fillText("Dare with me on darewith.app", PADDING, y)
 
     y -= 150
     context.globalAlpha = 0.25

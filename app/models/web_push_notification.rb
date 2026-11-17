@@ -1,5 +1,5 @@
 class WebPushNotification < ApplicationRecord
-  VAPID_SUBJECT = "https://strivo.me"
+  VAPID_SUBJECT = "https://#{Rails.configuration.app_host}"
 
   belongs_to :user
 

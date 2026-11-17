@@ -58,7 +58,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = {host: "strivo.me"}
+  config.action_mailer.default_url_options = {host: config.app_host}
   config.action_mailer.delivery_method = :brevo
   config.action_mailer.brevo_settings = {
     api_key: ENV.fetch("MAILING_SERVICE_API_KEY")
@@ -84,13 +84,8 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [:id]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "192.168.1.25",     # Allow requests from localhost
-  #   "take-on.me",     # Allow requests from example.com
-  #   /.*\.take-on\.me/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
+  config.hosts = [config.app_host, *config.legacy_hosts]
   # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-  config.webauthn_origin = "https://strivo.me"
+  config.host_authorization = {exclude: ->(request) { request.path == "/up" }}
+  config.webauthn_origin = "https://#{config.app_host}"
 end

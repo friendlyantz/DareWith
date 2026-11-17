@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  # Old domains forward to the current one, keeping the path
+  constraints(->(request) { Rails.configuration.legacy_hosts.include?(request.host) }) do
+    get "(*path)", format: false, to: redirect { |_params, request| "https://#{Rails.configuration.app_host}#{request.fullpath}" }
+  end
+
   resources :web_push_notifications, only: %i[create destroy] do
     delete :unsubscribe, on: :collection
   end

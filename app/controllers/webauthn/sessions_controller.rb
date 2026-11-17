@@ -8,7 +8,9 @@ module Webauthn
     def create
       user = User.find_by(username: session_params[:username])
 
-      if user
+      if user&.passkeys_left_on_old_domain?
+        render json: {errors: ["We moved to #{Rails.configuration.app_host}, so your passkey needs replacing. Sign in with email once, then add a new one."]}, status: :unprocessable_content
+      elsif user
         get_options = WebAuthn::Credential.options_for_get(
           allow: user.credentials.pluck(:external_id),
           user_verification: "required"
@@ -29,6 +31,7 @@ module Webauthn
       raise "user #{session[:current_authentication]["username"]} never initiated sign up" unless user
 
       credential = user.credentials.find_by(external_id: Base64.urlsafe_encode64(webauthn_credential.raw_id, padding: false))
+      return render json: "That passkey isn't for #{Rails.configuration.app_host}", status: :unprocessable_content unless credential
 
       begin
         webauthn_credential.verify(

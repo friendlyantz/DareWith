@@ -13,7 +13,7 @@ class User < ApplicationRecord
   PAYMENT_LINK = %r{\A(https?://)?([\w-]+\.)+[a-z]{2,}/\S+\z}i
 
   # Associations
-  has_many :credentials, dependent: :destroy
+  has_many :credentials, -> { on_this_domain }, dependent: :destroy
   has_many :challenge_story_likes, dependent: :destroy
   has_many :liked_challenge_stories, through: :challenge_story_likes, source: :challenge_story
   has_many :challenge_participants, dependent: :destroy
@@ -52,6 +52,11 @@ class User < ApplicationRecord
 
   def can_delete_credentials?
     credentials.size > CREDENTIAL_MIN_AMOUNT
+  end
+
+  # Their passkeys were made on an old domain, so none of them work here
+  def passkeys_left_on_old_domain?
+    credentials.none? && Credential.where(user_id: id).exists?
   end
 
   # One passkey that can't sync: losing that device locks them out

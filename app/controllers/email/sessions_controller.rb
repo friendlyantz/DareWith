@@ -64,7 +64,14 @@ module Email
       user.verify_email!
       sign_in(user)
 
-      redirect_to after_sign_in_path, notice: "Signed in successfully!"
+      redirect_to after_email_sign_in_path(user), notice: "Signed in successfully!"
+    end
+
+    # People whose passkeys stayed on the old domain go straight to adding a new one
+    def after_email_sign_in_path(user)
+      return after_sign_in_path unless user.passkeys_left_on_old_domain? && !likely_webview?
+
+      session.delete(:return_to).presence || credentials_path
     end
   end
 end
