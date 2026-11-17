@@ -26,7 +26,7 @@ export default class extends Controller {
     })
     .then(response => {
       if (response.ok) {
-        return response.json().then(data => this.handleSuccess(data));
+        return response.json().then(data => this.handleSuccess(data, submitButton));
       } else {
         return response.json().then(data => this.handleError(data, submitButton));
       }
@@ -37,9 +37,12 @@ export default class extends Controller {
     });
   }
 
-  handleSuccess(data) {
+  async handleSuccess(data, submitButton) {
     console.log("Session options:", data);
-    Credential.get(data);
+    const signedIn = await Credential.get(data);
+
+    // Cancelled or failed passkey prompt: let them try again
+    if (!signedIn && submitButton) submitButton.disabled = false;
   }
 
   handleError(response, submitButton) {

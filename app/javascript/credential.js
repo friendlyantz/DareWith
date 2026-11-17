@@ -9,8 +9,9 @@ function getCSRFToken() {
   }
 }
 
+// Resolves false when sign-in didn't go through, so the caller can let the person try again
 function callback(url, body) {
-  fetch(url, {
+  return fetch(url, {
     method: "POST",
     body: JSON.stringify(body),
     headers: {
@@ -24,11 +25,16 @@ function callback(url, body) {
       response.json()
         .then((data) => window.location.replace(data.redirect_to || "/"))
         .catch(() => window.location.replace("/"))
+      return true;
     } else if (response.status < 500) {
       response.text().then(showMessage);
     } else {
       showMessage("Sorry, something wrong happened.");
     }
+    return false;
+  }).catch(() => {
+    showMessage("Sorry, something wrong happened.");
+    return false;
   });
 }
 
@@ -41,10 +47,11 @@ async function create(callbackUrl, credentialOptions) {
     const credential = await navigator.credentials.create({ publicKey });
     
     // Use native toJSON() to serialize the credential
-    callback(callbackUrl, credential.toJSON());
+    return await callback(callbackUrl, credential.toJSON());
   } catch (error) {
     console.error("WebAuthn create error:", error);
     showMessage(`${error.name}: ${error.message}`);
+    return false;
   }
 }
 
@@ -57,10 +64,11 @@ async function get(credentialOptions) {
     const credential = await navigator.credentials.get({ publicKey });
     
     // Use native toJSON() to serialize the credential
-    callback("/webauthn/session/callback", credential.toJSON());
+    return await callback("/webauthn/session/callback", credential.toJSON());
   } catch (error) {
     console.error("WebAuthn get error:", error);
     showMessage(`${error.name}: ${error.message}`);
+    return false;
   }
 }
 

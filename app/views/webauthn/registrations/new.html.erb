@@ -8,7 +8,7 @@
   <% if likely_webview? %>
     <%= render "application/alerts/unsupported_browser", url: browser_handoff_url %>
   <% else %>
-    <%= render partial: "webauthn/alerts/feature_detection" %>
+    <%= render "webauthn/alerts/feature_detection", signing_up: true %>
   <% end %>
 
   <div class="rounded-box border border-base-300 bg-base-100 p-5">
@@ -32,9 +32,12 @@
     <%= render partial: "application/js_error" %>
   </div>
 
-  <p class="text-center text-sm">
-    Already have an account?
-    <%= link_to "Sign in", new_webauthn_session_path, class: "link link-accent font-semibold" %>
-  </p>
+  <div class="flex flex-col gap-2 text-center text-sm">
+    <p>
+      Already have an account?
+      <%= link_to "Sign in", new_webauthn_session_path, class: "link link-accent font-semibold" %>
+    </p>
+    <p><%= link_to "Create an account with email instead", new_email_registration_path, class: "link link-hover text-base-content/70" %></p>
+  </div>
 
 </div>

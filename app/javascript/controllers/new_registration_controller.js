@@ -26,7 +26,7 @@ export default class extends Controller {
     })
     .then(response => {
       if (response.ok) {
-        return response.json().then(data => this.handleSuccess(data, form));
+        return response.json().then(data => this.handleSuccess(data, form, submitButton));
       } else {
         return response.json().then(data => this.handleError(data, submitButton));
       }
@@ -37,7 +37,7 @@ export default class extends Controller {
     });
   }
 
-  handleSuccess(data, form) {
+  async handleSuccess(data, form, submitButton) {
     console.log("Registration options:", data);
     
     // Registration - check for user object in response
@@ -45,7 +45,10 @@ export default class extends Controller {
       const credential_nickname = form.querySelector("input[name='registration[nickname]']").value;
       const callback_url = `/webauthn/registration/callback?credential_nickname=${encodeURIComponent(credential_nickname)}`;
       
-      Credential.create(callback_url, data);
+      const registered = await Credential.create(callback_url, data);
+
+      // Cancelled or failed passkey prompt: let them try again
+      if (!registered && submitButton) submitButton.disabled = false;
     }
   }
 

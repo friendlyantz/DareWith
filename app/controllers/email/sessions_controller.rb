@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Email
-  class SessionsController < ApplicationController
+  class SessionsController < Email::ApplicationController
     rate_limit to: 10, within: 1.minute, only: :confirm
 
     def new
@@ -9,39 +9,11 @@ module Email
     end
 
     def create
-      email = session_params[:email]&.strip&.downcase
-      username = session_params[:username]&.strip
+      user = User.find_by(email: normalized_email)
+      return send_sign_in_email(user) if user
 
-      # Find or initialize user
-      user = User.find_or_initialize_by(email: email) do |u|
-        u.username = username || generate_username_from_email(email)
-      end
-
-      # Validate before proceeding
-      unless user.valid?
-        @error = user.errors.full_messages.join(", ")
-        render :new, status: :unprocessable_content
-        return
-      end
-
-      # Rate limiting
-      if user.persisted? && user.email_login_recently_sent?
-        session[:email_sign_in_user_id] = user.id
-        @email_sent = true
-        @error = "An email was recently sent. Use the code from it, or wait 15 minutes for a new one."
-        render :new, status: :too_many_requests
-        return
-      end
-
-      # Save new users
-      user.save! if user.new_record?
-
-      # Generate and send magic link, plus a code to type in this browser
-      token = user.generate_email_login_token!
-      code = user.generate_email_login_code!
-      session[:email_sign_in_user_id] = user.id
-      UserMailer.magic_link_email(user, token, code, session[:return_to]).deliver_later
-
+      # Same answer as for a real account, so it doesn't reveal who has one
+      session.delete(:email_sign_in_user_id)
       @email_sent = true
       render :new
     end
@@ -93,23 +65,6 @@ module Email
       sign_in(user)
 
       redirect_to after_sign_in_path, notice: "Signed in successfully!"
-    end
-
-    def session_params
-      params.require(:session).permit(:email, :username)
-    end
-
-    def generate_username_from_email(email)
-      base = email.split("@").first.gsub(/[^a-z0-9]/i, "")
-      username = base
-      counter = 1
-
-      while User.exists?(username: username)
-        username = "#{base}#{counter}"
-        counter += 1
-      end
-
-      username
     end
   end
 end

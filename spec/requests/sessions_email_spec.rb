@@ -32,6 +32,14 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       expect(response.body).to include("Check your email for a 6-digit code and a sign-in link.")
     end
 
+    it "doesn't create an account for a mistyped email" do
+      expect {
+        post email_session_path, params: {session: {email: "tset@example.com", username: "someone"}}
+      }.not_to change(User, :count)
+
+      expect(enqueued_jobs).to be_empty
+    end
+
     it "enforces rate limit (3 emails per 15 minutes)" do
       user.update!(last_email_sent_at: 5.minutes.ago)
 
@@ -220,6 +228,45 @@ RSpec.describe "Sessions Email Authentication", type: :request do
     mail_app_browser.get link
 
     expect(mail_app_browser.response.location).to end_with(challenge_story_path(story))
+  end
+
+  describe "POST /email/registration" do
+    it "creates the account and emails a code" do
+      expect {
+        post email_registration_path, params: {session: {email: " New@Example.com ", username: "newbie"}}
+      }.to change(User, :count).by(1).and have_enqueued_job
+
+      expect(User.last).to have_attributes(email: "new@example.com", username: "newbie")
+      expect(response.body).to include("Code from the email")
+    end
+
+    it "signs in with the code like any other email sign-in" do
+      perform_enqueued_jobs { post email_registration_path, params: {session: {email: "new@example.com", username: "newbie"}} }
+      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+
+      post confirm_email_session_path, params: {code:}
+
+      expect(session[:user_id]).to eq(User.find_by(username: "newbie").id)
+    end
+
+    it "emails the owner of a taken email instead of saying it's taken" do
+      expect {
+        post email_registration_path, params: {session: {email: user.email, username: "newbie"}}
+      }.to have_enqueued_job
+
+      expect(User.where(username: "newbie")).to be_empty
+      expect(response.body).to include("Check your email for a 6-digit code and a sign-in link.")
+    end
+
+    it "asks for an email and a username" do
+      expect {
+        post email_registration_path, params: {session: {email: "", username: "newbie"}}
+        post email_registration_path, params: {session: {email: "new@example.com", username: ""}}
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("Username can&#39;t be blank")
+    end
   end
 
   describe "Email mailer integration" do

@@ -1,14 +1,14 @@
 <% content_for :title, "Sign in with email" %>
 <div class="w-full max-w-sm flex flex-col gap-5 pt-6">
   <div>
-    <h1 class="font-display text-3xl font-bold tracking-tight">Sign in with email</h1>
-    <p class="text-sm text-base-content/70 mt-1">We'll email you a code and a sign-in link. New here? Add a username and we'll create your account.</p>
+    <h1 class="font-display text-3xl font-bold tracking-tight"><%= @email_sent ? "Check your email" : "Sign in with email" %></h1>
+    <p class="text-sm text-base-content/70 mt-1">We'll email you a code and a sign-in link.</p>
   </div>
 
   <% if @error %>
     <div class="alert alert-error alert-soft"><%= @error %></div>
   <% elsif @email_sent %>
-    <%# Same message for new and existing emails, so it doesn't reveal who has an account %>
+    <%# Same message whether or not the email has an account, so it doesn't reveal who has one %>
     <div class="alert alert-success alert-soft">Check your email for a 6-digit code and a sign-in link.</div>
   <% end %>
 
@@ -30,7 +30,15 @@
         <%= form.submit "Sign in", class: "btn btn-primary w-full" %>
       <% end %>
     </div>
-    <p class="text-center text-sm"><%= link_to "Didn't get it? Try again", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
+    <div class="flex flex-col gap-2 text-center text-sm">
+      <p><%= link_to "Didn't get it? Check the spelling and try again", @signing_up ? new_email_registration_path : new_email_session_path, class: "link link-hover text-base-content/70" %></p>
+      <% unless @signing_up %>
+        <p>
+          No account yet?
+          <%= link_to "Create one with email", new_email_registration_path, class: "link link-accent font-semibold" %>
+        </p>
+      <% end %>
+    </div>
   <% else %>
     <div class="rounded-box border border-base-300 bg-base-100 p-5">
       <%= form_with scope: :session, url: email_session_path, data: {turbo: false}, id: "email-form", class: "flex flex-col gap-4" do |form| %>
@@ -41,20 +49,18 @@
           </div>
         </div>
 
-        <div>
-          <%= form.label :username, "Username", class: "text-sm font-semibold" %>
-          <div data-controller="textfield" class="mt-1.5">
-            <%= form.text_field :username, class: "input mdc-text-field__input w-full", placeholder: "Only for new accounts", autocapitalize: "none" %>
-          </div>
-          <p class="text-xs text-base-content/70 mt-1">Only needed for a new account. It can't be changed later.</p>
-        </div>
-
         <%= form.submit "Continue with email", class: "btn btn-primary w-full" %>
       <% end %>
     </div>
   <% end %>
 
-  <p class="text-center text-sm">
-    <%= link_to "Sign in with a passkey instead", new_webauthn_session_path, class: "link link-hover text-base-content/70" %>
-  </p>
+  <% unless @email_sent %>
+    <div class="flex flex-col gap-2 text-center text-sm">
+      <p>
+        New here?
+        <%= link_to "Create an account with email", new_email_registration_path, class: "link link-accent font-semibold" %>
+      </p>
+      <p><%= link_to "Sign in with a passkey instead", new_webauthn_session_path, class: "link link-hover text-base-content/70" %></p>
+    </div>
+  <% end %>
 </div>
