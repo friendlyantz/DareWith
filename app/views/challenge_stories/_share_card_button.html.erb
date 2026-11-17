@@ -1,0 +1,9 @@
+<%# locals: (participant:, css: "", action: nil) %>
+<%= tag.button type: "button", class: css,
+  data: {
+    controller: "share-card",
+    action: ["share-card#share", action].compact.join(" "),
+    **share_card_values(participant).transform_keys { "share_card_#{it}_value" }
+  } do %>
+  <%= icon(:share, css: "size-4") %> Share my progress
+<% end %>

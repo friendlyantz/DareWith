@@ -49,6 +49,18 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include("10/100").and include("aiming for 100 km each")
       expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
     end
+
+    it "offers participants a progress card to share, but not visitors" do
+      user = create(:user)
+      create(:challenge_participant, user:, challenge_story: story)
+
+      get challenge_story_path(story)
+      expect(response.body).not_to include("Share my progress")
+
+      sign_in_as(user)
+      get challenge_story_path(story)
+      expect(response.body).to include("Share my progress").and include('data-controller="share-card"')
+    end
   end
 
   describe "GET /challenge_stories/new" do

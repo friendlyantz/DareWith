@@ -43,6 +43,10 @@ class ChallengeParticipant < ApplicationRecord
     Forecast.new(self)
   end
 
+  def latest_photo_check_in
+    challenge_check_ins.joins(:photo_attachment).order(created_at: :desc).first
+  end
+
   def check_ins_this_period
     challenge_story.goal.check_ins_in_period(check_in_dates)
   end

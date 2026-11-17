@@ -193,6 +193,16 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         expect(response.body).to include('data-controller="close-sheet"')
       end
 
+      it "offers the progress card, which keeps a closing sheet open" do
+        create(:badge, user:)
+        create(:challenge_check_in, challenge_participant: participant)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include("Share my progress")
+          .and include('data-action="share-card#share close-sheet#stay:stop"')
+      end
+
       it "shows the streak" do
         create(:challenge_check_in, challenge_participant: participant, checked_in_on: Date.yesterday)
 

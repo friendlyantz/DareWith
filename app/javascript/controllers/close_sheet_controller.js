@@ -12,6 +12,11 @@ export default class extends Controller {
     clearTimeout(this.timeout)
   }
 
+  // Something inside wants the sheet to stay, e.g. sharing the progress card
+  stay() {
+    clearTimeout(this.timeout)
+  }
+
   close() {
     this.element.closest("dialog")?.close()
   }
