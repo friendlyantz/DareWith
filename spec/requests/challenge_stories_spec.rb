@@ -46,7 +46,7 @@ RSpec.describe "ChallengeStories", type: :request do
 
       get challenge_story_path(story)
 
-      expect(response.body).to include("10 / 100").and include("aiming for 100 km each")
+      expect(response.body).to include("10/100").and include("aiming for 100 km each")
       expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
     end
   end
