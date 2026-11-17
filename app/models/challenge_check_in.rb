@@ -14,7 +14,6 @@ class ChallengeCheckIn < ApplicationRecord
   validates :amount, presence: true, numericality: {greater_than: 0, less_than: 100_000_000}, if: -> { challenge_story&.goal&.measured? }
   validates :amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { challenge_story&.goal&.whole_numbers? }
   validate :photo_size_validation
-  validate :one_check_in_per_day_per_participant
 
   # Scopes
   scope :today, -> { where(checked_in_on: Time.zone.today) }
@@ -30,9 +29,22 @@ class ChallengeCheckIn < ApplicationRecord
 
   # Broadcasts must be after has_one_attached for Cloudinary compatibility)
   after_create_commit :broadcast_to_story_and_participant_feeds
+  after_destroy_commit :remove_from_story_and_participant_feeds
 
   # Public methods
+  def first_of_the_day?
+    !ChallengeCheckIn.where(challenge_participant_id:, checked_in_on:).where.not(id:).exists?
+  end
+
+  # Mistakes are fixed by deleting and posting again, but only on the day, so settled results stay put
+  def deletable_by?(user)
+    challenge_participant.user_id == user&.id && checked_in_on == Time.zone.today
+  end
+
+  # Friends hear about your day once; later check-ins just show up in the feed
   def notify_other_participants
+    return unless first_of_the_day?
+
     challenge_story.active_participants.where.not(id: challenge_participant_id).includes(:user).find_each do |participant|
       participant.user.notify(
         title: "#{challenge_participant.name} checked in",
@@ -64,18 +76,17 @@ class ChallengeCheckIn < ApplicationRecord
     end
   end
 
+  def remove_from_story_and_participant_feeds
+    broadcast_remove_to challenge_story
+
+    User.where(id: challenge_story.challenge_participants.select(:user_id)).find_each do |user|
+      broadcast_remove_to [user, "challenge_check_ins_feed"]
+    end
+  end
+
   def photo_size_validation
     return unless photo.present? && photo.blob.byte_size > 10.megabytes
 
     errors.add(:photo, "is too large (maximum 10MB)")
-  end
-
-  def one_check_in_per_day_per_participant
-    return if challenge_participant.blank?
-
-    return unless new_record?
-    return unless ChallengeCheckIn.exists?(challenge_participant_id:, checked_in_on:)
-
-    errors.add(:base, "You can only check in once per day")
   end
 end

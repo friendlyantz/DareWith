@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_210000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -97,7 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_210000) do
     t.date "checked_in_on", null: false
     t.integer "challenge_check_in_replies_count", default: 0, null: false
     t.decimal "amount", precision: 10, scale: 2
-    t.index ["challenge_participant_id", "checked_in_on"], name: "idx_on_challenge_participant_id_checked_in_on_b71ead7892", unique: true
+    t.index ["challenge_participant_id", "checked_in_on"], name: "idx_on_challenge_participant_id_checked_in_on_b71ead7892"
     t.index ["challenge_participant_id"], name: "index_challenge_check_ins_on_challenge_participant_id"
     t.index ["challenge_story_id"], name: "index_challenge_check_ins_on_challenge_story_id"
     t.index ["created_at"], name: "index_challenge_check_ins_on_created_at"

@@ -18,6 +18,7 @@ class User < ApplicationRecord
   has_many :liked_challenge_stories, through: :challenge_story_likes, source: :challenge_story
   has_many :challenge_participants, dependent: :destroy
   has_many :challenge_stories, through: :challenge_participants
+  has_many :challenge_check_ins, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
   has_many :badges, dependent: :destroy
   has_many :challenge_check_in_replies, dependent: :destroy

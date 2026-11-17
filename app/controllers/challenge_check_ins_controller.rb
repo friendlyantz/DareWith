@@ -42,6 +42,11 @@ class ChallengeCheckInsController < ApplicationController
   end
 
   def destroy
+    challenge_check_in = current_user.challenge_check_ins.find(params[:id])
+    return head :forbidden unless challenge_check_in.deletable_by?(current_user)
+
+    challenge_check_in.destroy!
+    redirect_back_or_to challenge_story_path(challenge_check_in.challenge_story), notice: "Check-in deleted", status: :see_other
   end
 
   private

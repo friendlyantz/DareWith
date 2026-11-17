@@ -1,12 +1,22 @@
 <% show_challenge = local_assigns.fetch(:show_challenge, false) %>
 <% participant = challenge_check_in.challenge_participant %>
-<article id="<%= dom_id challenge_check_in %>" class="card overflow-hidden border border-base-300 bg-base-100">
+<%= tag.article id: dom_id(challenge_check_in), class: "card overflow-hidden border border-base-300 bg-base-100",
+  data: {controller: "own-check-in", own_check_in_user_id_value: participant.user_id, own_check_in_day_value: challenge_check_in.checked_in_on.iso8601} do %>
   <div class="flex items-center gap-3 px-4 py-3">
     <%= render "shared/avatar", name: participant.name, user: participant.user, size: "size-9" %>
     <div class="flex-1 min-w-0">
       <div class="flex items-baseline justify-between gap-2">
         <span class="font-semibold truncate"><%= participant.user_id == current_user&.id ? "You" : participant.name %></span>
-        <time class="shrink-0 text-xs text-base-content/60" datetime="<%= challenge_check_in.created_at.iso8601 %>"><%= short_time_ago(challenge_check_in.created_at) %></time>
+        <span class="flex shrink-0 items-center gap-1">
+          <time class="text-xs text-base-content/60" datetime="<%= challenge_check_in.created_at.iso8601 %>"><%= short_time_ago(challenge_check_in.created_at) %></time>
+          <%= button_to challenge_story_challenge_check_in_path(challenge_check_in.challenge_story_id, challenge_check_in),
+            method: :delete,
+            class: "btn btn-ghost btn-xs btn-circle text-base-content/60",
+            "aria-label": "Delete check-in",
+            form: {hidden: true, data: {own_check_in_target: "controls", turbo_confirm: "Delete this check-in? Its likes and replies go too."}} do %>
+            <%= icon(:trash, css: "size-4") %>
+          <% end %>
+        </span>
       </div>
       <% if show_challenge %>
         <%= link_to challenge_check_in.challenge_story.title, challenge_story_path(challenge_check_in.challenge_story), class: "link link-hover link-accent block truncate text-sm font-semibold" %>
@@ -30,4 +40,4 @@
       <%= render "challenge_check_in_replies/form", challenge_check_in: %>
     </div>
   </div>
-</article>
+<% end %>

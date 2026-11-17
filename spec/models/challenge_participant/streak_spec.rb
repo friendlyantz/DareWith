@@ -10,6 +10,10 @@ RSpec.describe ChallengeParticipant::Streak do
   end
 
   describe "#current" do
+    it "counts a day with several check-ins once" do
+      expect(streak(0, 0, 1).current(today)).to eq 2
+    end
+
     it "counts consecutive days up to today" do
       expect(streak(0, 1, 2, 4).current(today)).to eq 3
     end

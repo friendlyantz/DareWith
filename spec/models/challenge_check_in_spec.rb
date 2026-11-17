@@ -2,37 +2,32 @@ require "rails_helper"
 
 RSpec.describe ChallengeCheckIn, type: :model do
   describe "validations" do
-    describe "one_comment_per_day_per_participant" do
-      let(:challenge_participant) { create(:challenge_participant) }
-      let(:story) { challenge_participant.challenge_story }
+    let(:challenge_participant) { create(:challenge_participant) }
+    let(:story) { challenge_participant.challenge_story }
 
-      it "allows first check-in of the day" do
-        check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
+    it "allows several check-ins on the same day" do
+      create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
 
-        expect(check_in).to be_valid
-      end
+      expect(create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)).to be_persisted
+    end
+  end
 
-      it "prevents second check-in on same day" do
-        create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
-        second_check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
+  describe "#deletable_by?" do
+    let(:check_in) { create(:challenge_check_in) }
 
-        expect(second_check_in).not_to be_valid
-        expect(second_check_in.errors[:base]).to include("You can only check in once per day")
-      end
+    it "lets the author delete it on the day" do
+      expect(check_in.deletable_by?(check_in.challenge_participant.user)).to be true
+    end
 
-      it "is enforced by the database too" do
-        create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
-        second_check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story, checked_in_on: Time.zone.today)
+    it "keeps it once the day is over" do
+      check_in.update!(checked_in_on: Time.zone.yesterday)
 
-        expect { second_check_in.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
-      end
+      expect(check_in.deletable_by?(check_in.challenge_participant.user)).to be false
+    end
 
-      it "allows check-in on different day" do
-        create(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story, created_at: 1.day.ago)
-        today_check_in = build(:challenge_check_in, challenge_participant: challenge_participant, challenge_story: story)
-
-        expect(today_check_in).to be_valid
-      end
+    it "never lets someone else delete it" do
+      expect(check_in.deletable_by?(create(:user))).to be false
+      expect(check_in.deletable_by?(nil)).to be false
     end
   end
 
@@ -104,6 +99,13 @@ RSpec.describe ChallengeCheckIn, type: :model do
         .to have_enqueued_job(PushNotificationJob)
         .with(friend_device, title: "maya checked in", body: "Morning run: 5 km done", path: "/challenge_stories/#{story.id}")
         .exactly(:once)
+    end
+
+    it "only notifies for the first check-in of the day" do
+      create(:challenge_check_in, challenge_participant: author)
+      second = create(:challenge_check_in, challenge_participant: author)
+
+      expect { second.notify_other_participants }.not_to have_enqueued_job(PushNotificationJob)
     end
 
     it "skips participants who left" do

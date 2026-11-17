@@ -215,12 +215,50 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         create(:challenge_check_in, challenge_participant: participant, challenge_story: story)
       end
 
-      it "does not allow duplicate check-in" do
+      it "posts another check-in without pinging friends again" do
+        friend = create(:challenge_participant, challenge_story: story)
+        create(:web_push_notification, user: friend.user)
+
         expect do
           post challenge_story_challenge_check_ins_path(story),
             params: {challenge_check_in: {message: "Another check-in"}}
-        end.not_to change(ChallengeCheckIn, :count)
+        end.to change(ChallengeCheckIn, :count).by(1)
+
+        expect(PushNotificationJob).not_to have_been_enqueued
       end
+    end
+  end
+
+  describe "DELETE /challenge_stories/:challenge_story_id/challenge_check_ins/:id" do
+    before { sign_in_as(user) }
+
+    it "deletes your own check-in from today" do
+      check_in = create(:challenge_check_in, challenge_participant: participant)
+
+      expect {
+        delete challenge_story_challenge_check_in_path(story, check_in)
+      }.to change(ChallengeCheckIn, :count).by(-1)
+
+      expect(response).to redirect_to(challenge_story_path(story))
+      expect(participant.reload.challenge_check_ins_count).to eq 0
+    end
+
+    it "keeps check-ins from earlier days" do
+      check_in = create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.yesterday)
+
+      delete challenge_story_challenge_check_in_path(story, check_in)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ChallengeCheckIn.exists?(check_in.id)).to be true
+    end
+
+    it "doesn't let you delete a friend's check-in" do
+      check_in = create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story))
+
+      delete challenge_story_challenge_check_in_path(story, check_in)
+
+      expect(response).to have_http_status(:not_found)
+      expect(ChallengeCheckIn.exists?(check_in.id)).to be true
     end
   end
 end
