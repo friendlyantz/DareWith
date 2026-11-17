@@ -9,7 +9,7 @@ module Webauthn
       user = User.find_by(username: session_params[:username])
 
       if user&.passkeys_left_on_old_domain?
-        render json: {errors: ["We moved to #{Rails.configuration.app_host}, so your passkey needs replacing. Sign in with email once, then add a new one."]}, status: :unprocessable_content
+        render json: {errors: [moved_domain_message(user)]}, status: :unprocessable_content
       elsif user
         get_options = WebAuthn::Credential.options_for_get(
           allow: user.credentials.pluck(:external_id),
@@ -68,6 +68,14 @@ module Webauthn
     end
 
     private
+
+    # Without an email they can't sign in alone, so the admin sends them a sign-in link
+    def moved_domain_message(user)
+      moved = "We moved to #{Rails.configuration.app_host}, so your passkey needs replacing."
+      return "#{moved} Sign in with email once, then add a new one." if user.email.present?
+
+      "#{moved} Your account has no email, so ask whoever invited you to DareWith for a sign-in link."
+    end
 
     def session_params
       params.require(:session).permit(:username)

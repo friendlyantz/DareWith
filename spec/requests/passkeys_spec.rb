@@ -53,10 +53,20 @@ RSpec.describe "Passkeys", type: :request do
     end
 
     it "tells them to sign in with email instead of offering a passkey that can't work" do
+      user.update!(email: "old-passkey@example.com")
+
       post webauthn_session_path, params: {session: {username: user.username}}, as: :json
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.parsed_body["errors"].first).to include("Sign in with email once")
+    end
+
+    it "tells people without an email to ask for a sign-in link" do
+      user.update!(email: nil)
+
+      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
+
+      expect(response.parsed_body["errors"].first).to include("ask whoever invited you")
     end
 
     it "sends them to add a new passkey once they sign in by email" do
