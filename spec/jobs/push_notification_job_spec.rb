@@ -8,6 +8,6 @@ RSpec.describe PushNotificationJob, type: :job do
     described_class.perform_now(subscription, title: "maya checked in", body: "Leg day", path: "/today")
 
     expect(subscription).to have_received(:send_notification)
-      .with(title: "maya checked in", body: "Leg day", path: "/today", icon: "/icons/icon-192.png")
+      .with(title: "maya checked in", body: "Leg day", path: "/today", icon: "/icons/icon-192.png", badge: "/icons/badge-96.png")
   end
 end
