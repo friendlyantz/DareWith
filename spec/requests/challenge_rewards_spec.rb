@@ -46,12 +46,21 @@ RSpec.describe "ChallengeRewards", type: :request do
       expect(response.body).not_to include("Settle up with")
     end
 
-    it "lets the receiver mark it received any time, from the challenge page" do
+    it "lets the receiver mark it received once time is up, from the challenge page" do
+      story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today)
       sign_in_as(receiver.user)
 
       get challenge_story_path(story)
 
       expect(response.body).to include("Mark as received")
+    end
+
+    it "doesn't let the receiver mark it received earlier in the challenge" do
+      sign_in_as(receiver.user)
+
+      get challenge_story_path(story)
+
+      expect(response.body).not_to include("Mark as received")
     end
   end
 
@@ -174,7 +183,10 @@ RSpec.describe "ChallengeRewards", type: :request do
     let!(:reward) { create(:challenge_reward, giver: giver, receiver: receiver, challenge_story: story) }
 
     context "when receiver fulfills" do
-      before { sign_in_as(receiver.user) }
+      before do
+        story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today)
+        sign_in_as(receiver.user)
+      end
 
       it "marks the reward as fulfilled" do
         patch fulfill_challenge_story_challenge_reward_path(story, reward)
@@ -189,6 +201,17 @@ RSpec.describe "ChallengeRewards", type: :request do
         expect {
           patch fulfill_challenge_story_challenge_reward_path(story, reward)
         }.to have_enqueued_job(PushNotificationJob).with(device, hash_including(title: "#{receiver.name} received your reward"))
+      end
+    end
+
+    context "when receiver fulfills before the last day" do
+      before { sign_in_as(receiver.user) }
+
+      it "leaves the reward pending" do
+        patch fulfill_challenge_story_challenge_reward_path(story, reward)
+
+        expect(reward.reload).to be_pending
+        expect(flash[:alert]).to include("last day")
       end
     end
 

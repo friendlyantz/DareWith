@@ -41,7 +41,7 @@
       <% end %>
     <% end %>
 
-    <% if receiving || (giving && challenge_story.finished?) %>
+    <% if (receiving && challenge_story.settle_up_open?) || (giving && challenge_story.finished?) %>
       <div class="flex justify-end gap-2">
         <% if giving && challenge_story.finished? %>
           <%= button_to "Cancel", cancel_challenge_story_challenge_reward_path(challenge_story, reward),
@@ -49,7 +49,7 @@
             class: "btn btn-sm btn-ghost text-error",
             data: {turbo_confirm: "Cancel this reward? #{reward.receiver.name} won't get it."} %>
         <% end %>
-        <% if receiving %>
+        <% if receiving && challenge_story.settle_up_open? %>
           <%= button_to "Mark as received", fulfill_challenge_story_challenge_reward_path(challenge_story, reward),
             method: :patch,
             class: "btn btn-sm btn-primary",

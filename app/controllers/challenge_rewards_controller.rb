@@ -5,6 +5,7 @@ class ChallengeRewardsController < ApplicationController
   before_action :set_challenge_story
   before_action :set_reward, only: [:fulfill, :cancel]
   before_action :verify_receiver, only: [:fulfill]
+  before_action :verify_settle_up_open, only: [:fulfill]
   before_action :verify_giver, only: [:cancel]
 
   def index
@@ -95,6 +96,13 @@ class ChallengeRewardsController < ApplicationController
 
     redirect_to challenge_story_challenge_rewards_path(@challenge_story),
       alert: "You can only fulfill rewards pledged to you."
+  end
+
+  def verify_settle_up_open
+    return if @challenge_story.settle_up_open?
+
+    redirect_to challenge_story_challenge_rewards_path(@challenge_story),
+      alert: "Rewards can be marked as received from the last day of the challenge."
   end
 
   def reward_params
