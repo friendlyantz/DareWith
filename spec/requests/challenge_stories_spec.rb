@@ -115,6 +115,18 @@ RSpec.describe "ChallengeStories", type: :request do
     end
   end
 
+  describe "GET /challenge_stories/:id/edit" do
+    let(:story) { create(:challenge_story) }
+
+    context "when not signed in" do
+      it "redirects to sign in" do
+        get edit_challenge_story_path(story)
+
+        expect(response).to redirect_to(new_webauthn_session_path)
+      end
+    end
+  end
+
   describe "PATCH /challenge_stories/:id/complete" do
     let(:user) { create(:user) }
     let(:story) { create(:challenge_story) }
