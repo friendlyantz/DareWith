@@ -3,7 +3,7 @@ module ShareCardsHelper
   def share_card_values(participant)
     challenge_story = participant.challenge_story
     goal = challenge_story.goal
-    headline, caption = share_card_headline(participant)
+    headline, caption, emoji = share_card_headline(participant)
     photo = participant.latest_photo_check_in&.photo
 
     {
@@ -11,6 +11,7 @@ module ShareCardsHelper
       name: participant.name,
       headline:,
       caption:,
+      emoji:,
       progress_label: goal.progress_label,
       progress: share_card_progress(participant),
       url: challenge_story_url(challenge_story),
@@ -29,7 +30,7 @@ module ShareCardsHelper
     if challenge_story.total?
       ["#{goal.format_number(participant.total_amount)} / #{goal.format_amount(challenge_story.target_amount)}", "toward the target"]
     elsif streak > 1
-      ["🔥 #{streak}", "#{goal.period_name.pluralize(streak)} in a row"]
+      [streak.to_s, "#{goal.period_name.pluralize(streak)} in a row", "🔥"]
     elsif goal.measured?
       [goal.format_amount(participant.total_amount), "so far"]
     else

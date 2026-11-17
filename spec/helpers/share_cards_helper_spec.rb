@@ -14,10 +14,16 @@ RSpec.describe ShareCardsHelper, type: :helper do
 
       values = helper.share_card_values(participant)
 
-      expect(values).to include(title: "Push-ups", headline: "🔥 3", caption: "days in a row", progress_label: "Day 10 of 30")
+      expect(values).to include(title: "Push-ups", headline: "3", emoji: "🔥", caption: "days in a row", progress_label: "Day 10 of 30")
       expect(values[:progress]).to eq 0.333
       expect(values[:url]).to end_with "/challenge_stories/#{challenge_story.id}"
       expect(values[:photo_url]).to be_nil
+    end
+
+    it "has no emoji without a streak" do
+      check_in(3)
+
+      expect(helper.share_card_values(participant)[:emoji]).to be_nil
     end
 
     it "shows the total toward a target by the end, with the bar toward the target" do

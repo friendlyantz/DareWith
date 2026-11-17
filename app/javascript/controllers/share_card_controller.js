@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { copyText } from "controllers/clipboard_controller"
 
 const WIDTH = 1080
 const HEIGHT = 1920
@@ -12,7 +13,7 @@ const SANS = '"Inter", ui-sans-serif, system-ui, sans-serif'
 // The card is drawn on connect, because iOS only shares straight from the tap.
 export default class extends Controller {
   static values = {
-    title: String, name: String, headline: String, caption: String,
+    title: String, name: String, headline: String, caption: String, emoji: String,
     progressLabel: String, progress: Number, url: String, photoUrl: String
   }
 
@@ -20,7 +21,10 @@ export default class extends Controller {
     this.card = this.draw()
   }
 
+  // Instagram drops text shared with an image, so the link also goes on the clipboard for a Link sticker
   async share() {
+    copyText(this.urlValue)
+    this.confirmCopied()
     const file = new File([await this.card], "strivo-progress.png", { type: "image/png" })
 
     if (navigator.canShare?.({ files: [file] })) {
@@ -28,6 +32,13 @@ export default class extends Controller {
     } else {
       this.download(file)
     }
+  }
+
+  confirmCopied() {
+    this.element.classList.add("tooltip", "tooltip-open", "tooltip-top")
+    this.element.dataset.tip = "Link copied for a Link sticker"
+    clearTimeout(this.tooltipTimeout)
+    this.tooltipTimeout = setTimeout(() => this.element.classList.remove("tooltip-open"), 5000)
   }
 
   async draw() {
@@ -113,9 +124,8 @@ export default class extends Controller {
     context.fillText(this.captionValue, PADDING, y)
     context.globalAlpha = 1
 
-    y -= 80
-    context.font = `700 ${this.fitFontSize(context, this.headlineValue, width, 240)}px ${DISPLAY}`
-    context.fillText(this.headlineValue, PADDING, y)
+    y -= 90
+    this.drawHeadline(context, y, width)
 
     y -= 290
     context.font = `500 48px ${SANS}`
@@ -126,6 +136,24 @@ export default class extends Controller {
     context.font = `700 92px ${DISPLAY}`
     const lines = this.wrap(context, this.titleValue, width, 3)
     lines.reverse().forEach((line, index) => context.fillText(line, PADDING, y - 90 - index * 104))
+  }
+
+  // Emoji fonts draw bigger than the text and dip below the baseline (very much so on Android),
+  // so the emoji is drawn on its own at the number's height, resting on the baseline
+  drawHeadline(context, y, width) {
+    let x = PADDING
+    let size = 240
+
+    if (this.emojiValue) {
+      context.font = `${Math.round(size * 0.62)}px ${DISPLAY}`
+      const emoji = context.measureText(this.emojiValue)
+      context.fillText(this.emojiValue, x, y - emoji.actualBoundingBoxDescent)
+      x += emoji.width + 40
+    }
+
+    size = this.fitFontSize(context, this.headlineValue, PADDING + width - x, size)
+    context.font = `700 ${size}px ${DISPLAY}`
+    context.fillText(this.headlineValue, x, y)
   }
 
   fitFontSize(context, text, width, size) {
