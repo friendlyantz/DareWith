@@ -50,6 +50,43 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
     end
 
+    describe "inviting friends" do
+      let(:user) { create(:user) }
+
+      before { create(:challenge_participant, user:, challenge_story: story) }
+
+      it "shows an invite card and empty spots to someone alone in a challenge" do
+        sign_in_as(user)
+        get challenge_story_path(story)
+
+        expect(response.body).to include("Invite your friends").and include("Invite friends, 3 spots left")
+      end
+
+      it "drops the card once a friend joins, but keeps the empty spots" do
+        create(:challenge_participant, challenge_story: story)
+        sign_in_as(user)
+        get challenge_story_path(story)
+
+        expect(response.body).not_to include("Invite your friends")
+        expect(response.body).to include("Invite friends, 2 spots left")
+      end
+
+      it "doesn't invite when the challenge is full" do
+        create_list(:challenge_participant, 3, challenge_story: story)
+        sign_in_as(user)
+        get challenge_story_path(story)
+
+        expect(response.body).not_to include("Invite friends")
+      end
+
+      it "doesn't invite visitors" do
+        get challenge_story_path(story)
+
+        expect(response.body).not_to include("Invite friends")
+        expect(response.body).not_to include("Invite your friends")
+      end
+    end
+
     it "offers participants a progress card to share, but not visitors" do
       user = create(:user)
       create(:challenge_participant, user:, challenge_story: story)

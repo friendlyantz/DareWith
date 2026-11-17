@@ -1,4 +1,4 @@
-<%# locals: (challenge_story:) %>
+<%# locals: (challenge_story:, can_invite: false) %>
 <header class="flex flex-col gap-2">
   <% if challenge_story.completed? || challenge_story.finished? || challenge_story.round > 1 %>
     <div class="flex gap-2">
@@ -37,6 +37,18 @@
           <%= render "shared/avatar", name: participant.name, user: participant.user, checked_in: participant.checked_in_today? %>
         <% end %>
       </div>
+      <% if can_invite %>
+        <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_url(challenge_story) %>">
+          <button type="button" data-action="share-link#nativeShare" class="flex gap-1 -ml-1"
+            aria-label="Invite friends, <%= pluralize(challenge_story.available_spots, "spot") %> left">
+            <% challenge_story.available_spots.times do %>
+              <span class="grid size-8 place-items-center rounded-full border-2 border-dashed border-base-content/30 text-base-content/60">
+                <%= icon(:plus, css: "size-4") %>
+              </span>
+            <% end %>
+          </button>
+        </div>
+      <% end %>
       <% if challenge_story.accepting_check_ins? %>
         <span class="text-sm text-base-content/70">
           <%= challenge_story.checked_in_today_count %> of <%= challenge_story.active_participants.size %> checked in today

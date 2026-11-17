@@ -1,0 +1,21 @@
+<%# locals: (challenge_story:) %>
+<% url = challenge_story_url(challenge_story) %>
+<section class="card bg-base-100 border border-base-300">
+  <div class="card-body gap-3">
+    <h2 class="font-display text-xl font-semibold">Invite your friends</h2>
+    <p class="text-sm text-base-content/70">
+      Challenges are easier with friends keeping you honest. Send them the link; up to <%= pluralize(challenge_story.available_spots, "friend") %> can join.
+    </p>
+    <div class="grid grid-cols-2 gap-2">
+      <div data-controller="share-link" data-share-link-url-value="<%= url %>">
+        <button type="button" data-action="share-link#nativeShare" class="btn btn-primary btn-block rounded-full">
+          <%= icon(:share, css: "size-4") %> Share invite link
+        </button>
+      </div>
+      <button type="button" class="btn btn-block rounded-full"
+        data-controller="clipboard" data-clipboard-text-value="<%= url %>" data-clipboard-copied-value="Link copied" data-action="clipboard#copy">
+        Copy link
+      </button>
+    </div>
+  </div>
+</section>

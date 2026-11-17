@@ -4,9 +4,13 @@
 
 <%= tag.div class: "group/page w-full max-w-md flex flex-col gap-4", data: {controller: "sheet", can_reply: (true if @current_challenge_participant)} do %>
   <%= render "challenge_stories/top_bar", challenge_story: @challenge_story, participant: @current_challenge_participant %>
-  <%= render "challenge_stories/header", challenge_story: @challenge_story %>
+  <% can_invite = @current_challenge_participant && @challenge_story.accepting_check_ins? && !@challenge_story.at_capacity? %>
+  <%= render "challenge_stories/header", challenge_story: @challenge_story, can_invite: %>
 
   <% if @current_challenge_participant %>
+    <% if can_invite && @challenge_story.active_participants.size == 1 %>
+      <%= render "challenge_stories/invite_card", challenge_story: @challenge_story %>
+    <% end %>
     <% if @challenge_story.accepting_check_ins? %>
       <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @current_challenge_participant %>
     <% end %>
