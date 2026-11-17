@@ -52,7 +52,7 @@ class ChallengeStoriesController < ApplicationController
     if @challenge_story.save
       @challenge_story.find_or_activate_participant!(current_user)
       @challenge_story.invite_to_next_round(by: current_user) if @previous_challenge_story
-      redirect_to @challenge_story, notice: "Challenge story was successfully created."
+      redirect_to @challenge_story, notice: "Challenge created"
     else
       render :new, status: :unprocessable_content
     end
@@ -60,7 +60,7 @@ class ChallengeStoriesController < ApplicationController
 
   def update
     if @challenge_story.update(challenge_story_params)
-      redirect_to @challenge_story, notice: "Challenge story was successfully updated.", status: :see_other
+      redirect_to @challenge_story, notice: "Challenge updated", status: :see_other
     else
       render :edit, status: :unprocessable_content
     end

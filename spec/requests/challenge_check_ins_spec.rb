@@ -181,7 +181,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
       it "keeps the sheet open to celebrate a new badge" do
         post challenge_story_challenge_check_ins_path(story), params: valid_params
 
-        expect(response.body).not_to include("close-sheet")
+        expect(response.body).not_to include("data-close-sheet-after-value")
       end
 
       it "closes the sheet by itself when there's nothing new" do
@@ -190,7 +190,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
         post challenge_story_challenge_check_ins_path(story), params: valid_params
 
-        expect(response.body).to include('data-controller="close-sheet"')
+        expect(response.body).to include("data-close-sheet-after-value")
       end
 
       it "offers the progress card, which keeps a closing sheet open" do

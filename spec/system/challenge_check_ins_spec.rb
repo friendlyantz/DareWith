@@ -30,6 +30,32 @@ RSpec.describe "Challenge Check-ins", type: :system do
     expect(page).to have_content("Day 1: Completed my workout!")
   end
 
+  scenario "participant checks in from Today and stays there" do
+    visit today_path
+
+    click_on "Check in"
+
+    within "dialog" do
+      fill_in "message", with: "From Today"
+      click_on "submit"
+      click_on "Done"
+    end
+
+    expect(page).to have_current_path(today_path)
+    expect(page).to have_no_css("dialog[open]")
+  end
+
+  scenario "participant checks in from the form opened as its own page" do
+    visit new_challenge_story_challenge_check_in_path(challenge)
+
+    fill_in "message", with: "Opened in a new tab"
+    click_on "submit"
+    click_on "Done"
+
+    expect(page).to have_current_path(challenge_story_path(challenge))
+    expect(page).to have_content("You checked in today")
+  end
+
   scenario "participant cannot check in twice in one day" do
     create(:challenge_check_in, challenge_participant: participant, challenge_story: challenge)
 

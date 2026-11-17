@@ -4,13 +4,15 @@
     <%= render "challenge_rewards/reward_card", reward: reward, challenge_story: challenge_story %>
   <% end %>
 
-  <% if challenge_story.challenge_rewards.empty? %>
+  <% pledging_locked = participant && challenge_story.accepting_check_ins? && challenge_story.active_participants.size == 1 %>
+
+  <% if challenge_story.challenge_rewards.empty? && !pledging_locked %>
     <p class="py-6 text-center text-base-content/70">No rewards yet. Pledge one to raise the stakes.</p>
   <% end %>
 
   <% if participant && challenge_story.accepting_check_ins? %>
-    <% if challenge_story.active_participants.size == 1 %>
-      <p class="text-sm text-center text-base-content/70">Invite someone to unlock reward pledging.</p>
+    <% if pledging_locked %>
+      <p class="py-6 text-center text-base-content/70">Invite someone to unlock reward pledging.</p>
     <% elsif participant.unpledged_participants.any? %>
       <%= link_to "Pledge a reward", new_challenge_story_challenge_reward_path(challenge_story),
         class: "btn bg-base-100",

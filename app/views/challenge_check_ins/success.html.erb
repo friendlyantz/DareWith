@@ -4,7 +4,7 @@
 <% auto_close = @new_badges.empty? && !@challenge_participant.missing_pledges? %>
 <%= turbo_frame_tag "new_message" do %>
   <%= tag.div class: "flex flex-col items-center gap-5 pt-2 text-center",
-    data: ({controller: "close-sheet", action: "click->close-sheet#close", close_sheet_after_value: 4000} if auto_close) do %>
+    data: {controller: "close-sheet", action: ("click->close-sheet#close" if auto_close), close_sheet_after_value: (4000 if auto_close)}.compact do %>
     <div class="flex flex-col items-center gap-3">
       <div class="grid size-20 place-items-center rounded-full bg-accent/15 text-accent ring-2 ring-accent/40 motion-safe:animate-pop">
         <% if streak > 1 %>
@@ -46,9 +46,10 @@
         css: "btn btn-outline btn-block rounded-full",
         action: ("close-sheet#stay:stop" if auto_close) %>
       <p class="text-xs text-base-content/60">Sharing to Instagram? The link is copied too: paste it into a Link sticker.</p>
-      <form method="dialog">
-        <button class="btn btn-primary btn-block rounded-full">Done</button>
-      </form>
+      <%# Closes the sheet; opened as a full page, it goes to the challenge instead %>
+      <%= link_to "Done", challenge_story_path(challenge_story),
+        class: "btn btn-primary btn-block rounded-full",
+        data: {turbo_frame: "_top", action: "close-sheet#close"} %>
     </div>
   <% end %>
 <% end %>
