@@ -12,7 +12,11 @@
         <% end %>
         <%= render "shared/streak", challenge_story:, count: participant.streak.current, css: "ml-1" %>
       </p>
-      <progress class="progress progress-secondary h-1 mt-2.5" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"></progress>
+      <div class="flex items-center gap-2 mt-2.5">
+        <progress class="progress progress-secondary h-1" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"
+          aria-label="Challenge progress"></progress>
+        <span class="text-xs text-base-content/60 whitespace-nowrap">Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %></span>
+      </div>
     </div>
     <%= icon(:chevron_right, css: "size-5 mt-0.5 shrink-0 text-base-content/50") %>
   <% end %>
@@ -25,7 +29,7 @@
         <% end %>
       </div>
       <span class="text-sm text-base-content/70 truncate">
-        <%= challenge_story.checked_in_today_count %>/<%= challenge_story.active_participants.size %> today
+        <%= challenge_story.checked_in_today_count %> of <%= challenge_story.active_participants.size %> checked in today
       </span>
     </div>
 

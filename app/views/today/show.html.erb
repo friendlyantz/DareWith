@@ -16,6 +16,7 @@
 
   <% if @challenge_stories.any? %>
     <div id="today_summary" class="rounded-box bg-neutral text-neutral-content p-4 flex flex-col gap-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wide opacity-75">Your check-ins</p>
       <div class="flex items-baseline justify-between">
         <span class="font-semibold"><%= @done_count %> of <%= @challenge_stories.size %> done today</span>
         <span class="text-sm opacity-75">
