@@ -15,6 +15,25 @@ RSpec.describe "Today", type: :request do
 
       before { sign_in_as(user) }
 
+      it "shows this week's progress for a weekly challenge" do
+        story.update!(cadence: :weekly, times_per_period: 2, start: Time.zone.today - 1.day, finish: Time.zone.today + 12.days)
+        create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.yesterday)
+
+        get today_path
+
+        expect(response.body).to include("1 of 2 this week · 6 days left")
+        expect(response.body).to include("0 of 1 done today")
+      end
+
+      it "counts a weekly challenge as done once the week is" do
+        story.update!(cadence: :weekly, times_per_period: 1, start: Time.zone.today - 1.day, finish: Time.zone.today + 12.days)
+        create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.yesterday)
+
+        get today_path
+
+        expect(response.body).to include("Week done").and include("1 of 1 done today")
+      end
+
       it "invites the user to the next round of a past challenge" do
         round_one = create(:challenge_story, :finished, completed: true, title: "Gym")
         create(:challenge_participant, user:, challenge_story: round_one)

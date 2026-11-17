@@ -38,6 +38,26 @@ RSpec.describe User::WeeklyRecap do
     expect(recap.title).to eq("Your week: 1 of 7 days")
   end
 
+  it "gives weekly challenges their own line instead of counting their days" do
+    run = create(:challenge_story, :weekly, title: "Run", start: sunday - 4, times_per_period: 3)
+    weekly = create(:challenge_participant, user:, challenge_story: run)
+    check_in(weekly, sunday - 4, sunday - 2)
+    check_in(participant, sunday)
+
+    expect(recap.title).to eq("Your week: 1 of 7 days")
+    expect(recap.body).to eq("🔥 1-day streak in Morning run. Run: 2 of 3 this week")
+  end
+
+  it "has a plain title with only weekly challenges" do
+    participant.destroy!
+    run = create(:challenge_story, :weekly, title: "Run", start: sunday - 9, times_per_period: 2)
+    weekly = create(:challenge_participant, user:, challenge_story: run)
+    check_in(weekly, sunday - 9, sunday - 8, sunday - 1)
+
+    expect(recap.title).to eq("Your week")
+    expect(recap.body).to eq("🔥 1-week streak in Run. Run: 1 of 2 this week")
+  end
+
   it "encourages a fresh start when the week was empty" do
     expect(recap.title).to eq("Your week: 0 of 7 days")
     expect(recap.body).to eq("A new week starts tomorrow")

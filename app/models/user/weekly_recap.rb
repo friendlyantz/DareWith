@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Sunday evening summary of the last seven days: your days, your best streak and how friends did
+# Sunday evening summary of the last seven days: your days, each weekly challenge, your best streak and how friends did
 class User::WeeklyRecap
   FRIENDS_SHOWN = 3
 
@@ -15,12 +15,15 @@ class User::WeeklyRecap
     participants.any?
   end
 
+  # Days only add up across daily challenges; weekly ones get their own line
   def title
+    return "Your week" if possible_days.zero?
+
     "Your week: #{days_checked_in} of #{possible_days} days"
   end
 
   def body
-    [streak_line, friends_line].compact.join(". ")
+    [streak_line, *weekly_lines, friends_line].compact.join(". ")
   end
 
   private
@@ -38,14 +41,14 @@ class User::WeeklyRecap
   end
 
   def possible_days
-    @possible_days ||= participants
+    @possible_days ||= participants.select { it.challenge_story.daily? }
       .flat_map { |participant| (participant.challenge_story.start..participant.challenge_story.finish).to_a }
       .uniq.count { |day| week.cover?(day) }
   end
 
   # A check-in on the grace day after the end can't push this past the days on offer
   def days_checked_in
-    [days_in_week(participants), possible_days].min
+    [days_in_week(participants.select { it.challenge_story.daily? }), possible_days].min
   end
 
   def streak_line
@@ -53,7 +56,18 @@ class User::WeeklyRecap
     streak = best.streak.current(today)
     return "A new week starts tomorrow" if streak.zero?
 
-    "🔥 #{streak}-day streak in #{best.challenge_story.title}"
+    "🔥 #{streak}-#{best.challenge_story.goal.period_name} streak in #{best.challenge_story.title}"
+  end
+
+  # "Run: 2 of 3 this week", for weekly challenges still running
+  def weekly_lines
+    participants
+      .select { it.challenge_story.weekly? && it.challenge_story.finish >= today }
+      .map { "#{it.challenge_story.title}: #{it.challenge_story.goal.check_ins_in_period(check_in_dates(it), today)} of #{it.challenge_story.times_per_period} this week" }
+  end
+
+  def check_in_dates(participant)
+    participant.check_in_days.map(&:checked_in_on)
   end
 
   def friends_line

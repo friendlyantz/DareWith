@@ -7,7 +7,7 @@ class TodayController < ApplicationController
       .order(:finish)
       .partition(&:accepting_check_ins?)
 
-    @checked_in_count = @challenge_stories.count { it.participant_for(current_user).checked_in_today? }
+    @done_count = @challenge_stories.count { it.participant_for(current_user).done_for_now? }
     @round_invites = current_user.next_round_invites
   end
 end

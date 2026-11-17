@@ -15,7 +15,7 @@ RSpec.describe ChallengeStory::Goal do
     end
 
     it "describes a total target" do
-      expect(build(:challenge_story, unit: :km, target_amount: 100, target_scope: :total).goal.summary).to eq "100 km in total"
+      expect(build(:challenge_story, unit: :km, target_amount: 100, target_scope: :total).goal.summary).to eq "100 km each by the end"
     end
 
     it "describes a weekly cadence" do
@@ -40,5 +40,35 @@ RSpec.describe ChallengeStory::Goal do
     it "never pluralises km" do
       expect(build(:challenge_story, unit: :km).goal.format_amount(12)).to eq "12 km"
     end
+  end
+end
+
+RSpec.describe ChallengeStory::Goal, "periods" do
+  let(:start) { Date.new(2026, 11, 18) } # a Wednesday
+  let(:weekly) { build(:challenge_story, :weekly, start:, times_per_period: 3).goal }
+  let(:daily) { build(:challenge_story, start:, finish: start + 9.days).goal }
+
+  it "counts weeks from the start date, not from Monday" do
+    expect(weekly.period_index(start + 6.days)).to eq 0
+    expect(weekly.period_index(start + 7.days)).to eq 1
+    expect(weekly.progress_label(start + 7.days)).to eq "Week 2 of 4"
+    expect(daily.progress_label(start + 2.days)).to eq "Day 3 of 10"
+  end
+
+  it "knows how many days are left in the week" do
+    expect(weekly.days_left_in_period(start)).to eq 7
+    expect(weekly.days_left_in_period(start + 6.days)).to eq 1
+  end
+
+  it "keeps a week once it has enough check-ins" do
+    dates = [start, start + 2.days, start + 4.days, start + 8.days]
+
+    expect(weekly.kept_period_indexes(dates)).to eq [0]
+  end
+
+  it "counts the grace day after the end toward the last week" do
+    last_week = (start + 21.days..start + 22.days).to_a
+
+    expect(weekly.kept_period_indexes(last_week + [start + 28.days])).to eq [3]
   end
 end

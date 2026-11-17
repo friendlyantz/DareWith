@@ -239,9 +239,19 @@ RSpec.describe ChallengeStory, type: :model do
     end
 
     it "allows up to six times a week" do
-      expect(build(:challenge_story, cadence: :weekly, times_per_period: 6)).to be_valid
-      expect(build(:challenge_story, cadence: :weekly, times_per_period: 7)).not_to be_valid
-      expect(build(:challenge_story, cadence: :daily, times_per_period: 2)).not_to be_valid
+      expect(build(:challenge_story, :weekly, times_per_period: 6)).to be_valid
+      expect(build(:challenge_story, :weekly, times_per_period: 7)).not_to be_valid
+    end
+
+    it "ignores a weekly count on a daily challenge, since the form always sends one" do
+      expect(create(:challenge_story, cadence: :daily, times_per_period: 3).times_per_period).to eq 1
+    end
+
+    it "runs weekly challenges for whole weeks" do
+      story = build(:challenge_story, :weekly, start: Date.new(2026, 11, 17), finish: Date.new(2026, 11, 26))
+
+      expect(story).not_to be_valid
+      expect(story.errors[:finish]).to include("must make whole weeks for a weekly challenge, e.g. 30 Nov")
     end
 
     it "rejects unknown units instead of raising" do
@@ -283,7 +293,7 @@ RSpec.describe ChallengeStory, type: :model do
     let(:round_one) { create(:challenge_story, :finished, title: "Gym", description: "Any workout counts") }
 
     it "keeps the goal in the next round" do
-      round_one.update!(cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_time)
+      round_one.update!(finish: round_one.start + 13.days, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_time)
 
       expect(round_one.next_round).to have_attributes(cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_time")
     end

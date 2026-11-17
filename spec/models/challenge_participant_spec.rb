@@ -31,6 +31,34 @@ RSpec.describe ChallengeParticipant, type: :model do
     end
   end
 
+  describe "weekly challenges" do
+    let(:start) { Date.new(2026, 11, 18) }
+    let(:participant) { create(:challenge_participant, challenge_story: create(:challenge_story, :weekly, start:, times_per_period: 3)) }
+
+    def check_in(*days_from_start)
+      days_from_start.each { create(:challenge_check_in, challenge_participant: participant, checked_in_on: start + it) }
+    end
+
+    it "is done for the week after enough check-ins" do
+      check_in(0, 1, 2)
+
+      travel_to(start + 4.days) { expect(participant.reload).to be_done_for_now }
+    end
+
+    it "only reminds once the days left are just enough" do
+      check_in(0)
+
+      travel_to(start + 3.days) { expect(participant.reload.reminder_due_today?).to be false }
+      travel_to(start + 5.days) { expect(participant.reload.reminder_due_today?).to be true }
+    end
+
+    it "counts weeks kept for the leaderboard" do
+      check_in(0, 1, 2, 7, 8, 14, 15, 16)
+
+      expect(participant.reload.periods_kept).to eq 2
+    end
+  end
+
   describe "#rejoin!" do
     let(:participant) { create(:challenge_participant, :inactive) }
 

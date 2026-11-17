@@ -30,6 +30,18 @@
   </div>
 
   <fieldset class="group/goal flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
+    <div class="group/often grid grid-cols-2 gap-3">
+      <div class="col-span-2 group-has-[option[value='weekly']:checked]/often:col-span-1">
+        <%= form.label :cadence, "How often?", class: "text-sm font-semibold" %>
+        <%= form.select :cadence, [["Every day", "daily"], ["Weekly", "weekly"]], {}, class: "select w-full mt-1.5" %>
+      </div>
+      <div class="hidden group-has-[option[value='weekly']:checked]/often:block">
+        <%= form.label :times_per_period, "Times a week", class: "text-sm font-semibold" %>
+        <%= form.select :times_per_period, (1..6).map { ["#{it}× a week", it] }, {selected: challenge_story.weekly? ? challenge_story.times_per_period : 3}, class: "select w-full mt-1.5" %>
+      </div>
+      <p class="col-span-2 hidden text-sm text-base-content/70 group-has-[option[value='weekly']:checked]/often:block">Weeks start on the start date, so pick an end date that makes whole weeks.</p>
+    </div>
+
     <div>
       <%= form.label :unit, "What do you count?", class: "text-sm font-semibold" %>
       <%= form.select :unit,
@@ -47,10 +59,11 @@
           class: class_names("input w-full", "input-error": challenge_story.errors[:target_amount].any?),
           placeholder: "e.g. 50" %>
         <%= form.select :target_scope,
-          [["each time", "each_time"], ["in total", "total"]],
+          [["each time", "each_time"], ["by the end", "total"]],
           {},
           class: "select w-full" %>
       </div>
+      <p class="mt-1.5 text-sm text-base-content/70 hidden group-has-[option[value='total']:checked]/goal:block">Everyone aims for this much by the end date, counting all their check-ins.</p>
       <% challenge_story.errors.full_messages_for(:target_amount).each do |message| %>
         <p class="mt-1 text-sm text-error"><%= message %></p>
       <% end %>

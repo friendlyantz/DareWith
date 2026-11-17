@@ -60,7 +60,7 @@
               <div class="flex-1 min-w-0">
                 <p class="truncate font-medium"><%= challenge_story.title %></p>
                 <p class="text-sm text-base-content/70">
-                  Day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %> ·
+                  <%= challenge_story.goal.progress_label %> ·
                   <%= pluralize(challenge_story.challenge_participants_count, "person") %> ·
                   <%= pluralize(challenge_story.challenge_check_ins_count, "check-in") %>
                 </p>

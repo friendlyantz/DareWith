@@ -3,8 +3,10 @@ require "rails_helper"
 RSpec.describe ChallengeParticipant::Streak do
   let(:today) { Date.new(2026, 11, 17) }
 
+  let(:daily) { build(:challenge_story, start: today - 30.days, finish: today + 30.days).goal }
+
   def streak(*days_ago)
-    described_class.new(days_ago.map { today - it })
+    described_class.new(days_ago.map { today - it }, daily)
   end
 
   describe "#current" do
@@ -39,5 +41,26 @@ RSpec.describe ChallengeParticipant::Streak do
     it "is false after missing one day" do
       expect(streak(0, 2).comeback?).to be false
     end
+  end
+end
+
+RSpec.describe ChallengeParticipant::Streak, "weekly" do
+  let(:start) { Date.new(2026, 11, 2) }
+  let(:goal) { build(:challenge_story, :weekly, start:, finish: start + 55.days, times_per_period: 2).goal }
+
+  def streak(*days_from_start)
+    described_class.new(days_from_start.map { start + it }, goal)
+  end
+
+  it "counts weeks that hit the weekly count" do
+    expect(streak(0, 3, 7, 9, 14).current(start + 15.days)).to eq 2
+  end
+
+  it "stays alive while this week is still open" do
+    expect(streak(0, 3, 7, 9).current(start + 20.days)).to eq 2
+  end
+
+  it "breaks after a week that missed the count" do
+    expect(streak(0, 3, 7).current(start + 15.days)).to eq 0
   end
 end

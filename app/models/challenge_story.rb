@@ -28,6 +28,7 @@ class ChallengeStory < ApplicationRecord
   validates :description, presence: true, length: {maximum: 500}
   validates :start, :finish, presence: true
   validate :finish_cannot_be_earlier_than_start
+  validate :whole_weeks, if: :weekly?
   validates :times_per_period, inclusion: {in: ->(story) { story.weekly? ? 1..6 : [1] }}
   validates :target_amount, numericality: {greater_than: 0, less_than: 100_000_000}, allow_nil: true
   validates :target_amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { goal.whole_numbers? }
@@ -35,8 +36,9 @@ class ChallengeStory < ApplicationRecord
   validate :goal_locked_after_first_check_in, on: :update
 
   # Callbacks
-  # A target only means something with a unit, and the form always sends a scope
+  # The form always sends a weekly count and a scope, and a target only means something with a unit
   before_validation do
+    self.times_per_period = 1 if daily?
     self.target_amount = nil if unit.blank?
     self.target_scope = nil if target_amount.blank?
   end
@@ -96,7 +98,7 @@ class ChallengeStory < ApplicationRecord
   end
 
   def ranked_participants
-    active_participants.sort_by { -it.challenge_check_ins_count }
+    active_participants.sort_by { [-it.periods_kept, -it.challenge_check_ins_count] }
   end
 
   def participant_for(user)
@@ -183,6 +185,12 @@ class ChallengeStory < ApplicationRecord
     if finish.present? && start.present? && finish < start
       errors.add(:finish, "cannot be earlier than the start date")
     end
+  end
+
+  def whole_weeks
+    return if start.blank? || finish.blank? || finish < start || (duration_in_days % 7).zero?
+
+    errors.add(:finish, "must make whole weeks for a weekly challenge, e.g. #{(start + (duration_in_days.fdiv(7).ceil * 7 - 1).days).strftime("%-d %b")}")
   end
 
   # Check-ins already count toward the old goal, so changing it would rewrite history

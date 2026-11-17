@@ -12,9 +12,9 @@
       </div>
       <div>
         <p class="font-display text-2xl font-bold">
-          <%= streak > 1 ? "#{streak} days in a row" : "Checked in" %>
+          <%= streak > 1 ? streak_phrase(streak, challenge_story) : "Checked in" %>
         </p>
-        <p class="text-sm text-base-content/70"><%= challenge_story.title %> · day <%= challenge_story.current_day %> of <%= challenge_story.duration_in_days %></p>
+        <p class="text-sm text-base-content/70"><%= challenge_story.title %> · <%= challenge_story.goal.progress_label.downcase %></p>
       </div>
     </div>
 

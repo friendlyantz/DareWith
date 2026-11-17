@@ -38,7 +38,7 @@ class Badge::Awarder
 
   def challenge_kinds(participant)
     streak = participant.streak
-    kinds = STREAK_DAYS.select { |_kind, days| streak.longest >= days }.keys
+    kinds = participant.challenge_story.daily? ? STREAK_DAYS.select { |_kind, days| streak.longest >= days }.keys : []
     kinds << :comeback if streak.comeback?
     kinds + completion_kinds(participant)
   end
@@ -47,7 +47,7 @@ class Badge::Awarder
     challenge_story = participant.challenge_story
     return [] unless challenge_story.completed?
 
-    share = participant.days_checked_in.fdiv(challenge_story.duration_in_days)
+    share = participant.periods_kept.fdiv(challenge_story.goal.period_count)
     kinds = []
     kinds << :finisher if share >= FINISHER_SHARE
     kinds << :flawless if share >= 1

@@ -8,7 +8,7 @@
     <%= link_to new_challenge_story_challenge_check_in_path(challenge_story),
       class: "btn btn-primary btn-lg btn-block",
       data: {turbo_frame: "new_message", action: "sheet#open"} do %>
-      <%= icon(:camera) %> Check in · day <%= challenge_story.current_day %>
+      <%= icon(:camera) %> <%= check_in_button_label(participant) %>
     <% end %>
   <% elsif challenge_story.wrapping_up? %>
     <%= link_to challenge_story_challenge_rewards_path(challenge_story), class: "btn btn-primary btn-lg btn-block" do %>

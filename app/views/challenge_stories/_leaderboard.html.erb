@@ -1,6 +1,9 @@
 <%# locals: (challenge_story:) %>
 <% if challenge_story.active_participants.any? %>
-  <p class="text-sm text-base-content/70 mb-2">Days checked in, out of <%= challenge_story.current_day %> so far</p>
+  <% so_far = challenge_story.goal.current_period_number %>
+  <p class="text-sm text-base-content/70 mb-2">
+    <%= challenge_story.weekly? ? "Weeks with #{challenge_story.times_per_period} check-ins" : "Days checked in" %>, out of <%= so_far %> so far
+  </p>
   <ol class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
     <% challenge_story.ranked_participants.each.with_index(1) do |participant, rank| %>
       <li class="flex items-center gap-3 px-4 py-3">
@@ -10,13 +13,17 @@
           <div class="flex justify-between gap-2">
             <span class="flex min-w-0 items-center gap-1.5">
               <span class="font-semibold truncate"><%= participant.name %></span>
-              <%= render "shared/streak", days: participant.streak.current %>
+              <%= render "shared/streak", challenge_story:, count: participant.streak.current %>
             </span>
-            <span class="text-sm text-base-content/70 shrink-0"><%= participant.challenge_check_ins_count %> / <%= challenge_story.current_day %></span>
+            <span class="text-sm text-base-content/70 shrink-0"><%= participant.periods_kept %> / <%= so_far %></span>
           </div>
-          <progress class="progress progress-secondary h-1.5" value="<%= participant.challenge_check_ins_count %>" max="<%= challenge_story.current_day %>"></progress>
+          <progress class="progress progress-secondary h-1.5" value="<%= participant.periods_kept %>" max="<%= so_far %>"></progress>
         </div>
-        <% if participant.checked_in_today? %>
+        <% if challenge_story.weekly? %>
+          <span class="<%= class_names("w-16 text-right text-xs font-semibold", participant.period_kept? ? "text-info" : "text-base-content/60") %>">
+            <%= participant.check_ins_this_period %>/<%= challenge_story.times_per_period %> week
+          </span>
+        <% elsif participant.checked_in_today? %>
           <span class="w-16 text-right text-xs font-semibold text-info">Today ✓</span>
         <% else %>
           <span class="w-16 text-right text-xs font-semibold text-base-content/60">Not yet</span>

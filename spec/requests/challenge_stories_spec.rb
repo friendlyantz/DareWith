@@ -93,6 +93,14 @@ RSpec.describe "ChallengeStories", type: :request do
         expect(response.body).to include("50 reps each time")
       end
 
+      it "creates a weekly challenge" do
+        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(cadence: "weekly", times_per_period: "3", finish: Time.zone.today + 27.days)}
+
+        expect(ChallengeStory.last).to have_attributes(cadence: "weekly", times_per_period: 3)
+        follow_redirect!
+        expect(response.body).to include("Week 1 of 4").and include("3× a week")
+      end
+
       it "adds the creator as a participant" do
         post challenge_stories_path, params: valid_params
 

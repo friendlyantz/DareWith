@@ -40,6 +40,13 @@ RSpec.describe Badge::Awarder do
     expect(award.tally).to eq("first_check_in" => 1, "three_day_streak" => 2)
   end
 
+  it "doesn't award day streak badges in weekly challenges" do
+    challenge_story.update!(cadence: :weekly, times_per_period: 1, start: Time.zone.today - 13.days)
+    check_in_days_ago(0, 1, 2)
+
+    expect(award).to contain_exactly("first_check_in")
+  end
+
   it "awards a comeback after missing a few days" do
     check_in_days_ago(0, 5)
 

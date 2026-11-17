@@ -6,10 +6,54 @@ class ChallengeStory::Goal
   private attr_reader :challenge_story
 
   delegate :cadence, :times_per_period, :unit, :target_amount, :target_scope,
-    :weekly?, :each_time?, :total?, to: :challenge_story
+    :weekly?, :each_time?, :total?, :start, :finish, :duration_in_days, to: :challenge_story
 
   def initialize(challenge_story)
     @challenge_story = challenge_story
+  end
+
+  # Periods are days, or weeks counted from the start date
+  def period_name
+    weekly? ? "week" : "day"
+  end
+
+  def period_length
+    weekly? ? 7 : 1
+  end
+
+  def period_count
+    duration_in_days.fdiv(period_length).ceil
+  end
+
+  # Zero-based, and not clamped, so the day after the end is past the last period
+  def period_index(date)
+    (date - start).to_i.div(period_length)
+  end
+
+  def current_period_number(today = Time.zone.today)
+    period_index(today).clamp(0, period_count - 1) + 1
+  end
+
+  # "Day 3 of 30", "Week 2 of 4"
+  def progress_label(today = Time.zone.today)
+    "#{period_name.capitalize} #{current_period_number(today)} of #{period_count}"
+  end
+
+  def days_left_in_period(today = Time.zone.today)
+    period_length - (today - start).to_i.modulo(period_length)
+  end
+
+  # Check-ins on the grace day after the end count toward the last period.
+  # Ones before the start keep their negative index, so they can still begin a streak.
+  def kept_period_indexes(dates)
+    dates.uniq
+      .map { [period_index(it), period_count - 1].min }
+      .tally.select { |_index, check_ins| check_ins >= times_per_period }
+      .keys.sort
+  end
+
+  def check_ins_in_period(dates, today = Time.zone.today)
+    dates.uniq.count { period_index(it) == period_index(today) }
   end
 
   def measured?
@@ -59,6 +103,6 @@ class ChallengeStory::Goal
     return unless measured?
     return "counting #{unit_label}" unless targeted?
 
-    "#{format_amount(target_amount)} #{each_time? ? "each time" : "in total"}"
+    "#{format_amount(target_amount)} #{each_time? ? "each time" : "each by the end"}"
   end
 end

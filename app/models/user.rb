@@ -74,10 +74,10 @@ class User < ApplicationRecord
 
   def challenges_to_check_in_today
     Time.use_zone(time_zone) do
-      active_challenge_stories.includes(active_participants: :todays_check_ins).select do |challenge_story|
+      active_challenge_stories.includes(active_participants: [:todays_check_ins, :check_in_days]).select do |challenge_story|
         challenge_story.accepting_check_ins? &&
           challenge_story.start <= Time.zone.today &&
-          !challenge_story.participant_for(self).checked_in_today?
+          challenge_story.participant_for(self).reminder_due_today?
       end
     end
   end

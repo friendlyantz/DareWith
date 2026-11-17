@@ -17,12 +17,12 @@
   <% if @challenge_stories.any? %>
     <div id="today_summary" class="rounded-box bg-neutral text-neutral-content p-4 flex flex-col gap-2.5">
       <div class="flex items-baseline justify-between">
-        <span class="font-semibold"><%= @checked_in_count %> of <%= @challenge_stories.size %> done today</span>
+        <span class="font-semibold"><%= @done_count %> of <%= @challenge_stories.size %> done today</span>
         <span class="text-sm opacity-75">
-          <%= @checked_in_count == @challenge_stories.size ? "All done" : "#{@challenge_stories.size - @checked_in_count} to go" %>
+          <%= @done_count == @challenge_stories.size ? "All done" : "#{@challenge_stories.size - @done_count} to go" %>
         </span>
       </div>
-      <progress class="progress progress-primary h-1.5" value="<%= @checked_in_count %>" max="<%= @challenge_stories.size %>"></progress>
+      <progress class="progress progress-primary h-1.5" value="<%= @done_count %>" max="<%= @challenge_stories.size %>"></progress>
     </div>
 
     <%= render partial: "today/challenge_card", collection: @challenge_stories, as: :challenge_story %>

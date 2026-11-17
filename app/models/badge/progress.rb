@@ -41,7 +41,7 @@ class Badge::Progress
 
   def best_current_streak
     user.challenge_participants.active
-      .merge(ChallengeStory.active).joins(:challenge_story)
+      .merge(ChallengeStory.active.daily).joins(:challenge_story)
       .includes(:check_in_days)
       .map { it.streak.current }.max || 0
   end

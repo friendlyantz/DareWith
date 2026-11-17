@@ -10,6 +10,12 @@ FactoryBot.define do
       completed { true }
     end
 
+    trait :weekly do
+      cadence { :weekly }
+      times_per_period { 3 }
+      finish { start + 27.days }
+    end
+
     trait :finished do
       start { Time.zone.today - 10.days }
       finish { Time.zone.today - 3.days }

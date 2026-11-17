@@ -26,13 +26,33 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   def streak
-    @streak ||= Streak.new(check_in_dates)
+    @streak ||= Streak.new(check_in_dates, challenge_story.goal)
   end
 
-  # Days with a check-in while the challenge ran, counting the grace day after it
-  def days_checked_in
-    (check_in_dates & (challenge_story.start..challenge_story.finish + 1.day).to_a).size
-      .clamp(0, challenge_story.duration_in_days)
+  # Days with a check-in, or weeks that hit the weekly count
+  def periods_kept
+    challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }
+  end
+
+  def check_ins_this_period
+    challenge_story.goal.check_ins_in_period(check_in_dates)
+  end
+
+  def period_kept?
+    check_ins_this_period >= challenge_story.times_per_period
+  end
+
+  # Nothing left to do today: checked in, or this week's check-ins are done
+  def done_for_now?
+    checked_in_today? || period_kept?
+  end
+
+  # Daily: any day without a check-in. Weekly: only once the days left are just enough
+  def reminder_due_today?
+    return false if done_for_now?
+    return true if challenge_story.daily?
+
+    challenge_story.times_per_period - check_ins_this_period >= challenge_story.goal.days_left_in_period
   end
 
   def announce_joining
