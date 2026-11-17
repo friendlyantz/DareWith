@@ -3,8 +3,11 @@
   <% goal = challenge_story.goal %>
   <% so_far = goal.current_period_number %>
   <% mine = current_user && challenge_story.participant_for(current_user) %>
+  <% solo = mine && challenge_story.active_participants.size == 1 %>
   <p class="text-sm text-base-content/70 mb-2">
-    <% if challenge_story.total? %>
+    <% if solo %>
+      Just one person so far. Invite friends to make it a race.
+    <% elsif challenge_story.total? %>
       Totals so far, aiming for <%= goal.format_amount(challenge_story.target_amount) %> each
     <% else %>
       <%= challenge_story.weekly? ? "Weeks with #{challenge_story.times_per_period} check-ins" : "Days checked in" %>, out of <%= so_far %> so far
@@ -13,7 +16,7 @@
   <ol class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
     <% challenge_story.ranked_participants.each.with_index(1) do |participant, rank| %>
       <li class="flex items-center gap-3 px-4 py-3">
-        <span class="w-4 font-display font-bold text-base-content/60"><%= rank %></span>
+        <% unless solo %><span class="w-4 font-display font-bold text-base-content/60"><%= rank %></span><% end %>
         <%= render "shared/avatar", name: participant.name, user: participant.user, checked_in: participant.checked_in_today?, size: "size-9" %>
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <div class="flex items-baseline justify-between gap-2">

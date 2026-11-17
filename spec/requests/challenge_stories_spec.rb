@@ -42,12 +42,35 @@ RSpec.describe "ChallengeStories", type: :request do
       user = create(:user)
       participant = create(:challenge_participant, user:, challenge_story: story)
       create(:challenge_check_in, challenge_participant: participant, amount: 10)
+      create(:challenge_participant, challenge_story: story)
       sign_in_as(user)
 
       get challenge_story_path(story)
 
       expect(response.body).to include("10/100").and include("aiming for 100 km each")
       expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
+    end
+
+    describe "alone in a challenge" do
+      before do
+        user = create(:user)
+        create(:challenge_participant, user:, challenge_story: story)
+        sign_in_as(user)
+      end
+
+      it "skips the race wording on the leaderboard" do
+        get challenge_story_path(story)
+
+        expect(response.body).to include("Invite friends to make it a race")
+        expect(response.body).not_to include("so far</p>")
+      end
+
+      it "only says to invite someone on the rewards tab" do
+        get challenge_story_path(story)
+
+        expect(response.body).to include("Invite someone to unlock reward pledging")
+        expect(response.body).not_to include("Pledge one to raise the stakes")
+      end
     end
 
     describe "inviting friends" do
