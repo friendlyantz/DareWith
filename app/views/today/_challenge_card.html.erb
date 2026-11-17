@@ -10,7 +10,7 @@
         <% else %>
           <%= challenge_story.goal.progress_label %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
         <% end %>
-        <%= render "shared/streak", challenge_story:, count: participant.streak.current, css: "ml-1" %>
+        <%= render "shared/streak", challenge_story:, count: participant.streak.current, freezes: participant.streak.freezes, css: "ml-1" %>
       </p>
       <div class="flex items-center gap-2 mt-2.5">
         <progress class="progress progress-secondary h-1" value="<%= challenge_story.current_day %>" max="<%= challenge_story.duration_in_days %>"
@@ -22,6 +22,7 @@
   <% end %>
 
   <%= render "challenge_nudges/nudged_by", participant:, css: "mx-4 mb-2" %>
+  <%= render "today/freeze_used", participant:, css: "mx-4 mb-2" %>
 
   <div class="flex items-center justify-between gap-3 px-4 pb-4">
     <div class="flex items-center gap-2.5 min-w-0">

@@ -231,6 +231,23 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
         expect(response.body).to include("2 days in a row")
       end
+
+      it "shows the days to go for a streak freeze" do
+        create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.yesterday)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include("5 more days to earn a streak freeze")
+      end
+
+      it "celebrates a streak freeze on the 7th day in a row" do
+        (1..6).each { create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.today - it) }
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include("Streak freeze earned")
+        expect(response.body).not_to include("data-close-sheet-after-value")
+      end
     end
 
     context "with invalid params" do

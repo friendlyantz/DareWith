@@ -32,4 +32,22 @@ module GoalsHelper
   def streak_phrase(count, challenge_story)
     "#{pluralize(count, challenge_story.goal.period_name)} in a row"
   end
+
+  def freezes_phrase(freezes)
+    "#{pluralize(freezes, "streak freeze")}: #{(freezes == 1) ? "covers a day" : "cover days"} you miss"
+  end
+
+  # "2 more days to earn a streak freeze", or nil for weekly challenges
+  def freeze_progress_phrase(streak)
+    freezes = streak.freezes
+    days = streak.days_to_next_freeze
+
+    if days.nil?
+      "#{freezes} freezes ready: miss a day and your streak keeps going" if freezes.positive?
+    elsif freezes.zero?
+      "#{pluralize(days, "more day")} to earn a streak freeze"
+    else
+      "#{pluralize(freezes, "freeze")} · #{pluralize(days, "more day")} to earn another"
+    end
+  end
 end

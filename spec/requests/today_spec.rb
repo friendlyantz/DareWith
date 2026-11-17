@@ -47,6 +47,14 @@ RSpec.describe "Today", type: :request do
         expect(response.body).to include(challenge_participants_path(challenge_story_id: round_two.id))
       end
 
+      it "says when a freeze saved the streak yesterday" do
+        (2..8).each { create(:challenge_check_in, challenge_participant: participant, checked_in_on: Time.zone.today - it) }
+
+        get today_path
+
+        expect(response.body).to include("A freeze saved your 7 days in a row yesterday")
+      end
+
       it "offers a check-in for each active challenge" do
         get today_path
 

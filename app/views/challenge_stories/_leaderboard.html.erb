@@ -49,7 +49,7 @@
           <% forecast = forecast_line(participant) if participant == mine %>
           <% if participant.streak.current > 1 || details.any? || forecast %>
             <p class="flex flex-wrap items-center gap-x-1.5 text-xs text-base-content/70">
-              <%= render "shared/streak", challenge_story:, count: participant.streak.current, css: "text-xs" %>
+              <%= render "shared/streak", challenge_story:, count: participant.streak.current, freezes: participant.streak.freezes, css: "text-xs" %>
               <%= details.join(" · ") %>
               <% if forecast %><span class="font-semibold text-secondary"><%= forecast %></span><% end %>
             </p>

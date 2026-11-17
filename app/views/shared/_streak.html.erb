@@ -1,7 +1,13 @@
-<%# locals: (challenge_story:, count:, css: "") %>
+<%# locals: (challenge_story:, count:, freezes: 0, css: "") %>
 <% if count > 1 %>
   <span class="inline-flex shrink-0 items-center gap-0.5 align-text-bottom text-sm font-semibold text-accent <%= css %>" title="<%= streak_phrase(count, challenge_story) %>">
     <%= icon(:flame, css: "size-4") %><%= count %>
     <span class="sr-only"><%= challenge_story.goal.period_name.pluralize %> in a row</span>
   </span>
+  <% if freezes.positive? %>
+    <span class="inline-flex shrink-0 items-center gap-0.5 align-text-bottom text-sm font-semibold text-info <%= css %>" title="<%= freezes_phrase(freezes) %>">
+      <%= icon(:snowflake, css: "size-4") %><%= freezes %>
+      <span class="sr-only"><%= pluralize(freezes, "streak freeze") %></span>
+    </span>
+  <% end %>
 <% end %>

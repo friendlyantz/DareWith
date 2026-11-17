@@ -2,7 +2,7 @@
 <% streak = @challenge_participant.streak.current %>
 <%# Only stays open when there's something new to read %>
 <% ask_for_push = !current_user.push_enabled? %>
-<% auto_close = @new_badges.empty? && !@challenge_participant.missing_pledges? && !ask_for_push %>
+<% auto_close = @new_badges.empty? && !@challenge_participant.streak.freeze_earned_today? && !@challenge_participant.missing_pledges? && !ask_for_push %>
 <%= turbo_frame_tag "new_message" do %>
   <%= tag.div class: "flex flex-col items-center gap-5 pt-2 text-center",
     data: {controller: "close-sheet", action: ("click->close-sheet#close" if auto_close), close_sheet_after_value: (4000 if auto_close)}.compact do %>
@@ -19,8 +19,22 @@
           <%= streak > 1 ? streak_phrase(streak, challenge_story) : "Checked in" %>
         </p>
         <p class="text-sm text-base-content/70"><%= challenge_story.title %> · <%= challenge_story.goal.progress_label.downcase %></p>
+        <% unless @challenge_participant.streak.freeze_earned_today? %>
+          <% if (freeze_progress = freeze_progress_phrase(@challenge_participant.streak)) %>
+            <p class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-info">
+              <%= icon(:snowflake, css: "size-4 shrink-0") %><%= freeze_progress %>
+            </p>
+          <% end %>
+        <% end %>
       </div>
     </div>
+
+    <% if @challenge_participant.streak.freeze_earned_today? %>
+      <p class="flex w-full items-center gap-3 rounded-box border border-info/30 bg-info/10 px-4 py-3 text-left text-sm motion-safe:animate-pop [animation-delay:300ms]">
+        <%= icon(:snowflake, css: "size-6 shrink-0 text-info") %>
+        <span><span class="font-semibold">Streak freeze earned.</span> Miss a day and it keeps your streak going.</span>
+      </p>
+    <% end %>
 
     <% if @new_badges.any? %>
       <ul class="flex w-full flex-col gap-2">

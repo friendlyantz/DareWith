@@ -1,0 +1,7 @@
+<%# locals: (participant:, css: "") %>
+<% if participant.streak.frozen_yesterday? && !participant.checked_in_today? %>
+  <p class="<%= class_names("flex items-center gap-2 rounded-box border border-info/30 bg-info/10 px-3 py-2 text-sm", css) %>">
+    <%= icon(:snowflake, css: "size-4 shrink-0 text-info") %>
+    <span>A freeze saved your <%= streak_phrase(participant.streak.current, participant.challenge_story) %> yesterday. Check in today to keep it going.</span>
+  </p>
+<% end %>
