@@ -72,6 +72,15 @@ class ChallengeStory::Finale
     most_check_ins_where { it >= NIGHT_OWL_FROM_HOUR }
   end
 
+  # Settled or not, what each person is getting; withdrawn pledges are left out
+  def rewards_for(participant)
+    challenge_story.challenge_rewards.select { it.receiver_id == participant.id && !it.canceled? }
+  end
+
+  def rewards?
+    participants.any? { rewards_for(it).any? }
+  end
+
   def highlights?
     [longest_streaker, most_liked_check_in, early_bird, night_owl].any?
   end

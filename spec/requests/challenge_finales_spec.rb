@@ -21,6 +21,17 @@ RSpec.describe "ChallengeFinales", type: :request do
       expect(response.body).to include("Morning run", "That's a wrap", "3 of 8 days", "Longest streak")
     end
 
+    it "shows what everyone gets rewarded with" do
+      story = create(:challenge_story, :finished)
+      anna = create(:challenge_participant, challenge_story: story, user: create(:user, username: "anna"))
+      bob = create(:challenge_participant, challenge_story: story, user: create(:user, username: "bob"))
+      create(:challenge_reward, giver: anna, receiver: bob, challenge_story: story, description: "Dinner at Mario's")
+
+      get challenge_story_challenge_finale_path(story)
+
+      expect(response.body).to include("The rewards", "bob gets", "Dinner at Mario&#39;s", "from anna")
+    end
+
     it "offers the participant their finish card" do
       user = create(:user)
       story = create(:challenge_story, :finished, :with_participant, participant_user: user)

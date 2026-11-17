@@ -88,6 +88,17 @@ RSpec.describe ChallengeStory::Finale do
     end
   end
 
+  describe "#rewards_for" do
+    it "lists what someone gets, settled or not, but not withdrawn pledges" do
+      pending_reward = create(:challenge_reward, giver: anna, receiver: bob, challenge_story: story, description: "A coffee")
+      fulfilled = create(:challenge_reward, giver: create(:challenge_participant, challenge_story: story), receiver: bob, challenge_story: story, status: :fulfilled)
+      create(:challenge_reward, giver: bob, receiver: anna, challenge_story: story, status: :canceled)
+
+      expect(finale.rewards_for(bob)).to contain_exactly(pending_reward, fulfilled)
+      expect(finale.rewards_for(anna)).to be_empty
+    end
+  end
+
   describe "#flawless?" do
     it "is true only for someone who kept every day" do
       story.duration_in_days.times { check_in(anna, it) }

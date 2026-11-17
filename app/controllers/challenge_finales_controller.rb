@@ -3,6 +3,7 @@ class ChallengeFinalesController < ApplicationController
     @challenge_story = ChallengeStory
       .includes(
         active_participants: [{user: {avatar_attachment: :blob}}, :check_in_days],
+        challenge_rewards: {giver: {user: {avatar_attachment: :blob}}},
         challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, photo_attachment: :blob]
       )
       .find(params[:challenge_story_id])
