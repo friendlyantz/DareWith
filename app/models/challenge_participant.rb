@@ -122,6 +122,10 @@ class ChallengeParticipant < ApplicationRecord
     (other_active_ids - pledged_ids).empty?
   end
 
+  def friends
+    challenge_story.active_participants.where.not(id: id)
+  end
+
   def unpledged_participants
     pledged_ids = given_rewards.pluck(:receiver_id)
     challenge_story.active_participants

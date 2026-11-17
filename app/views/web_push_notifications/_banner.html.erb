@@ -1,11 +1,7 @@
 <% unless cookies[:push_notification_dismissed] %>
   <div class="flex justify-center px-5 pt-3">
-    <div data-controller="push-notifications" data-push-notifications-target="banner" data-push-notifications-endpoints-value="<%= current_user.web_push_notifications.pluck(:endpoint).to_json %>" class="hidden w-full max-w-md">
-      <div class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3 text-sm">
-        <span class="flex-1">Get notified when friends check in</span>
-        <button data-action="push-notifications#subscribe" class="btn btn-sm btn-primary">Enable</button>
-        <button data-action="push-notifications#dismiss" class="btn btn-sm btn-ghost">Later</button>
-      </div>
+    <div data-controller="push-notifications" data-push-notifications-endpoints-value="<%= current_user.web_push_notifications.pluck(:endpoint).to_json %>" data-action="push-notifications:subscribed@window->push-notifications#removeBanner" class="w-full max-w-md">
+      <%= render "web_push_notifications/prompt", message: "Get notified when friends check in", dismissable: true %>
     </div>
   </div>
 <% end %>

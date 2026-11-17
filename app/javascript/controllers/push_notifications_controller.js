@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // devices the server sends to (rows with data-endpoint).
 // The server's list (endpointsValue) decides whether this browser counts as on.
 export default class extends Controller {
-  static targets = ["banner", "toggle", "device"]
+  static targets = ["banner", "ask", "install", "blocked", "close", "toggle", "device"]
   static values = { endpoints: Array }
 
   connect() {
@@ -20,19 +20,27 @@ export default class extends Controller {
 
     this.markThisDevice(subscription)
 
-    // Only offer notifications when the browser supports them and they aren't blocked
     if (registered) {
       this.removeBanner()
-    } else if (this.canAsk()) {
-      this.showBanner()
+    } else {
+      this.showBanner(this.promptState())
     }
   }
 
-  canAsk() {
-    return 'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      'Notification' in window &&
-      Notification.permission !== 'denied'
+  // "ask" when the browser can subscribe, "install" on iPhone outside the Home Screen app
+  // (Safari only offers push there), "blocked" once permission is denied, otherwise nothing
+  promptState() {
+    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+
+    if (supported && Notification.permission === 'denied') return 'blocked'
+    if (supported) return 'ask'
+    if (this.isIOS() && !navigator.standalone) return 'install'
+    return null
+  }
+
+  isIOS() {
+    return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
   }
 
   markThisDevice(subscription) {
@@ -103,6 +111,7 @@ export default class extends Controller {
       if (existingSub) {
         await this.sendSubscriptionToServer(existingSub)
         this.removeBanner()
+        this.dispatch("subscribed", { target: window })
         return true
       }
 
@@ -119,6 +128,7 @@ export default class extends Controller {
 
       await this.sendSubscriptionToServer(sub)
       this.removeBanner()
+      this.dispatch("subscribed", { target: window })
       return true
     } catch (error) {
       console.error('Subscription error:', error)
@@ -172,10 +182,14 @@ export default class extends Controller {
     this.removeBanner()
   }
 
-  showBanner() {
-    if (this.hasBannerTarget) {
-      this.bannerTarget.classList.remove('hidden')
-    }
+  showBanner(state) {
+    if (!this.hasBannerTarget) return
+    if (!state) return this.removeBanner()
+
+    const stateTargets = { ask: this.askTargets, install: this.installTargets, blocked: this.blockedTargets }
+    stateTargets[state].forEach((element) => element.hidden = false)
+    if (state !== 'ask') this.closeTargets.forEach((element) => element.hidden = false)
+    this.bannerTarget.classList.remove('hidden')
   }
 
   removeBanner() {

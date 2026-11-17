@@ -116,6 +116,10 @@ class User < ApplicationRecord
     notify(title: recap.title, body: recap.body, path: "/today")
   end
 
+  def push_enabled?
+    web_push_notifications.exists?
+  end
+
   def notify(title:, body: nil, path: "/")
     web_push_notifications.each do |subscription|
       PushNotificationJob.perform_later(subscription, title:, body:, path:)

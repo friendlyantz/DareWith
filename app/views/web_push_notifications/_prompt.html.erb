@@ -1,0 +1,26 @@
+<%# The push-notifications controller shows the one state that fits this browser, or removes the prompt %>
+<div data-push-notifications-target="banner" class="hidden w-full">
+  <div class="flex items-center gap-3 rounded-box border border-primary/30 bg-primary/10 p-3 text-left text-sm">
+    <%= icon(:bell, css: "size-5 shrink-0 text-primary") %>
+    <div data-push-notifications-target="ask" hidden class="flex flex-1 flex-wrap items-center gap-2">
+      <span class="flex-1 min-w-40"><%= message %></span>
+      <div class="flex gap-1">
+        <button data-action="push-notifications#subscribe" class="btn btn-sm btn-primary">Turn on</button>
+        <% if dismissable %>
+          <button data-action="push-notifications#dismiss" class="btn btn-sm btn-ghost">Later</button>
+        <% end %>
+      </div>
+    </div>
+    <div data-push-notifications-target="install" hidden class="flex flex-1 flex-col gap-1">
+      <span><%= message %></span>
+      <span class="text-base-content/70">On iPhone, notifications need the app: tap Share, then <strong>Add to Home Screen</strong>, and open DareWith from there.</span>
+    </div>
+    <div data-push-notifications-target="blocked" hidden class="flex flex-1 flex-col gap-1">
+      <span>Notifications are blocked for DareWith</span>
+      <span class="text-base-content/70">Turn them back on in your phone's or browser's settings for this site, so friends' check-ins and nudges reach you.</span>
+    </div>
+    <% if dismissable %>
+      <button data-push-notifications-target="close" data-action="push-notifications#dismiss" hidden class="btn btn-ghost btn-sm btn-square" aria-label="Later">✕</button>
+    <% end %>
+  </div>
+</div>

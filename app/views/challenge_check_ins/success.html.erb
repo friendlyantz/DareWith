@@ -1,7 +1,8 @@
 <% challenge_story = @challenge_participant.challenge_story %>
 <% streak = @challenge_participant.streak.current %>
 <%# Only stays open when there's something new to read %>
-<% auto_close = @new_badges.empty? && !@challenge_participant.missing_pledges? %>
+<% ask_for_push = !current_user.push_enabled? %>
+<% auto_close = @new_badges.empty? && !@challenge_participant.missing_pledges? && !ask_for_push %>
 <%= turbo_frame_tag "new_message" do %>
   <%= tag.div class: "flex flex-col items-center gap-5 pt-2 text-center",
     data: {controller: "close-sheet", action: ("click->close-sheet#close" if auto_close), close_sheet_after_value: (4000 if auto_close)}.compact do %>
@@ -40,6 +41,14 @@
     <div class="w-full text-left">
       <%= render "challenge_rewards/pledge_reminder_banner", current_challenge_participant: @challenge_participant %>
     </div>
+
+    <% if ask_for_push %>
+      <% names = @challenge_participant.friends.map(&:name).first(3) %>
+      <% message = names.any? ? "Hear when #{names.to_sentence} #{names.one? ? "checks" : "check"} in" : "Hear when friends join and check in" %>
+      <div class="w-full" data-controller="push-notifications">
+        <%= render "web_push_notifications/prompt", message:, dismissable: false %>
+      </div>
+    <% end %>
 
     <div class="flex w-full flex-col gap-2">
       <%= render "challenge_stories/share_card_button", participant: @challenge_participant,

@@ -186,6 +186,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
       it "closes the sheet by itself when there's nothing new" do
         create(:badge, user:)
+        create(:web_push_notification, user:)
         create(:challenge_check_in, challenge_participant: participant)
 
         post challenge_story_challenge_check_ins_path(story), params: valid_params
@@ -195,12 +196,32 @@ RSpec.describe "ChallengeCheckIns", type: :request do
 
       it "offers the progress card, which keeps a closing sheet open" do
         create(:badge, user:)
+        create(:web_push_notification, user:)
         create(:challenge_check_in, challenge_participant: participant)
 
         post challenge_story_challenge_check_ins_path(story), params: valid_params
 
         expect(response.body).to include("Share my progress")
           .and include('data-action="share-card#share close-sheet#stay:stop"')
+      end
+
+      it "asks to turn on notifications, naming friends, and stays open" do
+        create(:badge, user:)
+        create(:challenge_check_in, challenge_participant: participant)
+        create(:challenge_participant, challenge_story: story, user: create(:user, username: "anna"))
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include("Hear when anna checks in")
+        expect(response.body).not_to include("data-close-sheet-after-value")
+      end
+
+      it "doesn't ask once notifications are on" do
+        create(:web_push_notification, user:)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).not_to include("Hear when")
       end
 
       it "shows the streak" do
