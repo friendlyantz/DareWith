@@ -31,7 +31,9 @@ Rails.application.routes.draw do
     resources :challenge_check_in_replies, only: %i[create]
   end
 
-  resources :challenge_participants, only: %i[create destroy]
+  resources :challenge_participants, only: %i[create destroy] do
+    resources :challenge_nudges, only: %i[create]
+  end
   get "home/index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

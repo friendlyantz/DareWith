@@ -1,0 +1,3 @@
+<%= turbo_stream.replace dom_id(@challenge_nudge.receiver, :nudge) do %>
+  <%= render "challenge_nudges/button", receiver: @challenge_nudge.receiver, sender: @challenge_nudge.sender %>
+<% end %>

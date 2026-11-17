@@ -10,6 +10,10 @@ class ChallengeParticipant < ApplicationRecord
   has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
   # Just enough of each check-in for streaks and totals, so pages can preload it cheaply
   has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on, :amount) }, class_name: "ChallengeCheckIn"
+  has_many :sent_nudges, class_name: "ChallengeNudge", foreign_key: "sender_id", dependent: :destroy
+  has_many :received_nudges, class_name: "ChallengeNudge", foreign_key: "receiver_id", dependent: :destroy
+  # Wide enough to hold "today" in any time zone, so pages can preload it
+  has_many :recent_nudges, -> { where(nudged_on: (Date.current - 1)..).order(:created_at) }, class_name: "ChallengeNudge", foreign_key: "receiver_id"
 
   # Enums
   enum :status, %w[active inactive].index_by(&:itself)
@@ -66,6 +70,31 @@ class ChallengeParticipant < ApplicationRecord
     return true if challenge_story.daily?
 
     challenge_story.times_per_period - check_ins_this_period >= challenge_story.goal.days_left_in_period
+  end
+
+  def local_today
+    Time.current.in_time_zone(user.time_zone).to_date
+  end
+
+  def nudges_today
+    recent_nudges.select { it.nudged_on == local_today }
+  end
+
+  def nudged_today?
+    nudges_today.any?
+  end
+
+  def nudged_today_by?(participant)
+    nudges_today.any? { it.sender_id == participant.id }
+  end
+
+  # A friend who's done today can nudge someone in the same running challenge who isn't
+  def nudgeable_by?(participant)
+    participant.present? && participant != self &&
+      participant.active? && active? &&
+      participant.challenge_story_id == challenge_story_id &&
+      challenge_story.accepting_check_ins? && challenge_story.start <= Time.zone.today &&
+      participant.checked_in_today? && !done_for_now?
   end
 
   def announce_joining

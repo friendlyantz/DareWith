@@ -87,6 +87,16 @@ RSpec.describe User, type: :model do
       end
     end
 
+    it "skips challenges where a friend already nudged them today" do
+      travel_to(seven_pm_in_melbourne) do
+        friend = create(:challenge_participant, challenge_story: story)
+        create(:challenge_check_in, challenge_participant: friend)
+        create(:challenge_nudge, sender: friend, receiver: participant)
+
+        expect { user.remind_to_check_in }.not_to have_enqueued_job(PushNotificationJob)
+      end
+    end
+
     it "skips challenges that haven't started" do
       story.update!(start: Date.new(2026, 11, 20))
 

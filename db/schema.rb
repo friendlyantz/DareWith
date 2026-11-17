@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -103,6 +103,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_020000) do
     t.index ["created_at"], name: "index_challenge_check_ins_on_created_at"
     t.check_constraint "amount IS NULL OR amount > 0::numeric", name: "check_amount_positive"
     t.check_constraint "challenge_check_in_likes_count >= 0", name: "check_comment_likes_non_negative"
+  end
+
+  create_table "challenge_nudges", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "sender_id", null: false
+    t.uuid "receiver_id", null: false
+    t.date "nudged_on", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["receiver_id", "nudged_on"], name: "index_challenge_nudges_on_receiver_id_and_nudged_on"
+    t.index ["receiver_id"], name: "index_challenge_nudges_on_receiver_id"
+    t.index ["sender_id", "receiver_id", "nudged_on"], name: "idx_on_sender_id_receiver_id_nudged_on_28d887eb32", unique: true
+    t.index ["sender_id"], name: "index_challenge_nudges_on_sender_id"
+    t.check_constraint "sender_id <> receiver_id", name: "check_nudge_not_self"
   end
 
   create_table "challenge_participants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -268,6 +281,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_020000) do
   add_foreign_key "challenge_check_in_replies", "users", on_delete: :cascade
   add_foreign_key "challenge_check_ins", "challenge_participants", on_delete: :cascade
   add_foreign_key "challenge_check_ins", "challenge_stories", on_delete: :cascade
+  add_foreign_key "challenge_nudges", "challenge_participants", column: "receiver_id", on_delete: :cascade
+  add_foreign_key "challenge_nudges", "challenge_participants", column: "sender_id", on_delete: :cascade
   add_foreign_key "challenge_participants", "challenge_stories", on_delete: :cascade
   add_foreign_key "challenge_participants", "users", on_delete: :cascade
   add_foreign_key "challenge_rewards", "challenge_participants", column: "giver_id", on_delete: :cascade

@@ -3,7 +3,7 @@ class TodayController < ApplicationController
 
   def show
     @challenge_stories, @wrap_up_stories = current_user.active_challenge_stories
-      .includes(active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins, :check_in_days])
+      .includes(active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins, :check_in_days, {recent_nudges: :sender}])
       .order(:finish)
       .partition(&:accepting_check_ins?)
 

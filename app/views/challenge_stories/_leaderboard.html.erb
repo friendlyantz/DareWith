@@ -48,6 +48,9 @@
             </p>
           <% end %>
         </div>
+        <% if mine && participant != mine %>
+          <%= render "challenge_nudges/button", receiver: participant, sender: mine %>
+        <% end %>
       </li>
     <% end %>
   </ol>

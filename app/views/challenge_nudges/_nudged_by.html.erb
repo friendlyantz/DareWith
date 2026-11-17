@@ -1,0 +1,6 @@
+<%# locals: (participant:, css: "") %>
+<% if participant.nudged_today? && !participant.done_for_now? %>
+  <p class="text-sm font-semibold text-primary <%= css %>">
+    👋 <%= participant.nudges_today.map { it.sender.name }.to_sentence %> nudged you
+  </p>
+<% end %>
