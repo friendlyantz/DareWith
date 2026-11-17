@@ -31,7 +31,7 @@ class ChallengeStory < ApplicationRecord
   validate :whole_weeks, if: :weekly?
   validates :times_per_period, inclusion: {in: ->(story) { story.weekly? ? 1..6 : [1] }}
   validates :target_amount, numericality: {greater_than: 0, less_than: 100_000_000}, allow_nil: true
-  validates :target_amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { goal.whole_numbers? }
+  validate :whole_number_target, if: -> { goal.whole_numbers? }
   validates :target_scope, presence: true, if: -> { target_amount.present? }
   validate :goal_locked_after_first_check_in, on: :update
 
@@ -195,6 +195,13 @@ class ChallengeStory < ApplicationRecord
     return if start.blank? || finish.blank? || finish < start || (duration_in_days % 7).zero?
 
     errors.add(:finish, "must make whole weeks for a weekly challenge, e.g. #{(start + (duration_in_days.fdiv(7).ceil * 7 - 1).days).strftime("%-d %b")}")
+  end
+
+  # A saved 50 loads as BigDecimal("50"), which numericality's only_integer rejects
+  def whole_number_target
+    return if target_amount.nil? || target_amount == target_amount.round
+
+    errors.add(:target_amount, "must be a whole number")
   end
 
   # Check-ins already count toward the old goal, so changing it would rewrite history

@@ -275,6 +275,12 @@ RSpec.describe ChallengeStory, type: :model do
       expect(build(:challenge_story, unit: :km, target_amount: 5.5, target_scope: :each_time)).to be_valid
     end
 
+    it "keeps a saved whole-number target valid when other fields change" do
+      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_time).reload
+
+      expect(story.update(title: "Renamed")).to be true
+    end
+
     it "rejects a target that isn't positive" do
       expect(build(:challenge_story, unit: :reps, target_amount: 0, target_scope: :each_time)).not_to be_valid
     end

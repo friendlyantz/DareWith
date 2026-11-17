@@ -267,6 +267,19 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response).to have_http_status(:not_found)
       expect(story.reload.title).to eq("Original")
     end
+
+    it "changes the dates once the goal is locked" do
+      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_time)
+      participant = create(:challenge_participant, user:, challenge_story: story)
+      create(:challenge_check_in, challenge_participant: participant, amount: 50)
+      new_finish = story.finish + 1.day
+
+      # The goal fieldset is disabled, so the form only sends the other fields
+      patch challenge_story_path(story), params: {challenge_story: {title: story.title, description: story.description, start: story.start, finish: new_finish}}
+
+      expect(response).to redirect_to(story)
+      expect(story.reload.finish).to eq new_finish
+    end
   end
 
   describe "next rounds" do
