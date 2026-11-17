@@ -2,6 +2,7 @@ module IconsHelper
   ICONS = {
     archive: '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v12h14V8M10 12h4"/>',
     bell: '<path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+    bell_off: '<path d="M6 16v-5a6 6 0 0 1 1-3.3M9.5 5.5A6 6 0 0 1 18 11v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0M4 4l16 16"/>',
     camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     chevron_left: '<path d="M15 18l-6-6 6-6"/>',

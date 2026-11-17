@@ -1,6 +1,15 @@
 <%# locals: (participant:, css: "") %>
 <% if participant.nudged_today? && !participant.done_for_now? %>
-  <p class="text-sm font-semibold text-primary <%= css %>">
-    👋 <%= participant.nudges_today.map { it.sender.name }.to_sentence %> nudged you
-  </p>
+  <% senders = participant.nudges_today.map(&:sender) %>
+  <div class="<%= class_names("flex items-center gap-3 rounded-box border border-primary/30 bg-primary/10 px-3 py-2 text-left", css) %>">
+    <div class="flex shrink-0 -space-x-2">
+      <% senders.each do |sender| %>
+        <%= render "shared/avatar", name: sender.name, user: sender.user, size: "size-8" %>
+      <% end %>
+    </div>
+    <p class="flex-1 text-sm">
+      <span class="font-semibold"><%= senders.map(&:name).to_sentence %> nudged you 👋</span><br>
+      <span class="text-base-content/70"><%= senders.one? ? "They've" : "They've all" %> checked in. Your turn.</span>
+    </p>
+  </div>
 <% end %>

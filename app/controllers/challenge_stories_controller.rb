@@ -26,7 +26,7 @@ class ChallengeStoriesController < ApplicationController
     remember_location unless current_user
     @challenge_story = ChallengeStory
       .includes(
-        active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins, :check_in_days, {recent_nudges: :sender}],
+        active_participants: [{user: [{avatar_attachment: :blob}, :web_push_notifications]}, :todays_check_ins, :check_in_days, {recent_nudges: {sender: {user: {avatar_attachment: :blob}}}}],
         challenge_rewards: [{giver: :user}, {receiver: :user}],
         challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, {challenge_check_in_replies: {user: {avatar_attachment: :blob}}}, photo_attachment: :blob]
       )

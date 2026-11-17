@@ -51,6 +51,18 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
     end
 
+    it "marks friends who have notifications off on the leaderboard" do
+      user = create(:user)
+      create(:challenge_participant, user:, challenge_story: story)
+      create(:challenge_participant, challenge_story: story)
+      create(:web_push_notification, user: create(:challenge_participant, challenge_story: story).user)
+      sign_in_as(user)
+
+      get challenge_story_path(story)
+
+      expect(response.body.scan('aria-label="Notifications off"').size).to eq 1
+    end
+
     describe "alone in a challenge" do
       before do
         user = create(:user)

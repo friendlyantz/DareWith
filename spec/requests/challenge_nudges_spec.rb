@@ -31,6 +31,14 @@ RSpec.describe "ChallengeNudges", type: :request do
       expect(response.body).to include("Nudged")
     end
 
+    it "says a friend without notifications will see it in the app" do
+      friend.user.web_push_notifications.destroy_all
+
+      post_nudge(as: :turbo_stream)
+
+      expect(response.body).to include("Sees it in the app")
+    end
+
     it "nudges each friend only once a day" do
       post_nudge(as: :turbo_stream)
 

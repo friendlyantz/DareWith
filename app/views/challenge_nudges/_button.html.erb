@@ -1,7 +1,10 @@
 <%# locals: (receiver:, sender:) %>
 <div id="<%= dom_id(receiver, :nudge) %>" class="shrink-0">
   <% if receiver.nudged_today_by?(sender) %>
-    <span class="flex items-center gap-1 text-xs text-base-content/60"><%= icon(:check, css: "size-4") %> Nudged</span>
+    <span class="flex flex-col items-end text-xs text-base-content/60">
+      <span class="flex items-center gap-1"><%= icon(:check, css: "size-4") %> Nudged</span>
+      <% unless receiver.user.push_enabled? %><span class="text-[0.65rem]">Sees it in the app</span><% end %>
+    </span>
   <% elsif receiver.nudgeable_by?(sender) %>
     <%= button_to challenge_participant_challenge_nudges_path(receiver), class: "btn btn-soft btn-primary btn-sm rounded-full",
       aria: {label: "Nudge #{receiver.name}"} do %>

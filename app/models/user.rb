@@ -117,7 +117,7 @@ class User < ApplicationRecord
   end
 
   def push_enabled?
-    web_push_notifications.exists?
+    web_push_notifications.any?
   end
 
   def notify(title:, body: nil, path: "/")

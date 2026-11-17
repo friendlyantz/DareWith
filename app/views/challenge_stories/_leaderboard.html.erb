@@ -20,7 +20,14 @@
         <%= render "shared/avatar", name: participant.name, user: participant.user, checked_in: participant.checked_in_today?, size: "size-9" %>
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <div class="flex items-baseline justify-between gap-2">
-            <span class="font-semibold truncate"><%= participant.name %></span>
+            <span class="flex min-w-0 items-center gap-1">
+              <span class="font-semibold truncate"><%= participant.name %></span>
+              <% if mine && participant != mine && !participant.user.push_enabled? %>
+                <span title="Notifications off: sees nudges and check-ins only in the app" aria-label="Notifications off">
+                  <%= icon(:bell_off, css: "size-3.5 shrink-0 text-base-content/50") %>
+                </span>
+              <% end %>
+            </span>
             <span class="shrink-0 whitespace-nowrap text-sm text-base-content/70">
               <% if challenge_story.total? %>
                 <%= goal.format_number(participant.total_amount) %>/<%= goal.format_number(challenge_story.target_amount) %>

@@ -14,7 +14,7 @@
       <% end %>
     </div>
   <% elsif challenge_story.accepting_check_ins? %>
-    <%= render "challenge_nudges/nudged_by", participant:, css: "mb-2 text-center" %>
+    <%= render "challenge_nudges/nudged_by", participant:, css: "mb-2" %>
     <%= link_to new_challenge_story_challenge_check_in_path(challenge_story),
       class: "btn btn-primary btn-lg btn-block",
       data: {turbo_frame: "new_message", action: "sheet#open"} do %>
