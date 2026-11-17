@@ -3,8 +3,8 @@ class Admin::ApplicationController < ApplicationController
 
   private
 
-  # A plain 404 for everyone else, so the page doesn't reveal it exists
+  # The usual not-found page for everyone else, so it doesn't reveal the admin exists
   def require_admin!
-    head :not_found unless current_user&.admin?
+    raise ActionController::RoutingError, "Not Found" unless current_user&.admin?
   end
 end
