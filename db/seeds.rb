@@ -96,31 +96,31 @@ challenge_data = {
     participants: %i[alice bob charlie],
     check_ins: {
       alice: [
-        {day: 1, message: "Day 1: Gym session complete! 💪", amount: 45, photo: :dumbbell_rack,
-         replies: [[:bob, "Look at you go! See you there tomorrow 🙌"], [:alice, "6am, don't be late 😤"]]},
+        {day: 1, message: "Day 1: Gym session complete! 💪", amount: 45},
         {day: 2, message: "Day 2: Feeling stronger already! 🏋️‍♀️", amount: 50},
         {day: 3, message: "Day 3: Leg day was tough but worth it! 🦵", amount: 45},
         {day: 4, message: "Upper body and a long stretch 🧘‍♀️", amount: 55},
         {day: 5, message: "Short one, but it counts ⏱️", amount: 30},
         {day: 6, message: "Rowing intervals, lungs on fire 🚣‍♀️", amount: 45},
-        {day: 7, message: "One week in a row! 🔥", amount: 60}
+        {day: 7, message: "One week in a row! 🔥", amount: 60, photo: :dumbbell_rack,
+         replies: [[:bob, "Look at you go! See you there tomorrow 🙌"], [:alice, "6am, don't be late 😤"]]}
       ],
       bob: [
         {day: 1, message: "First workout! 🚀", amount: 40},
-        {day: 2, message: "Leg day! 🏋️‍♂️", amount: 50, photo: :deadlift,
+        {day: 2, message: "Morning grind 🌅", amount: 35},
+        {day: 3, message: "Bench press 💪", amount: 45},
+        {day: 5, message: "PR today! 🎯", amount: 45, photo: :bicep_curl},
+        {day: 6, message: "Leg day! 🏋️‍♂️", amount: 50, photo: :deadlift,
          replies: [[:charlie, "That form though 👀"], [:bob, "Years of practice lifting bricks 🧱"]]},
-        {day: 3, message: "PR today! 🎯", amount: 45, photo: :bicep_curl},
-        {day: 5, message: "Bench press 💪", amount: 45},
-        {day: 6, message: "Morning grind 🌅", amount: 35},
         {day: 7, message: "Quick cardio before work 🏃‍♂️", amount: 25, hour: 7},
         {day: 7, message: "Back for an evening lift, couldn't help it 😅", amount: 40, hour: 19}
       ],
       charlie: [
-        {day: 1, message: "Day 1: Finally made it! 😅", amount: 30, photo: :sit_ups,
-         replies: [[:alice, "Proud of you! The first one is the hardest 💛"]]},
+        {day: 1, message: "Day 1: Finally made it! 😅", amount: 30},
         {day: 4, message: "Missed a couple of days, back at it 🔁", amount: 45},
         {day: 5, message: "another day Squats and lunges 🦵", amount: 45},
-        {day: 6, message: "Strong week! 💪", amount: 50}
+        {day: 6, message: "Strong week! 💪", amount: 50, photo: :sit_ups,
+         replies: [[:alice, "Proud of you! What a comeback 💛"]]}
       ]
     },
     rewards: [
@@ -143,23 +143,23 @@ challenge_data = {
     check_ins: {
       alice: [
         {day: 2, message: "Book 1: 'Atomic Habits' 📖", amount: 40},
-        {day: 5, message: "Still going strong habits!", amount: 45, photo: :book_stack,
-         replies: [[:dora, "That stack is goals 😍"]]},
+        {day: 5, message: "Still going strong habits!", amount: 45},
         {day: 8, message: "Started 'Sapiens' - fascinating read! 🧠", amount: 50},
         {day: 11, message: "Halfway through 'Sapiens' 🤯", amount: 60},
         {day: 16, message: "Finished 'Sapiens', what a ride", amount: 55},
-        {day: 19, message: "Book 3: 'The Midnight Library' 🌙", amount: 70}
+        {day: 19, message: "Book 3: 'The Midnight Library' 🌙", amount: 70, photo: :book_stack,
+         replies: [[:dora, "That stack is goals 😍"]]}
       ],
       dora: [
-        {day: 3, message: "'Where the Crawdads Sing' 🦋", amount: 35, photo: :book_spines,
-         replies: [[:alice, "Loved that one! Tell me when you reach the ending"], [:dora, "No spoilers!! 🙉"]]},
+        {day: 3, message: "'Where the Crawdads Sing' 🦋", amount: 35},
         {day: 6, message: "Crawdads, part two. Can't stop 🌾", amount: 30},
         {day: 10, message: "Rainy day, reading in bed ☔", amount: 40},
-        {day: 17, message: "'The Silent Patient' 😱", amount: 50}
+        {day: 17, message: "'The Silent Patient' 😱", amount: 50, photo: :book_spines,
+         replies: [[:alice, "Loved that one! Tell me when you reach the twist"], [:dora, "No spoilers!! 🙉"]]}
       ],
       bob: [
-        {day: 4, message: "Started '1984'", amount: 25, photo: :library},
-        {day: 12, message: "'The Alchemist' 🌟", amount: 40}
+        {day: 4, message: "Started '1984'", amount: 25},
+        {day: 12, message: "'The Alchemist' 🌟", amount: 40, photo: :library}
       ]
     },
     rewards: [
@@ -202,13 +202,13 @@ challenge_data = {
     participants: %i[bob charlie dora],
     check_ins: {
       bob: [
-        {day: 1, message: "Started with 10 minutes of breathing. Feeling calm! 🧘‍♂️", amount: 10, photo: :sunset_meditation,
-         replies: [[:dora, "What a spot for it 🌅"]]},
+        {day: 1, message: "Started with 10 minutes of breathing. Feeling calm! 🧘‍♂️", amount: 10},
         {day: 2, message: "Tried guided meditation. Slept better! 😴", amount: 15},
         {day: 4, message: "Breathing before a big meeting 🫁", amount: 10},
-        {day: 6, message: "Meditated outdoors. Birds were a nice touch. 🐦", amount: 20, photo: :sunrise_arms},
-        {day: 8, message: "New week, same calm ☁️", amount: 12},
-        {day: 10, message: "Lunch break sit 🍃", amount: 10}
+        {day: 6, message: "Lunch break sit 🍃", amount: 10},
+        {day: 8, message: "New week, sunset sit by the water 🌅", amount: 12, photo: :sunset_meditation,
+         replies: [[:dora, "What a spot for it 😍"]]},
+        {day: 10, message: "Meditated outdoors. Birds were a nice touch. 🐦", amount: 20, photo: :sunrise_arms}
       ],
       charlie: [
         {day: 1, message: "Day 1: Mind kept wandering, but I stuck with it. 🌱", amount: 10},
@@ -220,10 +220,10 @@ challenge_data = {
         {day: 1, message: "Lit a candle and meditated. Peaceful! 🕯️", amount: 15},
         {day: 2, message: "Shared my playlist with the group. 🎵", amount: 10},
         {day: 4, message: "Walking meditation by the river 🌊", amount: 20},
-        {day: 7, message: "Did a body scan meditation. Relaxed! 😌", amount: 25, photo: :beach_yoga,
-         replies: [[:charlie, "Need to try body scans, any app you'd recommend?"], [:dora, "Insight Timer, the free one 🙏"]]},
+        {day: 7, message: "Morning sit with tea 🍵", amount: 15},
         {day: 8, message: "Week 2, let's go 🌿", amount: 10},
-        {day: 9, message: "Morning sit with tea 🍵", amount: 15},
+        {day: 9, message: "Did a body scan meditation. Relaxed! 😌", amount: 25, photo: :beach_yoga,
+         replies: [[:charlie, "Need to try body scans, any app you'd recommend?"], [:dora, "Insight Timer, the free one 🙏"]]},
         {day: 10, message: "Three down this week ✨", amount: 10}
       ]
     },
