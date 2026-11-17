@@ -8,7 +8,8 @@ class ChallengeParticipant < ApplicationRecord
   has_many :received_rewards, class_name: "ChallengeReward", foreign_key: "receiver_id", dependent: :destroy
   has_many :challenge_check_ins, dependent: :destroy
   has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
-  has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on) }, class_name: "ChallengeCheckIn"
+  # Just enough of each check-in for streaks and totals, so pages can preload it cheaply
+  has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on, :amount) }, class_name: "ChallengeCheckIn"
 
   # Enums
   enum :status, %w[active inactive].index_by(&:itself)
@@ -32,6 +33,14 @@ class ChallengeParticipant < ApplicationRecord
   # Days with a check-in, or weeks that hit the weekly count
   def periods_kept
     challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }
+  end
+
+  def total_amount
+    check_in_days.sum { it.amount || 0 }
+  end
+
+  def forecast
+    Forecast.new(self)
   end
 
   def check_ins_this_period

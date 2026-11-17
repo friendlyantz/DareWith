@@ -98,7 +98,11 @@ class ChallengeStory < ApplicationRecord
   end
 
   def ranked_participants
-    active_participants.sort_by { [-it.periods_kept, -it.challenge_check_ins_count] }
+    if total?
+      active_participants.sort_by { [-it.total_amount, -it.periods_kept] }
+    else
+      active_participants.sort_by { [-it.periods_kept, -it.total_amount] }
+    end
   end
 
   def participant_for(user)

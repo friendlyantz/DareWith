@@ -178,6 +178,21 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         expect(response.body).not_to include("New badge")
       end
 
+      it "keeps the sheet open to celebrate a new badge" do
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).not_to include("close-sheet")
+      end
+
+      it "closes the sheet by itself when there's nothing new" do
+        create(:badge, user:)
+        create(:challenge_check_in, challenge_participant: participant)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include('data-controller="close-sheet"')
+      end
+
       it "shows the streak" do
         create(:challenge_check_in, challenge_participant: participant, checked_in_on: Date.yesterday)
 

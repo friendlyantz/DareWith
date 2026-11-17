@@ -1,8 +1,14 @@
 <%# locals: (challenge_story:) %>
 <% if challenge_story.active_participants.any? %>
-  <% so_far = challenge_story.goal.current_period_number %>
+  <% goal = challenge_story.goal %>
+  <% so_far = goal.current_period_number %>
+  <% mine = current_user && challenge_story.participant_for(current_user) %>
   <p class="text-sm text-base-content/70 mb-2">
-    <%= challenge_story.weekly? ? "Weeks with #{challenge_story.times_per_period} check-ins" : "Days checked in" %>, out of <%= so_far %> so far
+    <% if challenge_story.total? %>
+      Totals so far, aiming for <%= goal.format_amount(challenge_story.target_amount) %> each
+    <% else %>
+      <%= challenge_story.weekly? ? "Weeks with #{challenge_story.times_per_period} check-ins" : "Days checked in" %>, out of <%= so_far %> so far
+    <% end %>
   </p>
   <ol class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
     <% challenge_story.ranked_participants.each.with_index(1) do |participant, rank| %>
@@ -15,9 +21,24 @@
               <span class="font-semibold truncate"><%= participant.name %></span>
               <%= render "shared/streak", challenge_story:, count: participant.streak.current %>
             </span>
-            <span class="text-sm text-base-content/70 shrink-0"><%= participant.periods_kept %> / <%= so_far %></span>
+            <span class="text-sm text-base-content/70 shrink-0">
+              <% if challenge_story.total? %>
+                <%= goal.format_number(participant.total_amount) %> / <%= goal.format_number(challenge_story.target_amount) %>
+              <% else %>
+                <%= participant.periods_kept %> / <%= so_far %>
+              <% end %>
+            </span>
           </div>
-          <progress class="progress progress-secondary h-1.5" value="<%= participant.periods_kept %>" max="<%= so_far %>"></progress>
+          <% if challenge_story.total? %>
+            <progress class="progress progress-secondary h-1.5" value="<%= [participant.total_amount, challenge_story.target_amount].min %>" max="<%= challenge_story.target_amount %>"></progress>
+          <% else %>
+            <progress class="progress progress-secondary h-1.5" value="<%= participant.periods_kept %>" max="<%= so_far %>"></progress>
+          <% end %>
+          <% if participant == mine && (line = forecast_line(participant)) %>
+            <p class="text-xs font-semibold text-secondary"><%= line %></p>
+          <% elsif goal.measured? && !challenge_story.total? %>
+            <p class="text-xs text-base-content/70"><%= goal.format_amount(participant.total_amount) %> in total</p>
+          <% end %>
         </div>
         <% if challenge_story.weekly? %>
           <span class="<%= class_names("w-16 text-right text-xs font-semibold", participant.period_kept? ? "text-info" : "text-base-content/60") %>">

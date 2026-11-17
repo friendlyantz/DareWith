@@ -1,7 +1,10 @@
 <% challenge_story = @challenge_participant.challenge_story %>
 <% streak = @challenge_participant.streak.current %>
+<%# Only stays open when there's something new to read %>
+<% auto_close = @new_badges.empty? && !@challenge_participant.missing_pledges? %>
 <%= turbo_frame_tag "new_message" do %>
-  <div class="flex flex-col items-center gap-5 pt-2 text-center">
+  <%= tag.div class: "flex flex-col items-center gap-5 pt-2 text-center",
+    data: ({controller: "close-sheet", action: "click->close-sheet#close"} if auto_close) do %>
     <div class="flex flex-col items-center gap-3">
       <div class="grid size-20 place-items-center rounded-full bg-accent/15 text-accent ring-2 ring-accent/40 motion-safe:animate-pop">
         <% if streak > 1 %>
@@ -41,5 +44,5 @@
     <form method="dialog" class="w-full">
       <button class="btn btn-primary btn-block rounded-full">Done</button>
     </form>
-  </div>
+  <% end %>
 <% end %>

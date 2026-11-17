@@ -36,6 +36,19 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(story.title)
     end
+
+    it "shows totals and your pace for a target by the end" do
+      story.update!(start: Time.zone.today - 1.day, finish: Time.zone.today + 28.days, unit: :km, target_amount: 100, target_scope: :total)
+      user = create(:user)
+      participant = create(:challenge_participant, user:, challenge_story: story)
+      create(:challenge_check_in, challenge_participant: participant, amount: 10)
+      sign_in_as(user)
+
+      get challenge_story_path(story)
+
+      expect(response.body).to include("10 / 100").and include("aiming for 100 km each")
+      expect(response.body).to include("At this pace: 100 km by #{(story.start + 19.days).strftime("%-d %b")}")
+    end
   end
 
   describe "GET /challenge_stories/new" do

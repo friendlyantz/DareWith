@@ -289,6 +289,27 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "#ranked_participants" do
+    let(:story) { create(:challenge_story, start: Time.zone.today - 2.days, finish: Time.zone.today + 5.days, unit: :km) }
+    let!(:steady) { create(:challenge_participant, challenge_story: story) }
+    let!(:sprinter) { create(:challenge_participant, challenge_story: story) }
+
+    before do
+      3.times { create(:challenge_check_in, challenge_participant: steady, amount: 2, checked_in_on: Time.zone.today - it) }
+      create(:challenge_check_in, challenge_participant: sprinter, amount: 20)
+    end
+
+    it "ranks by days kept, then by total" do
+      expect(story.reload.ranked_participants).to eq [steady, sprinter]
+    end
+
+    it "ranks by total for a target by the end" do
+      story.update_columns(target_amount: 50, target_scope: "total")
+
+      expect(story.reload.ranked_participants).to eq [sprinter, steady]
+    end
+  end
+
   describe "rounds" do
     let(:round_one) { create(:challenge_story, :finished, title: "Gym", description: "Any workout counts") }
 
