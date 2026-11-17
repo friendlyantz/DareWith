@@ -10,6 +10,16 @@ RSpec.describe "Old domains", type: :request do
     expect(response).to redirect_to("https://#{Rails.configuration.app_host}/challenge_stories/42?invite=yes")
   end
 
+  it "forwards every old domain the tunnel still serves" do
+    %w[app.strivo.me take-on.me].each do |old_host|
+      host! old_host
+
+      get "/today"
+
+      expect(response).to redirect_to("https://#{Rails.configuration.app_host}/today")
+    end
+  end
+
   it "leaves the current domain alone" do
     get "/up"
 
