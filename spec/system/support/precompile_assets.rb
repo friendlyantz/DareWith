@@ -27,4 +27,9 @@ RSpec.configure do |config|
       $stdout.puts "Finished in #{(Time.current - start).round(2)} seconds"
     end
   end
+
+  # Left behind, the compiled assets would be served in development instead of the live files
+  config.after(:suite) do
+    FileUtils.rm_rf(Rails.public_path.join("assets"))
+  end
 end
