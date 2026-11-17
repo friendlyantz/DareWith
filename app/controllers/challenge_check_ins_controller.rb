@@ -57,6 +57,6 @@ class ChallengeCheckInsController < ApplicationController
   end
 
   def challenge_check_in_params
-    params.expect(challenge_check_in: %i[message photo])
+    params.expect(challenge_check_in: %i[message photo amount])
   end
 end

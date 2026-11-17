@@ -18,6 +18,9 @@
     <%= cl_image_tag(challenge_check_in.photo.key, width: 800, height: 600, crop: :fill, lazy: true, placeholder: true, class: "w-full aspect-4/3 object-cover bg-base-200", alt: "Check-in photo") %>
   <% end %>
 
+  <% if challenge_check_in.amount %>
+    <p class="px-4 pt-3 font-display text-2xl font-bold"><%= challenge_check_in.challenge_story.goal.format_amount(challenge_check_in.amount) %></p>
+  <% end %>
   <div class="px-4 pt-3"><%= simple_format challenge_check_in.message %></div>
   <div class="px-2 pb-1"><%= render "challenge_check_ins/likes", challenge_check_in: challenge_check_in %></div>
 

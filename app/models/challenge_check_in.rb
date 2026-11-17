@@ -11,6 +11,8 @@ class ChallengeCheckIn < ApplicationRecord
 
   # Validations
   validates :message, presence: true
+  validates :amount, presence: true, numericality: {greater_than: 0, less_than: 100_000_000}, if: -> { challenge_story&.goal&.measured? }
+  validates :amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { challenge_story&.goal&.whole_numbers? }
   validate :photo_size_validation
   validate :one_check_in_per_day_per_participant
 
@@ -20,6 +22,10 @@ class ChallengeCheckIn < ApplicationRecord
   # Callbacks
   before_validation on: :create do
     self.checked_in_on ||= (created_at || Time.current).in_time_zone.to_date
+  end
+
+  before_validation do
+    self.amount = nil unless challenge_story&.goal&.measured?
   end
 
   # Broadcasts must be after has_one_attached for Cloudinary compatibility)

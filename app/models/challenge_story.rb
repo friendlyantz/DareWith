@@ -7,7 +7,7 @@ class ChallengeStory < ApplicationRecord
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
   has_one :next_challenge_story, class_name: "ChallengeStory", foreign_key: :previous_challenge_story_id, dependent: :nullify, inverse_of: :previous_challenge_story
-  has_many :challenge_check_ins, -> { order(created_at: :desc) }, dependent: :destroy
+  has_many :challenge_check_ins, -> { order(created_at: :desc) }, dependent: :destroy, inverse_of: :challenge_story
   has_many :challenge_participants, dependent: :destroy
   has_many :challenge_rewards, dependent: :destroy
   has_many :challenge_story_likes, dependent: :destroy
@@ -18,13 +18,29 @@ class ChallengeStory < ApplicationRecord
   # Broadcasts (after associations)
   broadcasts_refreshes
 
+  # Enums
+  enum :cadence, %w[daily weekly].index_by(&:itself), validate: true
+  enum :unit, %w[reps minutes km pages].index_by(&:itself), prefix: :counts, validate: {allow_nil: true}
+  enum :target_scope, %w[each_time total].index_by(&:itself), validate: {allow_nil: true}
+
   # Validations
   validates :title, presence: true
   validates :description, presence: true, length: {maximum: 500}
   validates :start, :finish, presence: true
   validate :finish_cannot_be_earlier_than_start
+  validates :times_per_period, inclusion: {in: ->(story) { story.weekly? ? 1..6 : [1] }}
+  validates :target_amount, numericality: {greater_than: 0, less_than: 100_000_000}, allow_nil: true
+  validates :target_amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { goal.whole_numbers? }
+  validates :target_scope, presence: true, if: -> { target_amount.present? }
+  validate :goal_locked_after_first_check_in, on: :update
 
   # Callbacks
+  # A target only means something with a unit, and the form always sends a scope
+  before_validation do
+    self.target_amount = nil if unit.blank?
+    self.target_scope = nil if target_amount.blank?
+  end
+
   before_create do
     self.round = previous_challenge_story.round + 1 if previous_challenge_story
   end
@@ -34,6 +50,14 @@ class ChallengeStory < ApplicationRecord
   scope :completed, -> { where(completed: true) }
 
   # Public methods
+  def goal
+    @goal ||= Goal.new(self)
+  end
+
+  def goal_editable?
+    new_record? || challenge_check_ins_count.zero?
+  end
+
   def finished?
     finish < Time.zone.today
   end
@@ -122,6 +146,11 @@ class ChallengeStory < ApplicationRecord
       previous_challenge_story: self,
       title:,
       description:,
+      cadence:,
+      times_per_period:,
+      unit:,
+      target_amount:,
+      target_scope:,
       start: Time.zone.today,
       finish: Time.zone.today + (duration_in_days - 1).days
     )
@@ -154,5 +183,13 @@ class ChallengeStory < ApplicationRecord
     if finish.present? && start.present? && finish < start
       errors.add(:finish, "cannot be earlier than the start date")
     end
+  end
+
+  # Check-ins already count toward the old goal, so changing it would rewrite history
+  def goal_locked_after_first_check_in
+    return if challenge_check_ins_count.zero?
+    return unless (changed & %w[cadence times_per_period unit target_amount target_scope]).any?
+
+    errors.add(:base, "The goal can't change once someone has checked in")
   end
 end

@@ -36,6 +36,23 @@
         <span></span>
       </div>
 
+      <% if challenge_story.goal.measured? %>
+        <fieldset class="fieldset">
+          <label for="amount" class="fieldset-legend text-sm">How many <%= challenge_story.goal.unit_label %>?</label>
+          <label class="<%= class_names("input input-lg w-full", "input-error": challenge_check_in.errors[:amount].any?) %>">
+            <% goal = challenge_story.goal %>
+            <%= form.number_field :amount, id: "amount", required: true,
+              value: goal.format_number(challenge_check_in.amount || goal.suggested_amount),
+              min: goal.whole_numbers? ? 1 : 0, step: goal.whole_numbers? ? 1 : "any",
+              inputmode: goal.whole_numbers? ? "numeric" : "decimal", placeholder: "0" %>
+            <span class="label"><%= challenge_story.goal.unit_label %></span>
+          </label>
+          <% challenge_check_in.errors.full_messages_for(:amount).each do |message| %>
+            <p class="label text-error"><%= message %></p>
+          <% end %>
+        </fieldset>
+      <% end %>
+
       <fieldset class="fieldset">
         <label for="message" class="fieldset-legend text-sm">What did you do?</label>
         <%= form.text_area :message,

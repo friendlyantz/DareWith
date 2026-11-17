@@ -126,6 +126,33 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
+      it "records the amount when the challenge counts something" do
+        story.update!(unit: :km)
+
+        post challenge_story_challenge_check_ins_path(story), params: {challenge_check_in: {message: "Morning run", amount: "5.2"}}
+
+        expect(ChallengeCheckIn.last.amount).to eq BigDecimal("5.2")
+        get challenge_story_path(story)
+        expect(response.body).to include("5.2 km")
+      end
+
+      it "pre-fills the target and steps in whole reps" do
+        story.update!(unit: :reps, target_amount: 50, target_scope: :each_time)
+
+        get new_challenge_story_challenge_check_in_path(story)
+
+        expect(response.body).to include('value="50"').and include('step="1"')
+      end
+
+      it "asks for the amount when it's missing" do
+        story.update!(unit: :km)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include("How many km?")
+      end
+
       it "notifies the other participants" do
         friend = create(:challenge_participant, challenge_story: story)
         create(:web_push_notification, user: friend.user)

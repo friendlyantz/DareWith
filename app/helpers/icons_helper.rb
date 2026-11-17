@@ -22,6 +22,7 @@ module IconsHelper
     send: '<path d="M4 12l16-8-6 16-3-7z"/><path d="M11 13l9-9"/>',
     share: '<path d="M12 15V3M8 7l4-4 4 4M5 12v8h14v-8"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>'
   }.freeze

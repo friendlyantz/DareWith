@@ -29,6 +29,38 @@
     <% end %>
   </div>
 
+  <fieldset class="group/goal flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
+    <div>
+      <%= form.label :unit, "What do you count?", class: "text-sm font-semibold" %>
+      <%= form.select :unit,
+        ChallengeStory.units.keys.map { [(it == "km") ? "Kilometres" : it.capitalize, it] },
+        {include_blank: "Nothing, just check in"},
+        class: "select w-full mt-1.5" %>
+    </div>
+
+    <div class="group-has-[option[value='']:checked]/goal:hidden">
+      <%= form.label :target_amount, "Target (optional)", class: "text-sm font-semibold" %>
+      <div class="grid grid-cols-2 gap-3 mt-1.5">
+        <%= form.number_field :target_amount,
+          value: challenge_story.target_amount && challenge_story.goal.format_number(challenge_story.target_amount),
+          min: 0, step: "any", inputmode: "decimal",
+          class: class_names("input w-full", "input-error": challenge_story.errors[:target_amount].any?),
+          placeholder: "e.g. 50" %>
+        <%= form.select :target_scope,
+          [["each time", "each_time"], ["in total", "total"]],
+          {},
+          class: "select w-full" %>
+      </div>
+      <% challenge_story.errors.full_messages_for(:target_amount).each do |message| %>
+        <p class="mt-1 text-sm text-error"><%= message %></p>
+      <% end %>
+    </div>
+
+    <% unless challenge_story.goal_editable? %>
+      <p class="text-sm text-base-content/70">The goal is fixed once someone has checked in.</p>
+    <% end %>
+  </fieldset>
+
   <div class="grid grid-cols-2 gap-3">
     <div>
       <%= form.label :start, "Starts", class: "text-sm font-semibold" %>

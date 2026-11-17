@@ -36,6 +36,30 @@ RSpec.describe ChallengeCheckIn, type: :model do
     end
   end
 
+  describe "amount" do
+    it "is needed when the challenge counts something" do
+      participant = create(:challenge_participant, challenge_story: create(:challenge_story, unit: :reps))
+
+      expect(build(:challenge_check_in, challenge_participant: participant)).not_to be_valid
+      expect(build(:challenge_check_in, challenge_participant: participant, amount: 0)).not_to be_valid
+      expect(build(:challenge_check_in, challenge_participant: participant, amount: 25)).to be_valid
+    end
+
+    it "is a whole number for reps but not for km" do
+      reps = create(:challenge_participant, challenge_story: create(:challenge_story, unit: :reps))
+      km = create(:challenge_participant, challenge_story: create(:challenge_story, unit: :km))
+
+      expect(build(:challenge_check_in, challenge_participant: reps, amount: 2.5)).not_to be_valid
+      expect(build(:challenge_check_in, challenge_participant: km, amount: 2.5)).to be_valid
+    end
+
+    it "is ignored when the challenge only counts check-ins" do
+      check_in = create(:challenge_check_in, amount: 25)
+
+      expect(check_in.amount).to be_nil
+    end
+  end
+
   describe "broadcasting a new check-in" do
     let(:challenge_participant) { create(:challenge_participant) }
     let(:story) { challenge_participant.challenge_story }

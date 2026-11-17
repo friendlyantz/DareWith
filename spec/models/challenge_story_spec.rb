@@ -229,8 +229,64 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "goal" do
+    it "is a plain daily challenge by default" do
+      story = create(:challenge_story)
+
+      expect(story).to be_daily
+      expect(story.times_per_period).to eq 1
+      expect(story.goal).not_to be_measured
+    end
+
+    it "allows up to six times a week" do
+      expect(build(:challenge_story, cadence: :weekly, times_per_period: 6)).to be_valid
+      expect(build(:challenge_story, cadence: :weekly, times_per_period: 7)).not_to be_valid
+      expect(build(:challenge_story, cadence: :daily, times_per_period: 2)).not_to be_valid
+    end
+
+    it "rejects unknown units instead of raising" do
+      expect(build(:challenge_story, unit: "furlongs")).not_to be_valid
+    end
+
+    it "drops a target without a unit" do
+      story = create(:challenge_story, target_amount: 50, target_scope: :each_time)
+
+      expect(story).to have_attributes(target_amount: nil, target_scope: nil)
+    end
+
+    it "drops the scope without a target amount" do
+      story = create(:challenge_story, unit: :reps, target_scope: :each_time)
+
+      expect(story.target_scope).to be_nil
+    end
+
+    it "needs a whole-number target for reps" do
+      expect(build(:challenge_story, unit: :reps, target_amount: 50.5, target_scope: :each_time)).not_to be_valid
+      expect(build(:challenge_story, unit: :km, target_amount: 5.5, target_scope: :each_time)).to be_valid
+    end
+
+    it "rejects a target that isn't positive" do
+      expect(build(:challenge_story, unit: :reps, target_amount: 0, target_scope: :each_time)).not_to be_valid
+    end
+
+    it "is fixed once someone has checked in" do
+      story = create(:challenge_story, unit: :reps)
+      create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story), amount: 10)
+
+      expect(story.reload.update(unit: :minutes)).to be false
+      expect(story.errors[:base]).to include("The goal can't change once someone has checked in")
+      expect(story.reload.update(title: "Renamed")).to be true
+    end
+  end
+
   describe "rounds" do
     let(:round_one) { create(:challenge_story, :finished, title: "Gym", description: "Any workout counts") }
+
+    it "keeps the goal in the next round" do
+      round_one.update!(cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_time)
+
+      expect(round_one.next_round).to have_attributes(cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_time")
+    end
 
     it "starts the next round today with the same rules and length" do
       travel_to(Time.zone.local(2026, 11, 17, 9)) do

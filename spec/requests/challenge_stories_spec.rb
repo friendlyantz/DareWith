@@ -85,6 +85,14 @@ RSpec.describe "ChallengeStories", type: :request do
         expect(response).to redirect_to(challenge_story_path(ChallengeStory.last))
       end
 
+      it "saves the goal" do
+        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(unit: "reps", target_amount: "50", target_scope: "each_time")}
+
+        expect(ChallengeStory.last).to have_attributes(unit: "reps", target_amount: 50, target_scope: "each_time")
+        follow_redirect!
+        expect(response.body).to include("50 reps each time")
+      end
+
       it "adds the creator as a participant" do
         post challenge_stories_path, params: valid_params
 

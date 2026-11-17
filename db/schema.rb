@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -19,8 +19,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_200000) do
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "badge_kind", ["first_check_in", "three_day_streak", "week_streak", "three_week_streak", "comeback", "finisher", "flawless", "cheerleader", "good_for_it"]
+  create_enum "challenge_cadence", ["daily", "weekly"]
   create_enum "challenge_participant_status", ["active", "inactive"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
+  create_enum "challenge_target_scope", ["each_time", "total"]
+  create_enum "challenge_unit", ["reps", "minutes", "km", "pages"]
   create_enum "device_sign_in_state", ["pending", "approved", "used"]
 
   create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -93,10 +96,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_200000) do
     t.integer "challenge_check_in_likes_count", default: 0, null: false
     t.date "checked_in_on", null: false
     t.integer "challenge_check_in_replies_count", default: 0, null: false
+    t.decimal "amount", precision: 10, scale: 2
     t.index ["challenge_participant_id", "checked_in_on"], name: "idx_on_challenge_participant_id_checked_in_on_b71ead7892", unique: true
     t.index ["challenge_participant_id"], name: "index_challenge_check_ins_on_challenge_participant_id"
     t.index ["challenge_story_id"], name: "index_challenge_check_ins_on_challenge_story_id"
     t.index ["created_at"], name: "index_challenge_check_ins_on_created_at"
+    t.check_constraint "amount IS NULL OR amount > 0::numeric", name: "check_amount_positive"
     t.check_constraint "challenge_check_in_likes_count >= 0", name: "check_comment_likes_non_negative"
   end
 
@@ -150,11 +155,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_200000) do
     t.integer "challenge_rewards_count", default: 0, null: false
     t.uuid "previous_challenge_story_id"
     t.integer "round", default: 1, null: false
+    t.enum "cadence", default: "daily", null: false, enum_type: "challenge_cadence"
+    t.integer "times_per_period", default: 1, null: false
+    t.enum "unit", enum_type: "challenge_unit"
+    t.decimal "target_amount", precision: 10, scale: 2
+    t.enum "target_scope", enum_type: "challenge_target_scope"
     t.index ["completed"], name: "index_challenge_stories_on_completed"
     t.index ["created_at"], name: "index_challenge_stories_on_created_at"
     t.index ["finish"], name: "index_challenge_stories_on_finish"
     t.index ["previous_challenge_story_id"], name: "index_challenge_stories_on_previous_challenge_story_id", unique: true
     t.index ["start"], name: "index_challenge_stories_on_start"
+    t.check_constraint "(target_amount IS NULL) = (target_scope IS NULL)", name: "check_target_complete"
+    t.check_constraint "cadence = 'daily'::challenge_cadence AND times_per_period = 1 OR cadence = 'weekly'::challenge_cadence AND times_per_period >= 1 AND times_per_period <= 6", name: "check_times_per_period"
     t.check_constraint "challenge_check_ins_count >= 0", name: "check_story_comments_non_negative"
     t.check_constraint "challenge_participants_count >= 0", name: "check_participants_non_negative"
     t.check_constraint "challenge_rewards_count >= 0", name: "check_rewards_non_negative"
@@ -162,6 +174,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_200000) do
     t.check_constraint "char_length(description) <= 500", name: "check_description_length"
     t.check_constraint "finish >= start", name: "check_finish_after_start"
     t.check_constraint "round >= 1", name: "check_round_positive"
+    t.check_constraint "target_amount IS NULL OR unit IS NOT NULL AND target_amount > 0::numeric", name: "check_target_needs_unit"
   end
 
   create_table "challenge_story_likes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
