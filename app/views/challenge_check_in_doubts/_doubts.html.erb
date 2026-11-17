@@ -1,0 +1,15 @@
+<%# locals: (challenge_check_in:) %>
+<% doubts = challenge_check_in.challenge_check_in_doubts %>
+<% if doubts.any? %>
+  <div class="mx-4 mb-3 flex flex-col gap-1 rounded-box bg-warning/10 px-3 py-2 text-sm">
+    <p class="font-semibold">
+      🤨 <%= challenge_check_in.disputed? ? "Disputed" : "Doubted" %> by <%= doubts.map { it.user.username }.to_sentence %><%= " · doesn't count" if challenge_check_in.disputed? %>
+    </p>
+    <% doubts.select(&:note).each do |doubt| %>
+      <p><span class="font-semibold"><%= doubt.user.username %>:</span> <span class="break-words"><%= doubt.note %></span></p>
+    <% end %>
+    <p class="text-base-content/70">
+      <%= challenge_check_in.disputed? ? "Most friends doubt it. It counts again if doubts are withdrawn." : "Proof in a reply can win them over." %>
+    </p>
+  </div>
+<% end %>

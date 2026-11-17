@@ -77,4 +77,48 @@ RSpec.describe "Challenge Check-ins", type: :system do
       expect(page).to have_no_link("Check in")
     end
   end
+
+  scenario "friend doubts a check-in and withdraws the doubt" do
+    friend = create(:challenge_participant, challenge_story: challenge)
+    create(:challenge_check_in, challenge_participant: friend, message: "Did my run")
+    create(:challenge_check_in, challenge_participant: participant, message: "My own")
+
+    show_page.load
+
+    within("article", text: "My own") { expect(page).to have_no_content("Doubt it") }
+    within("article", text: "Did my run") do
+      find("summary", text: "Doubt it").click
+      fill_in "challenge_check_in_doubt[note]", with: "That's yesterday's photo"
+      click_on "Doubt"
+    end
+
+    within("article", text: "Did my run") do
+      expect(page).to have_content("Doubted by #{user.username}")
+      expect(page).to have_content("That's yesterday's photo")
+      click_on "Withdraw doubt"
+    end
+
+    within("article", text: "Did my run") do
+      expect(page).to have_no_content("Doubted by")
+      expect(page).to have_content("Doubt it")
+    end
+  end
+
+  scenario "friend doubts a check-in from the feed and stays on it" do
+    friend = create(:challenge_participant, challenge_story: challenge)
+    create(:challenge_check_in, challenge_participant: friend, message: "Did my run")
+    create(:challenge_check_in, challenge_participant: participant, message: "My own")
+
+    visit challenge_check_ins_path
+    within("article", text: "My own") { expect(page).to have_css("button[aria-label='Delete check-in']") }
+
+    within("article", text: "Did my run") do
+      find("summary", text: "Doubt it").click
+      click_on "Doubt"
+    end
+
+    expect(page).to have_current_path(challenge_check_ins_path)
+    within("article", text: "Did my run") { expect(page).to have_content("Doubted by #{user.username}") }
+    within("article", text: "My own") { expect(page).to have_css("button[aria-label='Delete check-in']") }
+  end
 end

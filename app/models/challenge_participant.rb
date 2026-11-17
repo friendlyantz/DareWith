@@ -7,9 +7,9 @@ class ChallengeParticipant < ApplicationRecord
   has_many :given_rewards, class_name: "ChallengeReward", foreign_key: "giver_id", dependent: :destroy
   has_many :received_rewards, class_name: "ChallengeReward", foreign_key: "receiver_id", dependent: :destroy
   has_many :challenge_check_ins, dependent: :destroy
-  has_many :todays_check_ins, -> { today }, class_name: "ChallengeCheckIn"
-  # Just enough of each check-in for streaks and totals, so pages can preload it cheaply
-  has_many :check_in_days, -> { select(:id, :challenge_participant_id, :checked_in_on, :amount) }, class_name: "ChallengeCheckIn"
+  has_many :todays_check_ins, -> { today.counted }, class_name: "ChallengeCheckIn"
+  # Just enough of each counted check-in for streaks and totals, so pages can preload it cheaply
+  has_many :check_in_days, -> { counted.select(:id, :challenge_participant_id, :checked_in_on, :amount) }, class_name: "ChallengeCheckIn"
   has_many :sent_nudges, class_name: "ChallengeNudge", foreign_key: "sender_id", dependent: :destroy
   has_many :received_nudges, class_name: "ChallengeNudge", foreign_key: "receiver_id", dependent: :destroy
   # Wide enough to hold "today" in any time zone, so pages can preload it
@@ -113,11 +113,17 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   def leave!
-    update!(status: :inactive)
+    transaction do
+      update!(status: :inactive)
+      challenge_story.settle_open_disputes!
+    end
   end
 
   def rejoin!
-    update!(status: :active)
+    transaction do
+      update!(status: :active)
+      challenge_story.settle_open_disputes!
+    end
   end
 
   def has_pledged_to_all_active_participants?

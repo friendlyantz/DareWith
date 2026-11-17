@@ -1,0 +1,26 @@
+<%# locals: (challenge_check_in:) %>
+<%# Shown in the browser to friends while doubts are open; the server checks again %>
+<%= tag.div class: "flex flex-col items-end",
+  data: {controller: "doubt", action: "turbo:morph@window->doubt#refresh",
+    doubt_author_id_value: challenge_check_in.challenge_participant.user_id,
+    doubt_doubter_ids_value: challenge_check_in.challenge_check_in_doubts.map(&:user_id),
+    doubt_closes_at_value: challenge_check_in.doubts_close_at.iso8601} do %>
+  <details class="flex flex-col items-end gap-2" hidden data-doubt-target="doubt">
+    <summary class="btn btn-ghost btn-sm px-2 text-base-content/70 list-none [&::-webkit-details-marker]:hidden">🤨 Doubt it</summary>
+    <%= form_with model: ChallengeCheckInDoubt.new, url: challenge_check_in_challenge_check_in_doubt_path(challenge_check_in),
+      class: "flex w-full items-center gap-2 px-2" do |form| %>
+      <%= form.text_field :note,
+        placeholder: "Why? e.g. that's yesterday's photo",
+        maxlength: ChallengeCheckInDoubt::NOTE_MAX_LENGTH,
+        autocomplete: "off",
+        aria: {label: "Why you doubt it (optional)"},
+        id: dom_id(challenge_check_in, :doubt_note),
+        class: "input input-sm flex-1 min-w-0 rounded-full" %>
+      <%= form.submit "Doubt", class: "btn btn-sm btn-warning rounded-full" %>
+    <% end %>
+  </details>
+  <%= button_to "Withdraw doubt", challenge_check_in_challenge_check_in_doubt_path(challenge_check_in),
+    method: :delete,
+    class: "btn btn-ghost btn-sm px-2 text-base-content/70",
+    form: {hidden: true, data: {doubt_target: "withdraw"}} %>
+<% end %>

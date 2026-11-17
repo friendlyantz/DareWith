@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ChallengeCheckIn < ApplicationRecord
+  DOUBT_WINDOW = 48.hours
+
   # Associations
   belongs_to :challenge_participant, counter_cache: true
   belongs_to :challenge_story, counter_cache: true
@@ -8,6 +10,11 @@ class ChallengeCheckIn < ApplicationRecord
   has_many :challenge_check_in_likes, dependent: :destroy
   has_many :liking_users, through: :challenge_check_in_likes, source: :user
   has_many :challenge_check_in_replies, -> { order(:created_at) }, dependent: :destroy
+  has_many :challenge_check_in_doubts, -> { order(:created_at) }, dependent: :destroy
+
+  # Enums
+  # Disputed check-ins don't count toward streaks, the leaderboard or misses
+  enum :status, %w[counted disputed].index_by(&:itself)
 
   # Validations
   validates :message, presence: true
@@ -52,6 +59,39 @@ class ChallengeCheckIn < ApplicationRecord
         path: Rails.application.routes.url_helpers.challenge_story_path(challenge_story)
       )
     end
+  end
+
+  # Friends in the challenge, while doubts are open
+  def doubtable_by?(user)
+    user.present? && user.id != challenge_participant.user_id &&
+      challenge_story.active_participants.exists?(user:) &&
+      challenge_story.accepting_check_ins? && Time.current < doubts_close_at
+  end
+
+  # 48 hours after posting, or when check-ins close, whichever is first
+  def doubts_close_at
+    [created_at + DOUBT_WINDOW, (challenge_story.finish + 2.days).in_time_zone].min
+  end
+
+  def doubt!(user, note: nil)
+    transaction do
+      challenge_check_in_doubts.create!(user:, note:).tap { settle_dispute! }
+    end
+  end
+
+  def withdraw_doubt!(user)
+    transaction do
+      challenge_check_in_doubts.find_by!(user:).destroy!
+      settle_dispute!
+    end
+  end
+
+  # Disputed once more than half of the friends still in the challenge doubt it. With a single
+  # friend a doubt only questions it, so in a pair one person can't wipe out the other's days.
+  def settle_dispute!
+    friends = challenge_story.active_participants.where.not(id: challenge_participant_id)
+    doubts = challenge_check_in_doubts.where(user_id: friends.select(:user_id)).count
+    update!(status: (friends.count >= 2 && doubts * 2 > friends.count) ? :disputed : :counted)
   end
 
   def liked_by?(user)

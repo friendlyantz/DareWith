@@ -76,6 +76,15 @@ RSpec.describe "ChallengeCheckIns", type: :request do
           expect(response.body).not_to include(other_check_in.message)
         end
       end
+
+      it "does not show check-ins from challenges the user left" do
+        participant.leave!
+        create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story), message: "After you left")
+
+        get challenge_check_ins_path
+
+        expect(response.body).not_to include("After you left")
+      end
     end
   end
 

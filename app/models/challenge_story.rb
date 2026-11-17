@@ -196,11 +196,22 @@ class ChallengeStory < ApplicationRecord
     participant = challenge_participants.find_by(user: user)
 
     if participant
-      participant.update!(status: :active) if participant.inactive?
+      participant.rejoin! if participant.inactive?
       participant
     else
-      challenge_participants.create!(user: user, status: :active)
+      challenge_participants.create!(user: user, status: :active).tap { settle_open_disputes! }
     end
+  end
+
+  # How many friends are in decides how many doubts dispute a check-in, so check-ins still open
+  # to doubts are judged again when someone joins or leaves. Closed ones keep their result.
+  def settle_open_disputes!
+    return unless accepting_check_ins?
+
+    challenge_check_ins
+      .where(created_at: ChallengeCheckIn::DOUBT_WINDOW.ago..)
+      .where(id: ChallengeCheckInDoubt.select(:challenge_check_in_id))
+      .find_each(&:settle_dispute!)
   end
 
   private

@@ -1,4 +1,5 @@
 <% content_for :title, "Feed" %>
+<% turbo_refreshes_with method: :morph, scroll: :preserve %>
 <div class="group/page w-full max-w-md flex flex-col gap-4" data-can-reply="true">
   <div>
     <p class="text-sm font-medium text-base-content/70">From your <%= pluralize(@challenge_stories.size, "active challenge") %></p>
