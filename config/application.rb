@@ -23,10 +23,8 @@ module TakeOnMe
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
 
-    # The app's domain. Passkeys, emails, push and redirects all follow it
+    # The app's domain. Passkeys, emails and push all follow it
     config.app_host = "darewith.app"
-    # Old domains: still accepted, and sent on to app_host
-    config.legacy_hosts = ["www.darewith.app", "strivo.me", "app.strivo.me", "take-on.me"]
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
