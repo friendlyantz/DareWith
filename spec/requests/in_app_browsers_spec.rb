@@ -45,4 +45,17 @@ RSpec.describe "In-app browsers", type: :request do
 
     expect(response.body).to include(%(data-clipboard-text-value="#{challenge_story_url(story)}"))
   end
+
+  it "sends a sign-in link opened in Instagram to Safari without using it up" do
+    user = create(:user)
+    token = user.generate_email_login_token!
+
+    get verify_email_session_path(token:), headers: {"User-Agent" => ios_in_app}
+
+    expect(response.body).to include("Open in Safari")
+    expect(response.body).to include("x-safari-http://www.example.com/email/session/verify?token=#{token}")
+    expect(response.body).to include("Sign in here anyway")
+    expect(session[:user_id]).to be_nil
+    expect(user.reload.verify_email_login_token(token)).to be true
+  end
 end

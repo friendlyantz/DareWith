@@ -1,0 +1,33 @@
+<% content_for :title, "Sign in" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Sign in as <%= @user.username %></h1>
+    <% if likely_webview? %>
+      <p class="text-sm text-base-content/70 mt-1">Open this link in <%= real_browser_name || "Safari or Chrome" %> first, so you can save a passkey there. The link still works after you switch.</p>
+    <% else %>
+      <p class="text-sm text-base-content/70 mt-1">Tap the button to finish signing in on this device.</p>
+    <% end %>
+  </div>
+
+  <div class="rounded-box border border-base-300 bg-base-100 p-5 flex flex-col gap-2">
+    <% if likely_webview? %>
+      <%# Signing in here would use up the link inside Instagram and co., where passkeys can't be saved %>
+      <% if (browser_url = open_in_browser_url(request.original_url)) %>
+        <%= link_to "Open in #{real_browser_name}", browser_url, class: "btn btn-primary w-full" %>
+      <% end %>
+      <button type="button" class="btn w-full <%= browser_url ? "btn-soft" : "btn-primary" %>" data-controller="clipboard" data-clipboard-text-value="<%= request.original_url %>" data-action="clipboard#copy">Copy link</button>
+      <details class="text-sm text-base-content/80">
+        <summary class="cursor-pointer">Button didn't work?</summary>
+        <ul class="list-disc pl-5 mt-1">
+          <li>iPhone: tap ⋯ or the share button, then "Open in Safari"</li>
+          <li>Android: tap ⋮, then "Open in Chrome" or "Open in browser"</li>
+          <li>Or copy the link and paste it into your browser</li>
+        </ul>
+      </details>
+    <% end %>
+    <%= button_to likely_webview? ? "Sign in here anyway" : "Sign in", verify_email_session_path,
+      params: {token: params[:token], return_to: params[:return_to]}.compact_blank,
+      class: "btn w-full #{likely_webview? ? "btn-ghost btn-sm" : "btn-primary"}",
+      form: {data: {turbo: false}} %>
+  </div>
+</div>

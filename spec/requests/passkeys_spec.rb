@@ -70,7 +70,7 @@ RSpec.describe "Passkeys", type: :request do
     end
 
     it "sends them to add a new passkey once they sign in by email" do
-      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+      post verify_email_session_path, params: {token: user.generate_email_login_token!}
 
       expect(response).to redirect_to(credentials_path)
     end

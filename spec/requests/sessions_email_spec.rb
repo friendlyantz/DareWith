@@ -74,10 +74,23 @@ RSpec.describe "Sessions Email Authentication", type: :request do
   end
 
   describe "GET /email/session/verify" do
+    it "only shows a Sign in button, so link previews don't use up the token" do
+      token = user.generate_email_login_token!
+
+      get verify_email_session_path, params: {token:, return_to: "/today"}
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Sign in as #{user.username}")
+      expect(session[:user_id]).to be_nil
+      expect(user.reload.email_login_token).to be_present
+    end
+  end
+
+  describe "POST /email/session/verify" do
     it "signs in user with valid token" do
       token = user.generate_email_login_token!
 
-      get verify_email_session_path, params: {token: token}
+      post verify_email_session_path, params: {token: token}
 
       expect(response).to redirect_to(root_path)
       expect(session[:user_id]).to eq(user.id)
@@ -88,7 +101,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       get challenge_story_path(story)
       token = user.generate_email_login_token!
 
-      get verify_email_session_path, params: {token: token}
+      post verify_email_session_path, params: {token: token}
 
       expect(response).to redirect_to(challenge_story_path(story))
     end
@@ -97,17 +110,17 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       get today_path
       token = user.generate_email_login_token!
 
-      get verify_email_session_path, params: {token: token}
+      post verify_email_session_path, params: {token: token}
 
       expect(response).to redirect_to(today_path)
     end
 
     it "only returns once" do
       get challenge_story_path(create(:challenge_story))
-      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+      post verify_email_session_path, params: {token: user.generate_email_login_token!}
       delete webauthn_session_path
 
-      get verify_email_session_path, params: {token: user.generate_email_login_token!}
+      post verify_email_session_path, params: {token: user.generate_email_login_token!}
 
       expect(response).to redirect_to(root_path)
     end
@@ -115,7 +128,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
     it "clears token after successful verification" do
       token = user.generate_email_login_token!
 
-      get verify_email_session_path, params: {token: token}
+      post verify_email_session_path, params: {token: token}
 
       user.reload
       expect(user.email_login_token).to be_nil
@@ -127,12 +140,14 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       expect(user.email_verified?).to be false
 
-      get verify_email_session_path, params: {token: token}
+      post verify_email_session_path, params: {token: token}
 
       user.reload
       expect(user.email_verified?).to be true
     end
+  end
 
+  describe "a bad link" do
     it "returns error for invalid token" do
       get verify_email_session_path, params: {token: "invalid-token"}
 
@@ -226,6 +241,8 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
     mail_app_browser = open_session
     mail_app_browser.get link
+    expect(mail_app_browser.response.body).to include(%(name="return_to" value="#{challenge_story_path(story)}"))
+    mail_app_browser.post link
 
     expect(mail_app_browser.response.location).to end_with(challenge_story_path(story))
   end

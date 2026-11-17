@@ -46,6 +46,9 @@ RSpec.describe "Admin users", type: :request do
         expect(user.reload.email_login_recently_sent?).to be false
 
         get sign_in_url
+        expect(response.body).to include("Sign in as #{user.username}")
+
+        post sign_in_url
         follow_redirect!
         expect(session[:user_id]).to eq(user.id)
       end

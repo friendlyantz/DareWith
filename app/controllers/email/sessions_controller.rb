@@ -3,6 +3,7 @@
 module Email
   class SessionsController < Email::ApplicationController
     rate_limit to: 10, within: 1.minute, only: :confirm
+    before_action :set_link_user, only: %i[verify redeem]
 
     def new
       # GET request - show the email sign-in form
@@ -18,29 +19,15 @@ module Email
       render :new
     end
 
+    # Opening the link only shows a Sign in button: chat apps and mail scanners open links
+    # to preview them, and that would use up the single-use token before the person taps it
     def verify
-      token = params[:token]
+    end
 
-      if token.blank?
-        redirect_to new_webauthn_session_path, alert: "Invalid sign-in link"
-        return
-      end
-
-      user = User.find_by_email_login_token(token)
-
-      if user.nil?
-        redirect_to new_webauthn_session_path, alert: "Invalid or expired sign-in link"
-        return
-      end
-
-      unless user.verify_email_login_token(token)
-        redirect_to new_webauthn_session_path, alert: "This sign-in link has expired"
-        return
-      end
-
+    def redeem
       # The link may open in another browser, so it carries the invite
       remember_location(params[:return_to]) if params[:return_to].present?
-      complete_sign_in(user)
+      complete_sign_in(@user)
     end
 
     def confirm
@@ -58,6 +45,15 @@ module Email
     end
 
     private
+
+    def set_link_user
+      return redirect_to(new_webauthn_session_path, alert: "Invalid sign-in link") if params[:token].blank?
+
+      @user = User.find_by_email_login_token(params[:token])
+      return redirect_to(new_webauthn_session_path, alert: "Invalid or expired sign-in link") unless @user
+
+      redirect_to(new_webauthn_session_path, alert: "This sign-in link has expired") unless @user.verify_email_login_token(params[:token])
+    end
 
     def complete_sign_in(user)
       user.clear_email_login_token!

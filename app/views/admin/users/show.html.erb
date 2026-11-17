@@ -28,7 +28,7 @@
           <button type="button" class="btn btn-primary" data-controller="clipboard" data-clipboard-text-value="<%= @sign_in_url %>" data-action="clipboard#copy">Copy</button>
         </div>
         <p class="text-xs text-base-content/60">
-          Works once, for 24 hours, in any browser, and replaces any link they were emailed. Opening it yourself signs you in as <%= @user.username %>.
+          Works once, for 24 hours, in any browser, and replaces any link they were emailed. Opening it shows a Sign in button, so chat app previews don't use it up.
         </p>
       <% else %>
         <p class="text-sm text-base-content/70">Make a link that signs <%= @user.username %> in, to send them by hand. It works like the one in the sign-in email.</p>

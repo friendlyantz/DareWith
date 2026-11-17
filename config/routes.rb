@@ -56,6 +56,7 @@ Rails.application.routes.draw do
   namespace :email do
     resource :session, only: %i[new create] do
       get :verify, on: :collection
+      post :verify, on: :collection, action: :redeem
       post :confirm, on: :collection
     end
     resource :registration, only: %i[new create]
