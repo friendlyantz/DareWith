@@ -196,7 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_020000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "backed_up"
-    t.string "rp_id", null: false
+    t.string "rp_id", default: "localhost", null: false
     t.index ["external_id"], name: "index_credentials_on_external_id", unique: true
     t.index ["user_id", "rp_id"], name: "index_credentials_on_user_id_and_rp_id"
     t.index ["user_id"], name: "index_credentials_on_user_id"
