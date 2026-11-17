@@ -69,6 +69,22 @@ RSpec.describe "ChallengeStories", type: :request do
         get new_challenge_story_path
 
         expect(response).to have_http_status(:ok)
+        expect(response.body).to include("30 days of push-ups")
+      end
+
+      it "pre-fills the form from a template" do
+        get new_challenge_story_path(template: "run")
+
+        expect(response.body).to include('value="Run 3× a week"')
+        expect(response.body).to include('<option selected="selected" value="weekly">')
+        expect(response.body).to include("Start blank")
+      end
+
+      it "shows a blank form for an unknown template" do
+        get new_challenge_story_path(template: "nope")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("Start blank")
       end
     end
   end

@@ -36,7 +36,9 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def new
+    @template = ChallengeStory::Template.find(params[:template]) unless @previous_challenge_story
     @challenge_story = @previous_challenge_story&.next_round ||
+      @template&.build ||
       ChallengeStory.new(start: Time.zone.today, finish: Time.zone.today + 7.days)
   end
 

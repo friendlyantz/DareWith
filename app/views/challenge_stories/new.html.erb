@@ -16,6 +16,10 @@
     <% end %>
   </div>
 
+  <% unless @challenge_story.previous_challenge_story %>
+    <%= render "templates", selected: @template %>
+  <% end %>
+
   <%= render "form", challenge_story: @challenge_story,
     submit_text: @challenge_story.previous_challenge_story ? "Start round #{@challenge_story.previous_challenge_story.round + 1}" : "Start challenge" %>
 </div>
