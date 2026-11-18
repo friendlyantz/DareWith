@@ -1,22 +1,20 @@
 require "rails_helper"
 
 RSpec.describe ChallengeCompletionJob, type: :job do
-  it "completes challenges that are ready and leaves the rest" do
-    ready = create(:challenge_story, :finished)
-    waiting = create(:challenge_story, :finished)
-    create(:challenge_reward, challenge_story: waiting,
-      giver: create(:challenge_participant, challenge_story: waiting),
-      receiver: create(:challenge_participant, challenge_story: waiting))
+  it "completes ended challenges, even with pledges still to settle, and leaves running ones" do
+    ended = create(:challenge_story, :finished)
+    create(:challenge_reward, challenge_story: ended,
+      giver: create(:challenge_participant, challenge_story: ended),
+      receiver: create(:challenge_participant, challenge_story: ended))
     running = create(:challenge_story)
 
     described_class.perform_now
 
-    expect(ready.reload).to be_completed
-    expect(waiting.reload).not_to be_completed
+    expect(ended.reload).to be_completed
     expect(running.reload).not_to be_completed
   end
 
-  it "charges penalties for misses, so the challenge waits for them to be settled" do
+  it "charges penalties for misses" do
     story = create(:challenge_story, :finished, penalty_mode: :per_miss, penalty: "a coffee")
     slacker = create(:challenge_participant, challenge_story: story)
     keen = create(:challenge_participant, challenge_story: story)
@@ -25,18 +23,19 @@ RSpec.describe ChallengeCompletionJob, type: :job do
     described_class.perform_now
 
     expect(story.challenge_rewards.penalty.sole).to have_attributes(giver: slacker, receiver: keen, description: "a coffee × 8")
-    expect(story.reload).not_to be_completed
   end
 
-  it "waits to charge penalties until the grace day is over everywhere" do
+  it "waits until the grace day is over everywhere" do
     story = create(:challenge_story, start: Date.new(2026, 11, 10), finish: Date.new(2026, 11, 16), penalty_mode: :per_miss, penalty: "a coffee")
     create(:challenge_participant, challenge_story: story)
     create(:challenge_participant, challenge_story: story)
 
-    travel_to(Time.utc(2026, 11, 18, 0, 15)) { described_class.perform_now }
+    travel_to(Time.utc(2026, 11, 18, 11, 0)) { described_class.perform_now }
     expect(story.challenge_rewards.penalty).to be_empty
+    expect(story.reload).not_to be_completed
 
-    travel_to(Time.utc(2026, 11, 19, 0, 15)) { described_class.perform_now }
+    travel_to(Time.utc(2026, 11, 18, 12, 0)) { described_class.perform_now }
     expect(story.challenge_rewards.penalty).to be_present
+    expect(story.reload).to be_completed
   end
 end

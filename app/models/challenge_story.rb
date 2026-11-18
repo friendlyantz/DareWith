@@ -2,7 +2,8 @@
 
 class ChallengeStory < ApplicationRecord
   MAX_PARTICIPANTS = 4
-  AUTO_COMPLETE_AFTER = 14.days
+  # The last time zone to finish a day, so the grace day is over for everyone, wherever they are
+  LAST_TIME_ZONE = "Etc/GMT+12"
 
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
@@ -98,16 +99,9 @@ class ChallengeStory < ApplicationRecord
     !completed? && Time.zone.today <= finish + 1.day
   end
 
-  def wrapping_up?
-    !completed? && !accepting_check_ins?
-  end
-
-  def auto_complete_on
-    finish + AUTO_COMPLETE_AFTER
-  end
-
-  def ready_to_auto_complete?
-    wrapping_up? && (challenge_rewards.pending.none? || Time.zone.today >= auto_complete_on)
+  # Once the grace day is over everywhere, the challenge completes by itself
+  def completes_at
+    (finish + 2.days).in_time_zone(LAST_TIME_ZONE)
   end
 
   def checked_in_today_count

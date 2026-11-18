@@ -20,10 +20,6 @@
       data: {turbo_frame: "new_message", action: "sheet#open"} do %>
       <%= icon(:camera) %> <%= check_in_button_label(participant) %>
     <% end %>
-  <% elsif challenge_story.wrapping_up? %>
-    <%= link_to challenge_story_challenge_rewards_path(challenge_story), class: "btn btn-primary btn-lg btn-block" do %>
-      <%= icon(:gift) %> Time's up · wrap up
-    <% end %>
   <% else %>
     <p class="py-1 text-center text-sm">This challenge is over. No more check-ins are allowed.</p>
   <% end %>

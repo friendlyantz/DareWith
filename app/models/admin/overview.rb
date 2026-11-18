@@ -59,7 +59,7 @@ class Admin::Overview
     }
   end
 
-  # Challenges, matching ChallengeStory#accepting_check_ins? and #wrapping_up?
+  # Challenges, matching ChallengeStory#accepting_check_ins?
   def running_challenges
     @running_challenges ||= ChallengeStory.active
       .where(start: ..Time.zone.today, finish: (Time.zone.today - 1.day)..)
@@ -68,8 +68,6 @@ class Admin::Overview
   end
 
   def upcoming_challenges_count = ChallengeStory.active.where(start: (Time.zone.today + 1.day)..).count
-
-  def wrapping_up_challenges_count = ChallengeStory.active.where(finish: ...(Time.zone.today - 1.day)).count
 
   def completed_challenges_count = ChallengeStory.completed.count
 

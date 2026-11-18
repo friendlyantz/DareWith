@@ -8,7 +8,7 @@
 
   <div>
     <h1 class="font-display text-3xl font-bold tracking-tight">Rewards</h1>
-    <% if @challenge_story.finished? && !@challenge_story.completed? %>
+    <% if @challenge_story.finished? %>
       <p class="text-sm text-base-content/70 mt-1">Time's up. Settle the pledges below.</p>
     <% end %>
   </div>

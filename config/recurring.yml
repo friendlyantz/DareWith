@@ -7,7 +7,7 @@ production:
     schedule: "0 * * * *"
   challenge_completion:
     class: ChallengeCompletionJob
-    schedule: "15 0 * * *"
+    schedule: "0 * * * *"
   device_sign_in_cleanup:
     command: "DeviceSignIn.stale.delete_all"
     schedule: "30 3 * * *"

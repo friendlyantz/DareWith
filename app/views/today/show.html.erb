@@ -39,13 +39,6 @@
     </div>
   <% end %>
 
-  <% if @wrap_up_stories.any? %>
-    <section class="flex flex-col gap-3 mt-2">
-      <h2 class="text-sm font-semibold text-base-content/70">Wrap up</h2>
-      <%= render partial: "today/wrap_up_card", collection: @wrap_up_stories, as: :challenge_story %>
-    </section>
-  <% end %>
-
   <%= link_to "All challenges", challenge_stories_path, class: "btn btn-ghost" %>
 
   <%= render "shared/sheet", title: "Check in", frame_id: "new_message" %>

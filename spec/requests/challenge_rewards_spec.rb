@@ -202,6 +202,14 @@ RSpec.describe "ChallengeRewards", type: :request do
           patch fulfill_challenge_story_challenge_reward_path(story, reward)
         }.to have_enqueued_job(PushNotificationJob).with(device, hash_including(title: "#{receiver.name} received your reward"))
       end
+
+      it "still works after the challenge completes" do
+        story.update!(completed: true)
+
+        patch fulfill_challenge_story_challenge_reward_path(story, reward)
+
+        expect(reward.reload).to be_fulfilled
+      end
     end
 
     context "when receiver fulfills before the last day" do
