@@ -9,7 +9,13 @@
       <p><span class="font-semibold"><%= doubt.user.username %>:</span> <span class="break-words"><%= doubt.note %></span></p>
     <% end %>
     <p class="text-base-content/70">
-      <%= challenge_check_in.disputed? ? "Most friends doubt it. It counts again if doubts are withdrawn." : "Proof in a reply can win them over." %>
+      <% if challenge_check_in.disputed? %>
+        Most friends doubt it. It counts again if doubts are withdrawn.
+      <% elsif challenge_check_in.challenge_story.active_participants.size < 3 %>
+        With just two of you, a doubt doesn't stop it counting. Proof in a reply can win them over.
+      <% else %>
+        Proof in a reply can win them over. If most friends doubt it, it stops counting.
+      <% end %>
     </p>
   </div>
 <% end %>

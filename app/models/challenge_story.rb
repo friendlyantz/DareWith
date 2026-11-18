@@ -6,6 +6,7 @@ class ChallengeStory < ApplicationRecord
   LAST_TIME_ZONE = "Etc/GMT+12"
   # How long a challenge stays on Today after it ends
   JUST_FINISHED_FOR = 7.days
+  GOAL_ATTRIBUTES = %w[cadence times_per_period unit target_amount target_scope penalty_mode penalty].freeze
 
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
@@ -41,6 +42,8 @@ class ChallengeStory < ApplicationRecord
   validates :target_scope, presence: true, if: -> { target_amount.present? }
   validates :penalty, presence: true, length: {maximum: 100}, if: :penalty_mode
   validate :goal_locked_after_first_check_in, on: :update
+  validate :start_locked_after_first_check_in, on: :update
+  validate :finish_not_moved_into_the_past, on: :update
 
   # Callbacks
   # The form always sends a weekly count and a scope, and a target only means something with a unit
@@ -76,6 +79,7 @@ class ChallengeStory < ApplicationRecord
     penalty_rule&.charge!&.each(&:notify_receiver)
   end
 
+  # The goal and start date stay open until someone checks in
   def goal_editable?
     new_record? || challenge_check_ins_count.zero?
   end
@@ -160,6 +164,20 @@ class ChallengeStory < ApplicationRecord
     end
   end
 
+  # Friends hear when the dates, goal or penalty change under them
+  def announce_changes(by:)
+    changes = changes_summary
+    return if changes.blank?
+
+    active_participants.where.not(user: by).includes(:user).find_each do |participant|
+      participant.user.notify(
+        title: "#{by.username} changed #{title}",
+        body: changes,
+        path: Rails.application.routes.url_helpers.challenge_story_path(self)
+      )
+    end
+  end
+
   # Same rules and length, starting today
   def next_round
     ChallengeStory.new(
@@ -234,8 +252,32 @@ class ChallengeStory < ApplicationRecord
   # Check-ins already count toward the old goal, so changing it would rewrite history
   def goal_locked_after_first_check_in
     return if challenge_check_ins_count.zero?
-    return unless (changed & %w[cadence times_per_period unit target_amount target_scope penalty_mode penalty]).any?
+    return unless (changed & GOAL_ATTRIBUTES).any?
 
     errors.add(:base, "The goal and penalty can't change once someone has checked in")
+  end
+
+  # Moving the start would turn days already played into misses, or leave check-ins outside the challenge
+  def start_locked_after_first_check_in
+    return unless start_changed? && challenge_check_ins_count.positive?
+
+    errors.add(:start, "can't change once someone has checked in")
+  end
+
+  # Ending early is fine, just not before today, so days already played stay as they were
+  def finish_not_moved_into_the_past
+    return unless finish_changed? && finish.present? && finish < Time.zone.today
+
+    errors.add(:finish, "can't be earlier than today")
+  end
+
+  # "Ends 30 Nov · Each miss: owe everyone a coffee", from the last save
+  def changes_summary
+    [
+      ("Starts #{start.strftime("%-d %b")}" if saved_change_to_start?),
+      ("Ends #{finish.strftime("%-d %b")}" if saved_change_to_finish?),
+      ("Goal: #{goal.summary || "check in every day"}" if (saved_changes.keys & (GOAL_ATTRIBUTES - %w[penalty_mode penalty])).any?),
+      (penalty_rule&.summary || "No penalty" if saved_change_to_penalty_mode? || saved_change_to_penalty?)
+    ].compact.join(" · ")
   end
 end

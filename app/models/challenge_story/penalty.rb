@@ -12,6 +12,11 @@ class ChallengeStory::Penalty
     @challenge_story = challenge_story
   end
 
+  # "Each miss: owe everyone a coffee"
+  def summary
+    "#{per_miss? ? "Each miss" : "Most misses"}: owe everyone #{penalty}"
+  end
+
   # How many times the participant owes each friend the penalty, counting misses so far
   def times_owed_by(participant)
     return participant.misses if per_miss?

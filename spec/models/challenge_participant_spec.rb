@@ -59,6 +59,25 @@ RSpec.describe ChallengeParticipant, type: :model do
     end
   end
 
+  describe "#misses" do
+    let(:story) { create(:challenge_story, start: Time.zone.today - 8.days, finish: Time.zone.today + 5.days) }
+
+    it "counts only the days since joining" do
+      late = create(:challenge_participant, challenge_story: story, created_at: 2.days.ago)
+
+      expect(late.misses).to eq 2
+    end
+
+    it "skips a week joined partway through" do
+      story = create(:challenge_story, :weekly, start: Time.zone.today - 10.days, times_per_period: 3)
+      late = create(:challenge_participant, challenge_story: story, created_at: 9.days.ago)
+      on_time = create(:challenge_participant, challenge_story: story)
+
+      expect(late.misses).to eq 0
+      expect(on_time.misses).to eq 1
+    end
+  end
+
   describe "#rejoin!" do
     let(:participant) { create(:challenge_participant, :inactive) }
 

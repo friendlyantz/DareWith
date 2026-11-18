@@ -71,7 +71,7 @@ RSpec.describe User::WeeklyRecap do
   end
 
   it "skips challenges that ended before the week" do
-    story.update!(finish: sunday - 7)
+    story.update_columns(finish: sunday - 7)
 
     expect(recap.any?).to be false
   end

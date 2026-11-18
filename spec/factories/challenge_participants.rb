@@ -4,6 +4,8 @@ FactoryBot.define do
     challenge_story
     name { user.username }
     status { :active }
+    # Joined when the challenge started, unless that's still to come
+    created_at { [challenge_story.start.in_time_zone, Time.current].min }
 
     trait :inactive do
       status { :inactive }

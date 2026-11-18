@@ -32,6 +32,11 @@ class ChallengeStory::Goal
     (date - start).to_i.div(period_length)
   end
 
+  # The first period that starts on or after the date
+  def first_full_period_from(date)
+    [(date - start).to_i.fdiv(period_length).ceil, 0].max
+  end
+
   def current_period_number(today = Time.zone.today)
     period_index(today).clamp(0, period_count - 1) + 1
   end

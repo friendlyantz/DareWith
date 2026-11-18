@@ -24,7 +24,7 @@ RSpec.describe "ChallengeRewards", type: :request do
     end
 
     it "shows the giver how to pay once time is up" do
-      story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 1.day)
+      story.update_columns(start: Time.zone.today - 10.days, finish: Time.zone.today - 1.day)
 
       get challenge_story_challenge_rewards_path(story)
 
@@ -139,7 +139,7 @@ RSpec.describe "ChallengeRewards", type: :request do
 
     context "after the challenge has ended" do
       it "does not accept new pledges" do
-        story.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 3.days)
+        story.update_columns(start: Time.zone.today - 10.days, finish: Time.zone.today - 3.days)
 
         expect {
           post challenge_story_challenge_rewards_path(story),

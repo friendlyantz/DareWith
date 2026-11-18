@@ -70,20 +70,23 @@
     </div>
 
     <% unless challenge_story.goal_editable? %>
-      <p class="text-sm text-base-content/70">The goal is fixed once someone has checked in.</p>
+      <p class="text-sm text-base-content/70">The goal and penalty are fixed once someone has checked in. To change them, delete today's check-ins first.</p>
     <% end %>
   </fieldset>
 
   <div class="grid grid-cols-2 gap-3">
     <div>
       <%= form.label :start, "Starts", class: "text-sm font-semibold" %>
-      <%= form.date_field :start, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?) %>
+      <%= form.date_field :start, disabled: !challenge_story.goal_editable?, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?) %>
     </div>
     <div>
       <%= form.label :finish, "Ends", class: "text-sm font-semibold" %>
       <%= form.date_field :finish, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:finish].any?) %>
     </div>
   </div>
+  <% unless challenge_story.goal_editable? %>
+    <p class="-mt-2 text-sm text-base-content/70">The start is fixed once someone has checked in. The end can still move, just not before today.</p>
+  <% end %>
   <% (challenge_story.errors.full_messages_for(:start) + challenge_story.errors.full_messages_for(:finish)).each do |message| %>
     <p class="-mt-2 text-sm text-error"><%= message %></p>
   <% end %>
@@ -102,7 +105,7 @@
         maxlength: 100,
         class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
         placeholder: "e.g. a coffee, $5, buys lunch" %>
-      <p class="mt-1.5 text-sm text-base-content/70">The app counts the misses. Streak freezes cover a day. It's settled between you at the end, like rewards.</p>
+      <p class="mt-1.5 text-sm text-base-content/70">The app counts the misses since each person joined. In daily challenges, <%= ChallengeParticipant::Streak::FREEZE_EVERY %> days in a row earn a streak freeze that covers a miss. It's settled between you at the end, like rewards.</p>
       <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>
         <p class="mt-1 text-sm text-error"><%= message %></p>
       <% end %>

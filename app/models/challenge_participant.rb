@@ -43,10 +43,16 @@ class ChallengeParticipant < ApplicationRecord
     challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }
   end
 
-  # Days, or weeks short of the weekly count, that are over and that no freeze covered
+  # Days, or weeks short of the weekly count, that are over and that no freeze covered.
+  # Only ones since joining count; a week you joined partway through doesn't.
   def misses
     goal = challenge_story.goal
-    (goal.closed_period_indexes - goal.kept_period_indexes(check_in_dates) - streak.frozen_indexes).size
+    missed = goal.closed_period_indexes - goal.kept_period_indexes(check_in_dates) - streak.frozen_indexes
+    missed.count { it >= goal.first_full_period_from(joined_on) }
+  end
+
+  def joined_on
+    created_at.to_date
   end
 
   def total_amount

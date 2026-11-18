@@ -267,6 +267,49 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "dates" do
+    let(:story) { create(:challenge_story, start: Time.zone.today - 3.days, finish: Time.zone.today + 4.days) }
+
+    it "fixes the start once someone has checked in" do
+      create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story))
+
+      expect(story.reload.update(start: story.start - 8.days)).to be false
+      expect(story.errors[:start]).to include("can't change once someone has checked in")
+    end
+
+    it "lets the end move, but not before today" do
+      create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story))
+
+      expect(story.reload.update(finish: Time.zone.today)).to be true
+      expect(story.update(finish: Time.zone.today + 10.days)).to be true
+      expect(story.update(finish: Time.zone.yesterday)).to be false
+      expect(story.errors[:finish]).to include("can't be earlier than today")
+    end
+  end
+
+  describe "#announce_changes" do
+    let(:story) { create(:challenge_story, title: "Gym") }
+    let(:creator) { create(:challenge_participant, challenge_story: story) }
+    let(:friend) { create(:challenge_participant, challenge_story: story) }
+    let!(:creator_device) { create(:web_push_notification, user: creator.user) }
+    let!(:friend_device) { create(:web_push_notification, user: friend.user) }
+
+    it "tells friends what changed" do
+      new_finish = story.finish + 6.days
+      story.update!(finish: new_finish, penalty_mode: :per_miss, penalty: "a coffee")
+
+      expect { story.announce_changes(by: creator.user) }
+        .to have_enqueued_job(PushNotificationJob).exactly(:once)
+        .with(friend_device, title: "#{creator.user.username} changed Gym", body: "Ends #{new_finish.strftime("%-d %b")} · Each miss: owe everyone a coffee", path: "/challenge_stories/#{story.id}")
+    end
+
+    it "stays quiet when only the title or rules text changed" do
+      story.update!(title: "Gym days")
+
+      expect { story.announce_changes(by: creator.user) }.not_to have_enqueued_job(PushNotificationJob)
+    end
+  end
+
   describe "#ranked_participants" do
     let(:story) { create(:challenge_story, start: Time.zone.today - 2.days, finish: Time.zone.today + 5.days, unit: :km) }
     let!(:steady) { create(:challenge_participant, challenge_story: story) }

@@ -46,7 +46,7 @@ RSpec.describe ChallengeParticipant::Forecast do
     run(5, on: start)
     expect(forecast(start + 1.day)).to be_available
     expect(forecast(start + 30.days)).not_to be_available
-    story.update!(target_scope: :each_time)
+    story.update_columns(target_scope: :each_time)
     expect(forecast(start + 1.day)).not_to be_available
   end
 end

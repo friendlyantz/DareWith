@@ -368,7 +368,7 @@ RSpec.describe User, type: :model do
       expect(user.next_round_invites).to be_empty
 
       round_two.challenge_participants.last.destroy!
-      round_two.update!(start: Time.zone.today - 10.days, finish: Time.zone.today - 2.days)
+      round_two.update_columns(start: Time.zone.today - 10.days, finish: Time.zone.today - 2.days)
       expect(user.next_round_invites).to be_empty
     end
   end

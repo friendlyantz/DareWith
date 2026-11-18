@@ -18,9 +18,7 @@ module GoalsHelper
 
   # "Each miss: owe everyone a coffee"
   def penalty_summary(challenge_story)
-    return unless challenge_story.penalty_mode
-
-    "#{challenge_story.per_miss? ? "Each miss" : "Most misses"}: owe everyone #{challenge_story.penalty}"
+    challenge_story.penalty_rule&.summary
   end
 
   # "2 misses · owes a coffee × 2". Most misses can still change hands until check-ins close.

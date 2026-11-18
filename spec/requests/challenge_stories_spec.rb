@@ -329,6 +329,16 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response).to redirect_to(story)
       expect(story.reload.finish).to eq new_finish
     end
+
+    it "tells friends when the end moves" do
+      story = create(:challenge_story)
+      new_finish = story.finish + 6.days
+      create(:challenge_participant, user:, challenge_story: story)
+      friend_device = create(:web_push_notification, user: create(:challenge_participant, challenge_story: story).user)
+
+      expect { patch challenge_story_path(story), params: {challenge_story: {finish: new_finish}} }
+        .to have_enqueued_job(PushNotificationJob).with(friend_device, hash_including(title: "#{user.username} changed #{story.title}", body: "Ends #{new_finish.strftime("%-d %b")}"))
+    end
   end
 
   describe "next rounds" do

@@ -60,6 +60,7 @@ class ChallengeStoriesController < ApplicationController
 
   def update
     if @challenge_story.update(challenge_story_params)
+      @challenge_story.announce_changes(by: current_user)
       redirect_to @challenge_story, notice: "Challenge updated", status: :see_other
     else
       render :edit, status: :unprocessable_content
