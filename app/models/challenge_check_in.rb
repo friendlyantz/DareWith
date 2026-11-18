@@ -19,7 +19,7 @@ class ChallengeCheckIn < ApplicationRecord
   # Validations
   validates :message, presence: true
   validates :amount, presence: true, numericality: {greater_than: 0, less_than: 100_000_000}, if: -> { challenge_story&.goal&.measured? }
-  validates :amount, numericality: {only_integer: true, message: "must be a whole number"}, allow_nil: true, if: -> { challenge_story&.goal&.whole_numbers? }
+  validate :whole_number_amount, if: -> { challenge_story&.goal&.whole_numbers? }
   validate :photo_size_validation
 
   # Scopes
@@ -122,6 +122,13 @@ class ChallengeCheckIn < ApplicationRecord
     User.where(id: challenge_story.challenge_participants.select(:user_id)).find_each do |user|
       broadcast_remove_to [user, "challenge_check_ins_feed"]
     end
+  end
+
+  # A saved 25 loads as BigDecimal("25"), which numericality's only_integer rejects
+  def whole_number_amount
+    return if amount.nil? || amount == amount.round
+
+    errors.add(:amount, "must be a whole number")
   end
 
   def photo_size_validation

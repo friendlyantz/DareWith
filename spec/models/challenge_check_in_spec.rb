@@ -48,6 +48,13 @@ RSpec.describe ChallengeCheckIn, type: :model do
       expect(build(:challenge_check_in, challenge_participant: km, amount: 2.5)).to be_valid
     end
 
+    it "keeps a saved whole-number amount valid" do
+      reps = create(:challenge_participant, challenge_story: create(:challenge_story, unit: :reps))
+      check_in = create(:challenge_check_in, challenge_participant: reps, amount: 25)
+
+      expect(ChallengeCheckIn.find(check_in.id)).to be_valid
+    end
+
     it "is ignored when the challenge only counts check-ins" do
       check_in = create(:challenge_check_in, amount: 25)
 
@@ -226,6 +233,7 @@ RSpec.describe ChallengeCheckIn, type: :model do
 
     it "takes disputed check-ins out of streaks and misses" do
       story.update_columns(start: Time.zone.today - 1.day)
+      author.update_columns(created_at: 1.day.ago)
       check_in.update_columns(checked_in_on: Time.zone.yesterday)
       friends.first(2).each { check_in.doubt!(it) }
 
