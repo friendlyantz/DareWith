@@ -32,6 +32,11 @@ class ChallengeStory::Template
       emoji: "🧘", title: "Meditate for 21 days", days: 21,
       goal: {cadence: "daily", unit: "minutes", target_amount: 10, target_scope: "each_time"},
       description: "Ten quiet minutes a day, with an app or without. Log your minutes."
+    },
+    fasting: {
+      emoji: "🍽️", title: "Intermittent fasting, 5× a week", days: 21,
+      goal: {cadence: "weekly", times_per_period: 5, unit: "hours", target_amount: 14, target_scope: "each_time"},
+      description: "Five fasts a week of 14 hours or more, last bite to first bite. Log the hours and post your fasting app or your first meal. Whoever misses the most weeks buys brunch."
     }
   }.freeze
 
