@@ -9,5 +9,6 @@ class TodayController < ApplicationController
 
     @done_count = @challenge_stories.count { it.participant_for(current_user).done_for_now? }
     @round_invites = current_user.next_round_invites
+    @just_finished = current_user.just_finished_challenge_stories
   end
 end

@@ -72,14 +72,30 @@ RSpec.describe "Today", type: :request do
         expect(response.body).not_to include(new_challenge_story_challenge_check_in_path(story))
       end
 
-      it "leaves out challenges whose check-ins have closed" do
+      it "moves ended challenges to just finished, outside the daily count, until a week after the end" do
         ended = create(:challenge_story, :finished, title: "Old push-ups")
-        create(:challenge_participant, user: user, challenge_story: ended)
+        friend = create(:challenge_participant, challenge_story: ended)
+        mine = create(:challenge_participant, user: user, challenge_story: ended)
+        create(:challenge_reward, challenge_story: ended, giver: friend, receiver: mine)
+        long_ago = create(:challenge_story, :completed, start: Time.zone.today - 20.days, finish: Time.zone.today - 8.days, title: "Ancient squats")
+        create(:challenge_participant, user: user, challenge_story: long_ago)
 
         get today_path
 
         expect(response.body).to include("0 of 1 done today")
-        expect(response.body).not_to include("Old push-ups")
+        expect(response.body).to include("Just finished", "Old push-ups", "1 pledge to settle")
+        expect(response.body).to include(challenge_story_challenge_finale_path(ended))
+        expect(response.body).not_to include("Ancient squats")
+      end
+
+      it "says when a just finished challenge completes by itself" do
+        ended = create(:challenge_story, start: Time.zone.today - 7.days, finish: Time.zone.today - 2.days, title: "Old push-ups")
+        create(:challenge_participant, user: user, challenge_story: ended)
+        travel_to(ended.completes_at - 1.hour)
+
+        get today_path
+
+        expect(response.body).to include("Completes by itself on")
       end
 
       it "leaves out challenges the user has left or that are completed" do

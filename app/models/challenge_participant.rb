@@ -34,6 +34,10 @@ class ChallengeParticipant < ApplicationRecord
     @streak ||= Streak.new(check_in_dates, challenge_story.goal)
   end
 
+  def pending_rewards_count
+    given_rewards.pending.count + received_rewards.pending.count
+  end
+
   # Days with a check-in, or weeks that hit the weekly count
   def periods_kept
     challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }

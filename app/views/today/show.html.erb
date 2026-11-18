@@ -39,6 +39,13 @@
     </div>
   <% end %>
 
+  <% if @just_finished.any? %>
+    <section class="flex flex-col gap-3 mt-2">
+      <h2 class="text-sm font-semibold text-base-content/70">Just finished</h2>
+      <%= render partial: "today/just_finished_card", collection: @just_finished, as: :challenge_story %>
+    </section>
+  <% end %>
+
   <%= link_to "All challenges", challenge_stories_path, class: "btn btn-ghost" %>
 
   <%= render "shared/sheet", title: "Check in", frame_id: "new_message" %>

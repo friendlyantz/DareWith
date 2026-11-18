@@ -145,6 +145,16 @@ class User < ApplicationRecord
       .reject(&:at_capacity?)
   end
 
+  # Ended in the last week, completed or not, so Today can point to the finale
+  def just_finished_challenge_stories
+    challenge_stories
+      .merge(ChallengeParticipant.active)
+      .where(finish: (Time.zone.today - ChallengeStory::JUST_FINISHED_FOR)...Time.zone.today)
+      .order(finish: :desc)
+      .includes(:active_participants)
+      .reject(&:accepting_check_ins?)
+  end
+
   def past_challenge_stories
     challenge_stories.merge(ChallengeStory.completed)
   end

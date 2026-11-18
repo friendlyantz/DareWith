@@ -4,6 +4,8 @@ class ChallengeStory < ApplicationRecord
   MAX_PARTICIPANTS = 4
   # The last time zone to finish a day, so the grace day is over for everyone, wherever they are
   LAST_TIME_ZONE = "Etc/GMT+12"
+  # How long a challenge stays on Today after it ends
+  JUST_FINISHED_FOR = 7.days
 
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true

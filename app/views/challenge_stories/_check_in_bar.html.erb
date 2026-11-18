@@ -20,6 +20,8 @@
       data: {turbo_frame: "new_message", action: "sheet#open"} do %>
       <%= icon(:camera) %> <%= check_in_button_label(participant) %>
     <% end %>
+  <% elsif !challenge_story.completed? %>
+    <p class="py-1 text-center text-sm">Check-ins are closed · completes by itself on <%= challenge_story.completes_at.in_time_zone.strftime("%-d %b") %></p>
   <% else %>
     <p class="py-1 text-center text-sm">This challenge is over. No more check-ins are allowed.</p>
   <% end %>
