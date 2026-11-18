@@ -28,7 +28,7 @@
             @participants.where.not(id: @current_challenge_participant.id),
             :id,
             :name,
-            {prompt: "Choose a participant"},
+            {},
             {class: "select w-full mt-1.5"} %>
         </div>
 
