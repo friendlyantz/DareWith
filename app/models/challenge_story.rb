@@ -61,6 +61,12 @@ class ChallengeStory < ApplicationRecord
   # Scopes
   scope :active, -> { where(completed: false) }
   scope :completed, -> { where(completed: true) }
+  # On their last day, so friends hear the day before. A round nobody checked in to ends the series.
+  scope :due_to_repeat, -> {
+    where(repeats: true, finish: Time.zone.today)
+      .where(challenge_check_ins_count: 1..)
+      .where.missing(:next_challenge_story)
+  }
 
   # Public methods
   def goal
@@ -178,8 +184,8 @@ class ChallengeStory < ApplicationRecord
     end
   end
 
-  # Same rules and length, starting today
-  def next_round
+  # Same rules and length, starting today unless it's lined up ahead
+  def next_round(start: Time.zone.today)
     ChallengeStory.new(
       previous_challenge_story: self,
       title:,
@@ -191,9 +197,14 @@ class ChallengeStory < ApplicationRecord
       target_scope:,
       penalty_mode:,
       penalty:,
-      start: Time.zone.today,
-      finish: Time.zone.today + (duration_in_days - 1).days
+      repeats:,
+      start:,
+      finish: start + (duration_in_days - 1).days
     )
+  end
+
+  def repeat!
+    Repeat.new(self).start!
   end
 
   def invite_to_next_round(by:)

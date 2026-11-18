@@ -5,6 +5,9 @@ production:
   weekly_recaps:
     class: WeeklyRecapJob
     schedule: "0 * * * *"
+  challenge_repeats:
+    class: ChallengeRepeatJob
+    schedule: "0 * * * *"
   challenge_completion:
     class: ChallengeCompletionJob
     schedule: "0 * * * *"

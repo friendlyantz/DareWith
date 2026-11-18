@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -194,10 +194,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
     t.enum "target_scope", enum_type: "challenge_target_scope"
     t.enum "penalty_mode", enum_type: "challenge_penalty_mode"
     t.string "penalty"
+    t.boolean "repeats", default: false, null: false
     t.index ["completed"], name: "index_challenge_stories_on_completed"
     t.index ["created_at"], name: "index_challenge_stories_on_created_at"
     t.index ["finish"], name: "index_challenge_stories_on_finish"
     t.index ["previous_challenge_story_id"], name: "index_challenge_stories_on_previous_challenge_story_id", unique: true
+    t.index ["repeats"], name: "index_challenge_stories_on_repeats"
     t.index ["start"], name: "index_challenge_stories_on_start"
     t.check_constraint "(penalty_mode IS NULL) = (penalty IS NULL)", name: "check_penalty_complete"
     t.check_constraint "(target_amount IS NULL) = (target_scope IS NULL)", name: "check_target_complete"

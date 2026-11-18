@@ -91,6 +91,6 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def challenge_story_params
-    params.expect(challenge_story: [:title, :description, :start, :finish, :cadence, :times_per_period, :unit, :target_amount, :target_scope, :penalty_mode, :penalty])
+    params.expect(challenge_story: [:title, :description, :start, :finish, :cadence, :times_per_period, :unit, :target_amount, :target_scope, :penalty_mode, :penalty, :repeats])
   end
 end

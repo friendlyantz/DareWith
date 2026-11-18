@@ -8,7 +8,7 @@
     <div class="flex-1 min-w-0">
       <p class="font-semibold">Round <%= next_round.round %> is on</p>
       <p class="text-sm text-base-content/70">
-        <%= pluralize(next_round.active_participants.size, "person") %> in · started <%= next_round.start.strftime("%-d %b") %>
+        <%= pluralize(next_round.active_participants.size, "person") %> in · <%= (next_round.start > Time.zone.today) ? "starts" : "started" %> <%= next_round.start.strftime("%-d %b") %>
       </p>
     </div>
     <%= link_to "Open", next_round, class: "btn btn-sm btn-primary shrink-0" %>

@@ -112,5 +112,13 @@
     </div>
   </fieldset>
 
+  <div>
+    <label class="flex items-center justify-between gap-3">
+      <span class="text-sm font-semibold">Repeat automatically</span>
+      <%= form.check_box :repeats, class: "toggle toggle-primary" %>
+    </label>
+    <p class="mt-1.5 text-sm text-base-content/70">The next round, same rules and length, is set up on the last day and starts the day after. Everyone stays in unless they leave it. Turn this off to stop after this round.</p>
+  </div>
+
   <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block mt-2" %>
 <% end %>
