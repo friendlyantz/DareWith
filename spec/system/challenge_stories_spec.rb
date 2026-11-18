@@ -40,6 +40,34 @@ RSpec.describe "Challenge Stories", type: :system do
 
       expect(page).to have_content("Finish cannot be earlier than the start date")
     end
+
+    scenario "the unit and target are picked from the rules as they're typed" do
+      new_challenge_page.load
+
+      new_challenge_page.fill_form(
+        title: "Walk the dog",
+        description: "At least 30+ minutes, every day",
+        start_date: Time.zone.today,
+        finish_date: Time.zone.today + 30.days
+      )
+
+      expect(new_challenge_page.goal_summary).to have_text("Every day · 30 minutes each time")
+      new_challenge_page.submit
+
+      expect(page).to have_content("Walk the dog")
+      expect(ChallengeStory.last).to have_attributes(unit: "minutes", target_amount: 30)
+    end
+
+    scenario "a unit picked by hand is kept while typing the rules" do
+      new_challenge_page.load
+
+      new_challenge_page.unit_field.select("Reps")
+      new_challenge_page.description_field.set("Squats, 5 km of them")
+
+      expect(new_challenge_page.unit_field.value).to eq("reps")
+      expect(new_challenge_page.target_amount_field.value).to eq("")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · counting reps")
+    end
   end
 
   describe "viewing a challenge" do

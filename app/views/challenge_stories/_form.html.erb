@@ -1,5 +1,6 @@
 <%# locals: (challenge_story:, submit_text:) %>
-<%= form_with(model: challenge_story, class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5") do |form| %>
+<%= form_with(model: challenge_story, class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5",
+  data: {controller: "challenge-goal", action: "input->challenge-goal#summarize change->challenge-goal#summarize"}) do |form| %>
   <% if challenge_story.new_record? && challenge_story.previous_challenge_story_id %>
     <%= hidden_field_tag :previous_challenge_story_id, challenge_story.previous_challenge_story_id %>
   <% end %>
@@ -12,7 +13,8 @@
     <%= form.label :title, "Title", class: "text-sm font-semibold" %>
     <%= form.text_field :title,
       class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:title].any?),
-      placeholder: "e.g. 30 days at the gym" %>
+      placeholder: "e.g. 30 days at the gym",
+      data: {challenge_goal_target: "text", action: "input->challenge-goal#guess"} %>
     <% challenge_story.errors.full_messages_for(:title).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>
     <% end %>
@@ -23,7 +25,8 @@
     <%= form.text_area :description,
       rows: 5,
       class: class_names("textarea w-full mt-1.5 text-base", "textarea-error": challenge_story.errors[:description].any?),
-      placeholder: "What counts as a check-in?\n\ne.g. Any workout of 30+ minutes counts. Post a photo." %>
+      placeholder: "What counts as a check-in?\n\ne.g. Any workout of 30+ minutes counts. Post a photo.",
+      data: {challenge_goal_target: "text", action: "input->challenge-goal#guess"} %>
     <% challenge_story.errors.full_messages_for(:description).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>
     <% end %>
@@ -33,11 +36,11 @@
     <div class="group/often grid grid-cols-2 gap-3">
       <div class="col-span-2 group-has-[option[value='weekly']:checked]/often:col-span-1">
         <%= form.label :cadence, "How often?", class: "text-sm font-semibold" %>
-        <%= form.select :cadence, [["Every day", "daily"], ["Weekly", "weekly"]], {}, class: "select w-full mt-1.5" %>
+        <%= form.select :cadence, [["Every day", "daily"], ["Weekly", "weekly"]], {}, class: "select w-full mt-1.5", data: {challenge_goal_target: "cadence"} %>
       </div>
       <div class="hidden group-has-[option[value='weekly']:checked]/often:block">
         <%= form.label :times_per_period, "Times a week", class: "text-sm font-semibold" %>
-        <%= form.select :times_per_period, (1..6).map { ["#{it}× a week", it] }, {selected: challenge_story.weekly? ? challenge_story.times_per_period : 3}, class: "select w-full mt-1.5" %>
+        <%= form.select :times_per_period, (1..6).map { ["#{it}× a week", it] }, {selected: challenge_story.weekly? ? challenge_story.times_per_period : 3}, class: "select w-full mt-1.5", data: {challenge_goal_target: "timesPerPeriod"} %>
       </div>
       <p class="col-span-2 hidden text-sm text-base-content/70 group-has-[option[value='weekly']:checked]/often:block">Weeks start on the start date, so pick an end date that makes whole weeks.</p>
     </div>
@@ -47,7 +50,8 @@
       <%= form.select :unit,
         ChallengeStory.units.keys.map { [(it == "km") ? "Kilometres" : it.capitalize, it] },
         {include_blank: "Nothing, just check in"},
-        class: "select w-full mt-1.5" %>
+        class: "select w-full mt-1.5",
+        data: {challenge_goal_target: "unit", action: "change->challenge-goal#chooseUnit"} %>
     </div>
 
     <div class="group-has-[option[value='']:checked]/goal:hidden">
@@ -57,11 +61,13 @@
           value: challenge_story.target_amount && challenge_story.goal.format_number(challenge_story.target_amount),
           min: 0, step: "any", inputmode: "decimal",
           class: class_names("input w-full", "input-error": challenge_story.errors[:target_amount].any?),
-          placeholder: "e.g. 50" %>
+          placeholder: "e.g. 50",
+          data: {challenge_goal_target: "targetAmount"} %>
         <%= form.select :target_scope,
           [["each time", "each_time"], ["by the end", "total"]],
           {},
-          class: "select w-full" %>
+          class: "select w-full",
+          data: {challenge_goal_target: "targetScope"} %>
       </div>
       <p class="mt-1.5 text-sm text-base-content/70 hidden group-has-[option[value='total']:checked]/goal:block">Everyone aims for this much by the end date, counting all their check-ins.</p>
       <% challenge_story.errors.full_messages_for(:target_amount).each do |message| %>
@@ -119,6 +125,8 @@
     </label>
     <p class="mt-1.5 text-sm text-base-content/70">The next round, same rules and length, is set up on the last day and starts the day after. Everyone stays in unless they leave it. Turn this off to stop after this round.</p>
   </div>
+
+  <p class="mt-2 text-sm text-base-content/70">Goal: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
 
   <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block mt-2" %>
 <% end %>
