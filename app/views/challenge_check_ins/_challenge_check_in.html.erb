@@ -25,7 +25,7 @@
   </div>
 
   <% if challenge_check_in.photo.attached? %>
-    <%= cl_image_tag(challenge_check_in.photo.key, width: 800, height: 600, crop: :fill, lazy: true, placeholder: true, class: "w-full aspect-4/3 object-cover bg-base-200", alt: "Check-in photo") %>
+    <%= cl_image_tag(challenge_check_in.photo.key, width: 800, height: 1000, crop: :limit, lazy: true, placeholder: true, class: "w-full max-h-128 object-contain bg-base-200", alt: "Check-in photo") %>
   <% end %>
 
   <% if challenge_check_in.amount %>
