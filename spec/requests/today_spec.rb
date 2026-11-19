@@ -91,9 +91,7 @@ RSpec.describe "Today", type: :request do
       it "says when a just finished challenge completes by itself" do
         ended = create(:challenge_story, start: Time.zone.today - 7.days, finish: Time.zone.today - 2.days, title: "Old push-ups")
         create(:challenge_participant, user: user, challenge_story: ended)
-        travel_to(ended.completes_at - 1.hour)
-
-        get today_path
+        travel_to(ended.completes_at - 1.hour) { get today_path }
 
         expect(response.body).to include("Completes by itself on")
       end
