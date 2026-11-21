@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resource :today, only: %i[show], controller: "today"
   resource :profile, only: %i[show update], path: "me"
   resource :avatar, only: %i[update destroy]
+  resources :notifications, only: %i[index]
 
   resources :challenge_stories, only: %i[index show new create edit update] do
     member do

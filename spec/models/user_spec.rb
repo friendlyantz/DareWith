@@ -158,8 +158,27 @@ RSpec.describe User, type: :model do
       }.to have_enqueued_job(PushNotificationJob).exactly(2).times
     end
 
-    it "does nothing without devices" do
+    it "doesn't push without devices" do
       expect { user.notify(title: "Hello") }.not_to have_enqueued_job(PushNotificationJob)
+    end
+
+    it "keeps an unread notification for the app, with or without devices" do
+      user.notify(title: "Hello", body: "Your turn", path: "/today")
+
+      expect(user.notifications.unread.sole).to have_attributes(title: "Hello", body: "Your turn", path: "/today")
+    end
+  end
+
+  describe "#read_notifications!" do
+    it "marks only this user's notifications read" do
+      user = create(:user)
+      create_list(:notification, 2, user:)
+      someone_else = create(:notification)
+
+      user.read_notifications!
+
+      expect(user.unread_notifications_count).to eq(0)
+      expect(someone_else.reload).to be_unread
     end
   end
 

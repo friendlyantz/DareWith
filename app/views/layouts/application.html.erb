@@ -41,7 +41,7 @@
       <% end %>
     </script>
 
-    <%= render "layouts/navbar" unless current_user %>
+    <%= render "layouts/navbar" %>
     <%= render "layouts/flash" %>
 
     <% if current_user && !current_page?(profile_path) %>
@@ -57,6 +57,7 @@
         </main>
       <% end %>
     </div>
+    <%= turbo_stream_from current_user, "notifications" if current_user %>
     <%= render "layouts/footer" %>
   </body>
 </html>

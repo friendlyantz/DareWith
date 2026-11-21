@@ -1,0 +1,6 @@
+<span id="notifications_badge" class="indicator">
+  <% if (count = user.unread_notifications_count).positive? %>
+    <span class="indicator-item badge badge-primary badge-xs"><%= count > 9 ? "9+" : count %></span>
+  <% end %>
+  <%= icon(:bell, css: "size-6") %>
+</span>

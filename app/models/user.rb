@@ -20,6 +20,7 @@ class User < ApplicationRecord
   has_many :challenge_stories, through: :challenge_participants
   has_many :challenge_check_ins, through: :challenge_participants
   has_many :web_push_notifications, dependent: :destroy
+  has_many :notifications, dependent: :delete_all
   has_many :badges, dependent: :destroy
   has_many :challenge_check_in_replies, dependent: :destroy
   has_one_attached :avatar
@@ -122,9 +123,18 @@ class User < ApplicationRecord
   end
 
   def notify(title:, body: nil, path: "/")
+    notifications.create!(title:, body:, path:)
     web_push_notifications.each do |subscription|
       PushNotificationJob.perform_later(subscription, title:, body:, path:)
     end
+  end
+
+  def unread_notifications_count
+    notifications.unread.count
+  end
+
+  def read_notifications!
+    notifications.unread.update_all(read_at: Time.current)
   end
 
   def liked_friends_check_ins_count

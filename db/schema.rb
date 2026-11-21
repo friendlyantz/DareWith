@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -254,6 +254,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_090000) do
     t.check_constraint "state = 'pending'::device_sign_in_state OR user_id IS NOT NULL", name: "check_device_sign_in_approved_by_user"
   end
 
+  create_table "notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "title", null: false
+    t.string "body"
+    t.string "path", default: "/", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_notifications_unread_on_user_id", where: "(read_at IS NULL)"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.citext "username", null: false
     t.string "webauthn_id"
@@ -320,5 +332,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_090000) do
   add_foreign_key "challenge_story_likes", "users", on_delete: :cascade
   add_foreign_key "credentials", "users", on_delete: :cascade
   add_foreign_key "device_sign_ins", "users", on_delete: :cascade
+  add_foreign_key "notifications", "users", on_delete: :cascade
   add_foreign_key "web_push_notifications", "users", on_delete: :cascade
 end

@@ -1,3 +1,10 @@
 <div class="navbar bg-base-100 border-b border-base-300 min-h-14 px-3">
-  <%= link_to "DareWith", root_path, class: "font-display text-xl font-bold tracking-tight px-2" %>
+  <div class="flex-1">
+    <%= link_to "DareWith", current_user ? today_path : root_path, class: "font-display text-xl font-bold tracking-tight px-2" %>
+  </div>
+  <% if current_user %>
+    <%= link_to notifications_path, class: "btn btn-ghost btn-circle", aria: {label: "Alerts"} do %>
+      <%= render "notifications/badge", user: current_user %>
+    <% end %>
+  <% end %>
 </div>

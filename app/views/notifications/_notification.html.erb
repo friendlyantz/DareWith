@@ -1,0 +1,9 @@
+<%= link_to notification.path, class: class_names("flex gap-3 rounded-box border border-base-300 p-4", "bg-base-100": !notification.unread?, "bg-primary/10 border-primary/30": notification.unread?) do %>
+  <div class="flex-1 min-w-0">
+    <p class="font-semibold"><%= notification.title %></p>
+    <% if notification.body.present? %>
+      <p class="text-sm text-base-content/70"><%= notification.body %></p>
+    <% end %>
+  </div>
+  <span class="text-xs text-base-content/60 whitespace-nowrap"><%= time_ago_in_words(notification.created_at) %></span>
+<% end %>

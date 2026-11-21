@@ -1,0 +1,20 @@
+<% content_for :title, "Alerts" %>
+<div class="w-full max-w-md flex flex-col gap-4">
+  <div>
+    <p class="text-sm font-medium text-base-content/70">Nudges, replies, doubts and rewards</p>
+    <h1 class="font-display text-4xl font-bold tracking-tight">Alerts</h1>
+  </div>
+
+  <% if @notifications.any? %>
+    <div class="flex flex-col gap-2">
+      <%= render @notifications %>
+    </div>
+  <% else %>
+    <div class="card border border-base-300 bg-base-100">
+      <div class="card-body items-center text-center">
+        <h2 class="font-display text-xl font-semibold">Nothing yet</h2>
+        <p class="text-base-content/70">When friends nudge you, reply or send a reward, it shows up here.</p>
+      </div>
+    </div>
+  <% end %>
+</div>
