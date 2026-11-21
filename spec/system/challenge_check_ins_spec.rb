@@ -28,6 +28,8 @@ RSpec.describe "Challenge Check-ins", type: :system do
 
     expect(page).to have_content("You checked in today")
     expect(page).to have_content("Day 1: Completed my workout!")
+    # The page didn't reload, so the menu's progress card was swapped for one with this check-in
+    expect(page).to have_css("#share_card_challenge_participant_#{participant.id}[data-share-card-headline-value='1']", visible: :all)
   end
 
   scenario "participant checks in from Today and stays there" do

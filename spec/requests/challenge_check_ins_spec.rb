@@ -214,6 +214,13 @@ RSpec.describe "ChallengeCheckIns", type: :request do
           .and include('data-action="share-card#share close-sheet#stay:stop"')
       end
 
+      it "refreshes the progress card in the challenge page's menu, which doesn't reload" do
+        post challenge_story_challenge_check_ins_path(story), params: valid_params
+
+        expect(response.body).to include(%(<turbo-stream action="replace" target="share_card_challenge_participant_#{participant.id}">))
+          .and include(%(id="share_card_challenge_participant_#{participant.id}"))
+      end
+
       it "asks to turn on notifications, naming friends, and stays open" do
         create(:badge, user:)
         create(:challenge_check_in, challenge_participant: participant)

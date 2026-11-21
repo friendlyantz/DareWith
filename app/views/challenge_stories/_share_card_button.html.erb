@@ -1,5 +1,5 @@
-<%# locals: (participant:, css: "", action: nil) %>
-<%= tag.button type: "button", class: css,
+<%# locals: (participant:, css: "", action: nil, id: nil) %>
+<%= tag.button type: "button", id:, class: css,
   data: {
     controller: "share-card",
     action: ["share-card#share", action].compact.join(" "),
