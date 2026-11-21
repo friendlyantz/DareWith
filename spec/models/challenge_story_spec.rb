@@ -9,6 +9,10 @@ RSpec.describe ChallengeStory, type: :model do
       expect(story.errors[:finish]).to include("cannot be earlier than the start date")
     end
 
+    it "is valid without a description, since the settings are the rules" do
+      expect(build(:challenge_story, description: "")).to be_valid
+    end
+
     it "validates description length" do
       story = build(:challenge_story, description: "a" * 501)
 

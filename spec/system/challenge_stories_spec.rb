@@ -41,32 +41,45 @@ RSpec.describe "Challenge Stories", type: :system do
       expect(page).to have_content("Finish cannot be earlier than the start date")
     end
 
-    scenario "the unit and target are picked from the rules as they're typed" do
+    scenario "the unit and target are picked from the title as it's typed" do
       new_challenge_page.load
 
       new_challenge_page.fill_form(
-        title: "Walk the dog",
-        description: "At least 30+ minutes, every day",
+        title: "Walk the dog 30+ minutes",
         start_date: Time.zone.today,
-        finish_date: Time.zone.today + 30.days
+        finish_date: Time.zone.today + 29.days
       )
 
-      expect(new_challenge_page.goal_summary).to have_text("Every day · 30 minutes a day")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · 30 minutes a day · 30 days")
       new_challenge_page.submit
 
-      expect(page).to have_content("Walk the dog")
+      expect(page).to have_content("Walk the dog 30+ minutes")
       expect(ChallengeStory.last).to have_attributes(unit: "minutes", target_amount: 30)
     end
 
-    scenario "a unit picked by hand is kept while typing the rules" do
+    scenario "a unit picked by hand is kept while typing the title" do
       new_challenge_page.load
 
       new_challenge_page.unit_field.select("Reps")
-      new_challenge_page.description_field.set("Squats, 5 km of them")
+      new_challenge_page.title_field.set("Squats, 5 km of them")
 
       expect(new_challenge_page.unit_field.value).to eq("reps")
       expect(new_challenge_page.target_amount_field.value).to eq("")
       expect(new_challenge_page.goal_summary).to have_text("Every day · counting reps")
+    end
+
+    scenario "the rules summary spells out the penalty and length" do
+      new_challenge_page.load
+
+      new_challenge_page.fill_form(title: "Gym", start_date: Time.zone.today, finish_date: Time.zone.today + 27.days)
+      new_challenge_page.penalty_mode_field.select("They owe everyone, every miss")
+      new_challenge_page.penalty_field.set("$5")
+
+      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: owe everyone $5 · 28 days")
+      new_challenge_page.submit
+
+      expect(page).to have_content("Each miss: owe everyone $5")
+      expect(ChallengeStory.last.description).to eq ""
     end
   end
 

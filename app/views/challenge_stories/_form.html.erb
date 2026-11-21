@@ -14,20 +14,8 @@
     <%= form.text_field :title,
       class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:title].any?),
       placeholder: "e.g. 30 days at the gym",
-      data: {challenge_goal_target: "text", action: "input->challenge-goal#guess"} %>
+      data: {challenge_goal_target: "title", action: "input->challenge-goal#guess"} %>
     <% challenge_story.errors.full_messages_for(:title).each do |message| %>
-      <p class="mt-1 text-sm text-error"><%= message %></p>
-    <% end %>
-  </div>
-
-  <div>
-    <%= form.label :description, "Rules", class: "text-sm font-semibold" %>
-    <%= form.text_area :description,
-      rows: 5,
-      class: class_names("textarea w-full mt-1.5 text-base", "textarea-error": challenge_story.errors[:description].any?),
-      placeholder: "What counts as a check-in?\n\ne.g. Any workout of 30+ minutes counts. Post a photo.",
-      data: {challenge_goal_target: "text", action: "input->challenge-goal#guess"} %>
-    <% challenge_story.errors.full_messages_for(:description).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>
     <% end %>
   </div>
@@ -84,11 +72,11 @@
   <div class="grid grid-cols-2 gap-3">
     <div>
       <%= form.label :start, "Starts", class: "text-sm font-semibold" %>
-      <%= form.date_field :start, disabled: !challenge_story.goal_editable?, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?) %>
+      <%= form.date_field :start, disabled: !challenge_story.goal_editable?, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?), data: {challenge_goal_target: "start"} %>
     </div>
     <div>
       <%= form.label :finish, "Ends", class: "text-sm font-semibold" %>
-      <%= form.date_field :finish, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:finish].any?) %>
+      <%= form.date_field :finish, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:finish].any?), data: {challenge_goal_target: "finish"} %>
     </div>
   </div>
   <% unless challenge_story.goal_editable? %>
@@ -104,14 +92,16 @@
       <%= form.select :penalty_mode,
         [["Nothing happens", ""], ["They owe everyone, every miss", "per_miss"], ["Whoever misses most owes everyone", "most_misses"]],
         {},
-        class: "select w-full mt-1.5" %>
+        class: "select w-full mt-1.5",
+        data: {challenge_goal_target: "penaltyMode"} %>
     </div>
     <div class="group-has-[option[value='']:checked]/penalty:hidden">
       <%= form.label :penalty, "What do they owe?", class: "text-sm font-semibold" %>
       <%= form.text_field :penalty,
         maxlength: 100,
         class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
-        placeholder: "e.g. a coffee, $5, buys lunch" %>
+        placeholder: "e.g. a coffee, $5, a candy bar",
+        data: {challenge_goal_target: "penalty"} %>
       <p class="mt-1.5 text-sm text-base-content/70">The app counts the misses since each person joined. In daily challenges, <%= ChallengeParticipant::Streak::FREEZE_EVERY %> days in a row earn a streak freeze that covers a miss. It's settled between you at the end, like rewards.</p>
       <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>
         <p class="mt-1 text-sm text-error"><%= message %></p>
@@ -127,7 +117,18 @@
     <p class="mt-1.5 text-sm text-base-content/70">The next round, same rules and length, is set up on the last day and starts the day after. Everyone stays in unless they leave it. Turn this off to stop after this round.</p>
   </div>
 
-  <p class="mt-2 text-sm text-base-content/70">Goal: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
+  <div>
+    <%= form.label :description, "What counts? (optional)", class: "text-sm font-semibold" %>
+    <%= form.text_area :description,
+      rows: 3,
+      class: class_names("textarea w-full mt-1.5 text-base", "textarea-error": challenge_story.errors[:description].any?),
+      placeholder: "Anything the settings above don't cover.\ne.g. Any workout of 30+ minutes. Post a photo." %>
+    <% challenge_story.errors.full_messages_for(:description).each do |message| %>
+      <p class="mt-1 text-sm text-error"><%= message %></p>
+    <% end %>
+  </div>
+
+  <p class="mt-2 text-sm text-base-content/70">Rules: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
 
   <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block mt-2" %>
 <% end %>

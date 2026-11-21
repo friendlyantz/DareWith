@@ -9,12 +9,14 @@ class Library::NewChallengeStoryPage < BasePage
   element :finish_field, 'input[name="challenge_story[finish]"]'
   element :unit_field, 'select[name="challenge_story[unit]"]'
   element :target_amount_field, 'input[name="challenge_story[target_amount]"]'
+  element :penalty_mode_field, 'select[name="challenge_story[penalty_mode]"]'
+  element :penalty_field, 'input[name="challenge_story[penalty]"]'
   element :goal_summary, '[data-challenge-goal-target="summary"]'
   element :submit_button, 'button[type="submit"]'
 
-  def fill_form(title:, description:, start_date:, finish_date:)
+  def fill_form(title:, start_date:, finish_date:, description: nil)
     title_field.set(title)
-    description_field.set(description)
+    description_field.set(description) if description
     start_field.set(start_date.to_s)
     finish_field.set(finish_date.to_s)
   end

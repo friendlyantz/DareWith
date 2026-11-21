@@ -4,11 +4,11 @@ import { Controller } from "@hotwired/stimulus"
 const AMOUNT_AND_UNIT = /(\d+(?:\.\d+)?)\s*\+?\s*-?\s*(minutes?|mins?|hours?|hrs?|km|kilomet(?:re|er)s?|pages?|reps?)\b/i
 const UNITS = { min: "minutes", h: "hours", k: "km", p: "pages", r: "reps" }
 
-// Picks what to count from the title and rules as they're typed ("walk the dog 30+ minutes"
+// Picks what to count from the title as it's typed ("walk the dog 30+ minutes"
 // counts minutes, 30 a day) until the person picks a unit themselves,
-// and spells the goal out next to the submit button so a wrong pick is easy to spot
+// and spells the rules out next to the submit button so a wrong pick is easy to spot
 export default class extends Controller {
-  static targets = ["text", "cadence", "timesPerPeriod", "unit", "targetAmount", "targetScope", "summary"]
+  static targets = ["title", "cadence", "timesPerPeriod", "unit", "targetAmount", "targetScope", "start", "finish", "penaltyMode", "penalty", "summary"]
 
   connect() {
     this.guessing = this.unitTarget.value === "" && !this.unitTarget.matches(":disabled")
@@ -19,7 +19,7 @@ export default class extends Controller {
   guess() {
     if (!this.guessing) return
 
-    const [, amount = "", word] = this.textTargets.map(it => it.value).join("\n").match(AMOUNT_AND_UNIT) || []
+    const [, amount = "", word] = this.titleTarget.value.match(AMOUNT_AND_UNIT) || []
     this.unitTarget.value = word ? this.unitFor(word) : ""
     if (this.targetAmountTarget.value === this.guessedAmount) {
       this.targetAmountTarget.value = this.guessedAmount = amount
@@ -34,7 +34,25 @@ export default class extends Controller {
   summarize() {
     const often = this.cadenceTarget.value === "weekly" ? `${this.timesPerPeriodTarget.value}× a week` : "Every day"
     this.targetScopeTarget.querySelector("option[value='each_period']").text = `a ${this.periodName()}`
-    this.summaryTarget.textContent = [often, this.target()].join(" · ")
+    this.summaryTarget.textContent = [often, this.target(), this.penalty(), this.length()].filter(Boolean).join(" · ")
+  }
+
+  // Mirrors ChallengeStory::Penalty#summary
+  penalty() {
+    const owed = this.penaltyTarget.value.trim()
+    if (!this.penaltyModeTarget.value || !owed) return
+
+    return `${this.penaltyModeTarget.value === "per_miss" ? "Each miss" : "Most misses"}: owe everyone ${owed}`
+  }
+
+  length() {
+    const start = Date.parse(this.startTarget.value)
+    const finish = Date.parse(this.finishTarget.value)
+    if (!start || !finish || finish < start) return
+
+    const days = Math.round((finish - start) / 86_400_000) + 1
+    if (this.cadenceTarget.value === "weekly" && days % 7 === 0) return days === 7 ? "1 week" : `${days / 7} weeks`
+    return days === 1 ? "1 day" : `${days} days`
   }
 
   target() {

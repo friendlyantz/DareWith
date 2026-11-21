@@ -20,6 +20,12 @@ RSpec.describe ChallengeStory::Template do
 
       expect(challenge_story.goal.summary).to eq "3× a week · 15 km a week"
     end
+
+    ChallengeStory::Template::CATALOGUE.each_key do |key|
+      it "gives #{key} a penalty for every miss, so everyone keeps a tally" do
+        expect(described_class.find(key).build).to have_attributes(penalty_mode: "per_miss", penalty: be_present)
+      end
+    end
   end
 
   describe ".find" do

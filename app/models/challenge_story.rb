@@ -35,7 +35,7 @@ class ChallengeStory < ApplicationRecord
 
   # Validations
   validates :title, presence: true
-  validates :description, presence: true, length: {maximum: 500}
+  validates :description, length: {maximum: 500}
   validates :start, :finish, presence: true
   validate :finish_cannot_be_earlier_than_start
   validate :whole_weeks, if: :weekly?
