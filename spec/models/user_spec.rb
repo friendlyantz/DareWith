@@ -296,26 +296,6 @@ RSpec.describe User, type: :model do
       end
     end
 
-    describe "#email_login_recently_sent?" do
-      it "returns true if email was sent recently" do
-        user.update!(last_email_sent_at: 5.minutes.ago)
-
-        expect(user.email_login_recently_sent?).to be true
-      end
-
-      it "returns false if no email was sent" do
-        user.update!(last_email_sent_at: nil)
-
-        expect(user.email_login_recently_sent?).to be false
-      end
-
-      it "returns false if email was sent over 15 minutes ago" do
-        user.update!(last_email_sent_at: 20.minutes.ago)
-
-        expect(user.email_login_recently_sent?).to be false
-      end
-    end
-
     describe "#email_verified?" do
       it "returns true when email_verified_at is set" do
         user.update!(email_verified_at: Time.current)

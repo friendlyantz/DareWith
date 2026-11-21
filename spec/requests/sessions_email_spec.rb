@@ -25,28 +25,39 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       expect(response.body).to include("Check your email")
     end
 
-    it "returns success for unregistered email so attackers can't enumerate users" do
+    it "looks the same for an email with no account, so attackers can't enumerate users" do
       post email_session_path, params: {session: {email: "unknown@example.com"}}
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Check your email for a 6-digit code and a sign-in link.")
+      expect(response.body).to include("Check your email for a 6-digit code and a link.")
+      expect(response.body).to include("Code from the email")
     end
 
-    it "doesn't create an account for a mistyped email" do
+    it "emails a code to join, but creates no account until a username is picked" do
       expect {
-        post email_session_path, params: {session: {email: "tset@example.com", username: "someone"}}
+        perform_enqueued_jobs { post email_session_path, params: {session: {email: "new@example.com"}} }
       }.not_to change(User, :count)
 
+      expect(ActionMailer::Base.deliveries.last).to have_attributes(to: ["new@example.com"], subject: /\A\d{6} is your code to join DareWith\z/)
+    end
+
+    it "asks for a real email address" do
+      post email_session_path, params: {session: {email: "not-an-email"}}
+
+      expect(response).to have_http_status(:unprocessable_content)
       expect(enqueued_jobs).to be_empty
     end
 
-    it "enforces rate limit (3 emails per 15 minutes)" do
-      user.update!(last_email_sent_at: 5.minutes.ago)
+    it "limits how many emails are sent, the same way with or without an account" do
+      allow(Email::SessionsController.cache_store).to receive(:increment).and_return(4)
 
-      post email_session_path, params: {session: {email: user.email}}
+      [user.email, "unknown@example.com"].each do |email|
+        post email_session_path, params: {session: {email:}}
 
-      expect(response).to have_http_status(:too_many_requests)
-      expect(response.body).to include("recently sent")
+        expect(response).to have_http_status(:too_many_requests)
+        expect(response.body).to include("That&#39;s a lot of emails")
+      end
+      expect(enqueued_jobs).to be_empty
     end
 
     it "strips and lowercases email" do
@@ -223,14 +234,6 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       expect(other_browser.response.location).to end_with(new_email_session_path)
       expect(other_browser.session[:user_id]).to be_nil
     end
-
-    it "keeps the code box when an email was just sent" do
-      request_code
-      post email_session_path, params: {session: {email: user.email}}
-
-      expect(response).to have_http_status(:too_many_requests)
-      expect(response.body).to include("Code from the email")
-    end
   end
 
   it "the link carries the invite, so it works when it opens in another browser" do
@@ -247,61 +250,150 @@ RSpec.describe "Sessions Email Authentication", type: :request do
     expect(mail_app_browser.response.location).to end_with(challenge_story_path(story))
   end
 
-  describe "POST /email/registration" do
-    it "creates the account and emails a code" do
+  describe "signing up with an email that has no account" do
+    def request_signup_code(email = "new@example.com")
+      perform_enqueued_jobs { post email_session_path, params: {session: {email:}} }
+      ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+    end
+
+    # Just the path, so it opens on the same host, like the real link does in the same browser
+    def signup_link
+      URI(ActionMailer::Base.deliveries.last.text_part.body.to_s[%r{http://\S+/email/registration/verify\S+}]).request_uri
+    end
+
+    it "takes the code, then a username, and signs them in to make their first challenge" do
+      code = request_signup_code(" New@Example.com ")
+
+      post confirm_email_session_path, params: {code:}
+      expect(response).to redirect_to(new_email_registration_path)
+      follow_redirect!
+      expect(response.body).to include("Pick a username", "new@example.com")
+
       expect {
-        post email_registration_path, params: {session: {email: " New@Example.com ", username: "newbie"}}
-      }.to change(User, :count).by(1).and have_enqueued_job
+        post email_registration_path, params: {user: {username: " newbie "}}
+      }.to change(User, :count).by(1)
 
-      expect(User.last).to have_attributes(email: "new@example.com", username: "newbie")
-      expect(response.body).to include("Code from the email")
-    end
-
-    it "signs in with the code like any other email sign-in" do
-      perform_enqueued_jobs { post email_registration_path, params: {session: {email: "new@example.com", username: "newbie"}} }
-      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
-
-      post confirm_email_session_path, params: {code:}
-
-      expect(session[:user_id]).to eq(User.find_by(username: "newbie").id)
-    end
-
-    it "starts them on making their first challenge" do
-      perform_enqueued_jobs { post email_registration_path, params: {session: {email: "new@example.com", username: "newbie"}} }
-      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
-
-      post confirm_email_session_path, params: {code:}
-
+      new_user = User.find_by(username: "newbie")
+      expect(new_user).to have_attributes(email: "new@example.com", email_verified?: true)
+      expect(session[:user_id]).to eq(new_user.id)
       expect(response).to redirect_to(new_challenge_story_path)
     end
 
-    it "sends someone already in a challenge to their day" do
-      create(:challenge_participant, user:)
-      perform_enqueued_jobs { post email_session_path, params: {session: {email: user.email}} }
-      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+    it "takes the link instead, and keeps the invite" do
+      story = create(:challenge_story)
+      get challenge_story_path(story)
+      request_signup_code
 
+      get signup_link
+      expect(response).to redirect_to(new_email_registration_path)
+      post email_registration_path, params: {user: {username: "newbie"}}
+
+      expect(response).to redirect_to(challenge_story_path(story))
+    end
+
+    it "won't make an account from a link forwarded to someone else" do
+      request_signup_code("sender@example.com")
+
+      someone_else = open_session
+      someone_else.get signup_link
+      expect(someone_else.response).to have_http_status(:forbidden)
+      expect(someone_else.response.body).to include("This link opened in a different browser", "Email a new code to use here")
+
+      someone_else.get new_email_registration_path
+      expect(someone_else.response.location).to end_with(new_email_session_path)
+    end
+
+    it "can carry on in the browser the link opened in, with a new code emailed there" do
+      request_signup_code
+      link = signup_link
+      mail_app_browser = open_session
+      mail_app_browser.get link
+
+      perform_enqueued_jobs { mail_app_browser.post email_session_path, params: {session: {email: "new@example.com"}} }
+      mail_app_browser.post confirm_email_session_path, params: {code: ActionMailer::Base.deliveries.last.subject[/\d{6}/]}
+
+      expect(mail_app_browser.response.location).to end_with(new_email_registration_path)
+    end
+
+    it "still takes the link after the code was typed" do
+      post confirm_email_session_path, params: {code: request_signup_code}
+
+      get signup_link
+
+      expect(response).to redirect_to(new_email_registration_path)
+    end
+
+    it "lets a link preview open the link without using it up" do
+      request_signup_code
+      link = signup_link
+
+      open_session.get link
+      get link
+
+      expect(response).to redirect_to(new_email_registration_path)
+    end
+
+    it "won't use the link again once the account exists" do
+      request_signup_code
+      link = signup_link
+      get link
+      post email_registration_path, params: {user: {username: "newbie"}}
+
+      open_session.tap { it.get link }.then do |other_browser|
+        expect(other_browser.response.location).to end_with(new_email_session_path)
+        expect(other_browser.flash[:alert]).to include("expired or was already used")
+      end
+    end
+
+    it "refuses a tampered link" do
+      get verify_email_registration_path, params: {token: "forged"}
+
+      expect(response).to redirect_to(new_email_session_path)
+    end
+
+    it "locks the code after five wrong tries" do
+      code = request_signup_code
+      wrong = (code == "000000") ? "111111" : "000000"
+
+      5.times { post confirm_email_session_path, params: {code: wrong} }
       post confirm_email_session_path, params: {code:}
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(session[:verified_email_signup_id]).to be_nil
     end
 
-    it "emails the owner of a taken email instead of saying it's taken" do
-      expect {
-        post email_registration_path, params: {session: {email: user.email, username: "newbie"}}
-      }.to have_enqueued_job
+    it "expires the code after 15 minutes" do
+      code = request_signup_code
 
-      expect(User.where(username: "newbie")).to be_empty
-      expect(response.body).to include("Check your email for a 6-digit code and a sign-in link.")
-    end
-
-    it "asks for an email and a username" do
-      expect {
-        post email_registration_path, params: {session: {email: "", username: "newbie"}}
-        post email_registration_path, params: {session: {email: "new@example.com", username: ""}}
-      }.not_to change(User, :count)
+      travel_to(16.minutes.from_now) { post confirm_email_session_path, params: {code:} }
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(response.body).to include("Username can&#39;t be blank")
+    end
+
+    it "only asks for a username once the email is proven" do
+      request_signup_code
+
+      get new_email_registration_path
+      expect(response).to redirect_to(new_email_session_path)
+
+      expect { post email_registration_path, params: {user: {username: "newbie"}} }.not_to change(User, :count)
+    end
+
+    it "keeps them on the username step when the username is taken" do
+      create(:user, username: "newbie")
+      post confirm_email_session_path, params: {code: request_signup_code}
+
+      post email_registration_path, params: {user: {username: "newbie"}}
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("Username has already been taken")
+    end
+
+    it "sends someone with an account their sign-in code instead" do
+      perform_enqueued_jobs { post email_session_path, params: {session: {email: user.email}} }
+
+      expect(ActionMailer::Base.deliveries.last.subject).to match(/is your DareWith sign-in code/)
+      expect(EmailSignup.count).to eq(0)
     end
   end
 

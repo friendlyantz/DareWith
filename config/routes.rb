@@ -65,7 +65,9 @@ Rails.application.routes.draw do
       post :verify, on: :collection, action: :redeem
       post :confirm, on: :collection
     end
-    resource :registration, only: %i[new create]
+    resource :registration, only: %i[new create] do
+      get :verify, on: :collection
+    end
   end
 
   namespace :admin do

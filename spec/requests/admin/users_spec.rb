@@ -43,7 +43,7 @@ RSpec.describe "Admin users", type: :request do
 
         sign_in_url = response.body[%r{http://www\.example\.com/email/session/verify\?token=[\w-]+}]
         expect(sign_in_url).to be_present
-        expect(user.reload.email_login_recently_sent?).to be false
+        expect(user.reload.last_email_sent_at).to be_nil
 
         get sign_in_url
         expect(response.body).to include("Sign in as #{user.username}")

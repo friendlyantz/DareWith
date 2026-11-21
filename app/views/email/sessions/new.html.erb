@@ -1,15 +1,15 @@
-<% content_for :title, "Sign in with email" %>
+<% content_for :title, "Continue with email" %>
 <div class="w-full max-w-sm flex flex-col gap-5 pt-6">
   <div>
-    <h1 class="font-display text-3xl font-bold tracking-tight"><%= @email_sent ? "Check your email" : "Sign in with email" %></h1>
-    <p class="text-sm text-base-content/70 mt-1">We'll email you a code and a sign-in link.</p>
+    <h1 class="font-display text-3xl font-bold tracking-tight"><%= @email_sent ? "Check your email" : "Continue with email" %></h1>
+    <p class="text-sm text-base-content/70 mt-1">New or back again, we'll email you a code. No password needed.</p>
   </div>
 
   <% if @error %>
     <div class="alert alert-error alert-soft"><%= @error %></div>
   <% elsif @email_sent %>
     <%# Same message whether or not the email has an account, so it doesn't reveal who has one %>
-    <div class="alert alert-success alert-soft">Check your email for a 6-digit code and a sign-in link.</div>
+    <div class="alert alert-success alert-soft">Check your email for a 6-digit code and a link.</div>
   <% end %>
 
   <% if @email_sent %>
@@ -27,17 +27,11 @@
             class: "input w-full mt-1.5 font-mono text-lg tracking-widest" %>
           <p class="text-xs text-base-content/70 mt-1">Type it here to stay in this browser. Or tap the link in the email.</p>
         </div>
-        <%= form.submit "Sign in", class: "btn btn-primary w-full" %>
+        <%= form.submit "Continue", class: "btn btn-primary w-full" %>
       <% end %>
     </div>
     <div class="flex flex-col gap-2 text-center text-sm">
-      <p><%= link_to "Didn't get it? Check the spelling and try again", @signing_up ? new_email_registration_path : new_email_session_path, class: "link link-hover text-base-content/70" %></p>
-      <% unless @signing_up %>
-        <p>
-          No account yet?
-          <%= link_to "Create one with email", new_email_registration_path, class: "link link-accent font-semibold" %>
-        </p>
-      <% end %>
+      <p><%= link_to "Didn't get it? Check the spelling and try again", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
     </div>
   <% else %>
     <div class="rounded-box border border-base-300 bg-base-100 p-5">
@@ -45,7 +39,7 @@
         <div>
           <%= form.label :email, "Email", class: "text-sm font-semibold" %>
           <div data-controller="textfield" class="mt-1.5">
-            <%= form.email_field :email, class: "input mdc-text-field__input w-full", placeholder: "your@email.com", required: true, autocapitalize: "none" %>
+            <%= form.email_field :email, value: params.dig(:session, :email), class: "input mdc-text-field__input w-full", placeholder: "your@email.com", required: true, autocapitalize: "none" %>
           </div>
         </div>
 
@@ -56,10 +50,6 @@
 
   <% unless @email_sent %>
     <div class="flex flex-col gap-2 text-center text-sm">
-      <p>
-        New here?
-        <%= link_to "Create an account with email", new_email_registration_path, class: "link link-accent font-semibold" %>
-      </p>
       <p><%= link_to "Sign in with a passkey instead", new_webauthn_session_path, class: "link link-hover text-base-content/70" %></p>
     </div>
   <% end %>

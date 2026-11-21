@@ -1,0 +1,26 @@
+<%# locals: (signup:) %>
+<% content_for :title, "Open in the other browser" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">This link opened in a different browser</h1>
+    <p class="text-sm text-base-content/70 mt-1">
+      To keep accounts safe, the link only works in the browser where you entered your email.
+    </p>
+  </div>
+
+  <div class="rounded-box border border-base-300 bg-base-100 p-5 flex flex-col gap-4">
+    <div>
+      <p class="font-semibold">Go back to that page</p>
+      <p class="text-sm text-base-content/70">Type the 6-digit code from the email there.</p>
+    </div>
+    <div class="divider my-0 text-xs text-base-content/60">or</div>
+    <div class="flex flex-col gap-2">
+      <p class="font-semibold">Carry on here</p>
+      <%# The email goes in a hidden field, so the page doesn't show a forwarded link's address to whoever opened it %>
+      <%= button_to "Email a new code to use here", email_session_path,
+        params: {session: {email: signup.email}},
+        class: "btn btn-primary w-full",
+        form: {data: {turbo: false}} %>
+    </div>
+  </div>
+</div>

@@ -1,29 +1,44 @@
 # frozen_string_literal: true
 
 module Email
-  class RegistrationsController < Email::ApplicationController
+  # The last step of signing up with email: the email is proven theirs, so they pick a username
+  class RegistrationsController < ApplicationController
+    before_action :set_verified_signup, only: %i[new create]
+
+    # Opening the link proves the email. Nothing is used up, so link previews are harmless.
+    # It only works in the browser that asked for it, so a link forwarded to someone else
+    # can't make them an account on the sender's email
+    def verify
+      signup = EmailSignup.find_by_link(params[:token])
+      return redirect_to new_email_session_path, alert: "That link has expired or was already used. Ask for a new code." unless signup
+      return render :other_browser, locals: {signup:}, status: :forbidden unless started_here?(signup)
+
+      session[:verified_email_signup_id] = signup.id
+      redirect_to new_email_registration_path
+    end
+
     def new
+      @user = User.new(email: @signup.email)
     end
 
     def create
-      @signing_up = true
-      return render_error("Email can't be blank") if normalized_email.blank?
+      @user = @signup.create_user(username: params.dig(:user, :username)&.strip)
+      return render :new, status: :unprocessable_content unless @user.persisted?
 
-      # Taken email: sign its owner in instead, so the form doesn't reveal who has an account
-      existing = User.find_by(email: normalized_email)
-      return send_sign_in_email(existing) if existing
-
-      user = User.new(email: normalized_email, username: params.dig(:session, :username)&.strip)
-      return render_error(user.errors.full_messages.to_sentence) unless user.save
-
-      send_sign_in_email(user)
+      session.delete(:verified_email_signup_id)
+      sign_in(@user)
+      redirect_to after_sign_in_path, notice: "Welcome to DareWith!"
     end
 
     private
 
-    def render_error(message)
-      @error = message
-      render :new, status: :unprocessable_content
+    def started_here?(signup)
+      signup.id.in?([session[:email_signup_id], session[:verified_email_signup_id]])
+    end
+
+    def set_verified_signup
+      @signup = EmailSignup.find_by(id: session[:verified_email_signup_id])
+      redirect_to new_email_session_path, alert: "Enter your email to get a code first" unless @signup
     end
   end
 end

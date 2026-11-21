@@ -1,0 +1,21 @@
+<h1>Join DareWith</h1>
+
+<p>Type this code on the page where you entered your email. It expires in 15 minutes.</p>
+<p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;"><%= @code %></p>
+<p>Or tap the link below in the browser where you entered your email. It expires in 24 hours.</p>
+<p>
+  <%= link_to "Join DareWith", @signup_url, style: "display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;" %>
+</p>
+
+<p style="color: #666;">
+  Or copy and paste this link in your browser:<br>
+  <code><%= @signup_url %></code>
+</p>
+
+<p style="color: #666;">
+  Already have an account? There's none for this email, so you may have used a different one.
+</p>
+
+<p style="color: #999; font-size: 12px;">
+  If you didn't request this, you can safely ignore this email.
+</p>

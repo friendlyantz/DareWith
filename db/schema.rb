@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -254,6 +254,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_150000) do
     t.index ["expires_at"], name: "index_device_sign_ins_on_expires_at"
     t.index ["user_id"], name: "index_device_sign_ins_on_user_id"
     t.check_constraint "state = 'pending'::device_sign_in_state OR user_id IS NOT NULL", name: "check_device_sign_in_approved_by_user"
+  end
+
+  create_table "email_signups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "email", null: false
+    t.string "code_digest", null: false
+    t.integer "code_attempts", default: 0, null: false
+    t.datetime "code_sent_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_email_signups_on_email", unique: true
+    t.check_constraint "email::text = lower(btrim(email::text))", name: "email_signups_email_normalized"
   end
 
   create_table "notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

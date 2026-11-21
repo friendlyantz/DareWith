@@ -5,8 +5,6 @@ class User < ApplicationRecord
   EMAIL_TOKEN_EXPIRY = 24.hours
   EMAIL_CODE_EXPIRY = 15.minutes
   MAX_EMAIL_CODE_ATTEMPTS = 5
-  RATE_LIMIT_WINDOW = 15.minutes
-  MAX_EMAIL_ATTEMPTS = 3
   REMINDER_HOURS = (6..22).to_a
   WEEKLY_RECAP_HOUR = 18
   ADMIN_USERNAMES = %w[friendlyantz].freeze
@@ -228,16 +226,6 @@ class User < ApplicationRecord
   def self.find_by_email_login_token(raw_token)
     hashed_token = Digest::SHA256.hexdigest(raw_token)
     find_by(email_login_token: hashed_token)
-  end
-
-  def email_login_recently_sent?
-    last_email_sent_at.present? && last_email_sent_at > RATE_LIMIT_WINDOW.ago
-  end
-
-  def email_login_attempts_exceeded?
-    # Count how many times email_login_token was set in the last window
-    # Simple rate limit: last_email_sent_at indicates a send attempt
-    email_login_recently_sent?
   end
 
   def email_verified?

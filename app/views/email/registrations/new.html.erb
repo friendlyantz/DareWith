@@ -1,40 +1,32 @@
-<% content_for :title, "Create an account with email" %>
+<% content_for :title, "Pick a username" %>
 <div class="w-full max-w-sm flex flex-col gap-5 pt-6">
   <div>
-    <h1 class="font-display text-3xl font-bold tracking-tight">Create an account</h1>
-    <p class="text-sm text-base-content/70 mt-1">We'll email you a code and a sign-in link. No password needed.</p>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Pick a username</h1>
+    <p class="text-sm text-base-content/70 mt-1">Last step. Your account is for <span class="font-semibold text-base-content"><%= @user.email %></span>.</p>
   </div>
 
-  <% if @error %>
-    <div class="alert alert-error alert-soft"><%= @error %></div>
+  <% if @user.errors[:email].any? %>
+    <div class="alert alert-error alert-soft">
+      That email already has an account. <%= link_to "Sign in instead", new_email_session_path, class: "link font-semibold" %>
+    </div>
   <% end %>
 
   <div class="rounded-box border border-base-300 bg-base-100 p-5">
-    <%= form_with scope: :session, url: email_registration_path, data: {turbo: false}, id: "email-registration-form", class: "flex flex-col gap-4" do |form| %>
-      <div>
-        <%= form.label :email, "Email", class: "text-sm font-semibold" %>
-        <div data-controller="textfield" class="mt-1.5">
-          <%= form.email_field :email, value: params.dig(:session, :email), class: "input mdc-text-field__input w-full", placeholder: "your@email.com", required: true, autocapitalize: "none" %>
-        </div>
-      </div>
-
+    <%= form_with model: @user, url: email_registration_path, data: {turbo: false}, id: "email-registration-form", class: "flex flex-col gap-4" do |form| %>
       <div>
         <%= form.label :username, "Username", class: "text-sm font-semibold" %>
         <div data-controller="textfield" class="mt-1.5">
-          <%= form.text_field :username, value: params.dig(:session, :username), class: "input mdc-text-field__input w-full", placeholder: "e.g. sloth_no_more", required: true, autocapitalize: "none" %>
+          <%= form.text_field :username,
+            class: class_names("input mdc-text-field__input w-full", "input-error": @user.errors[:username].any?),
+            placeholder: "e.g. sloth_no_more", required: true, autofocus: true, autocapitalize: "none" %>
         </div>
+        <% @user.errors.full_messages_for(:username).each do |message| %>
+          <p class="mt-1 text-sm text-error"><%= message %></p>
+        <% end %>
         <p class="text-xs text-base-content/70 mt-1">Friends see this name. It can't be changed later.</p>
       </div>
 
       <%= form.submit "Create account", class: "btn btn-primary w-full" %>
     <% end %>
-  </div>
-
-  <div class="flex flex-col gap-2 text-center text-sm">
-    <p>
-      Already have an account?
-      <%= link_to "Sign in with email", new_email_session_path, class: "link link-accent font-semibold" %>
-    </p>
-    <p><%= link_to "Create an account with a passkey instead", new_webauthn_registration_path, class: "link link-hover text-base-content/70" %></p>
   </div>
 </div>
