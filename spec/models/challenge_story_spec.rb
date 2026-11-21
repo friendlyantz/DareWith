@@ -227,24 +227,24 @@ RSpec.describe ChallengeStory, type: :model do
     end
 
     it "drops a target without a unit" do
-      story = create(:challenge_story, target_amount: 50, target_scope: :each_time)
+      story = create(:challenge_story, target_amount: 50, target_scope: :each_period)
 
       expect(story).to have_attributes(target_amount: nil, target_scope: nil)
     end
 
     it "drops the scope without a target amount" do
-      story = create(:challenge_story, unit: :reps, target_scope: :each_time)
+      story = create(:challenge_story, unit: :reps, target_scope: :each_period)
 
       expect(story.target_scope).to be_nil
     end
 
     it "needs a whole-number target for reps" do
-      expect(build(:challenge_story, unit: :reps, target_amount: 50.5, target_scope: :each_time)).not_to be_valid
-      expect(build(:challenge_story, unit: :km, target_amount: 5.5, target_scope: :each_time)).to be_valid
+      expect(build(:challenge_story, unit: :reps, target_amount: 50.5, target_scope: :each_period)).not_to be_valid
+      expect(build(:challenge_story, unit: :km, target_amount: 5.5, target_scope: :each_period)).to be_valid
     end
 
     it "keeps a saved whole-number target valid when other fields change" do
-      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_time).reload
+      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_period).reload
 
       expect(story.update(title: "Renamed")).to be true
     end
@@ -254,7 +254,7 @@ RSpec.describe ChallengeStory, type: :model do
     end
 
     it "rejects a target that isn't positive" do
-      expect(build(:challenge_story, unit: :reps, target_amount: 0, target_scope: :each_time)).not_to be_valid
+      expect(build(:challenge_story, unit: :reps, target_amount: 0, target_scope: :each_period)).not_to be_valid
     end
 
     it "is fixed once someone has checked in" do
@@ -335,9 +335,9 @@ RSpec.describe ChallengeStory, type: :model do
     let(:round_one) { create(:challenge_story, :finished, title: "Gym", description: "Any workout counts") }
 
     it "keeps the goal in the next round" do
-      round_one.update!(finish: round_one.start + 13.days, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_time)
+      round_one.update!(finish: round_one.start + 13.days, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5, target_scope: :each_period)
 
-      expect(round_one.next_round).to have_attributes(cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_time")
+      expect(round_one.next_round).to have_attributes(cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_period")
     end
 
     it "keeps the penalty in the next round" do

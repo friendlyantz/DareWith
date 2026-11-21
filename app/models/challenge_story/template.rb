@@ -5,13 +5,13 @@ class ChallengeStory::Template
   CATALOGUE = {
     push_ups: {
       emoji: "💪", title: "30 days of push-ups", days: 30,
-      goal: {cadence: "daily", unit: "reps", target_amount: 50, target_scope: "each_time"},
+      goal: {cadence: "daily", unit: "reps", target_amount: 50, target_scope: "each_period"},
       description: "50 push-ups a day, in as many sets as you like. Log how many you did. Whoever misses the most days buys coffee."
     },
     run: {
       emoji: "🏃", title: "Run 3× a week", days: 28,
-      goal: {cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 5, target_scope: "each_time"},
-      description: "Three runs a week, any pace. Log the distance and post a photo or your route. Whoever misses the most weeks buys lunch."
+      goal: {cadence: "weekly", times_per_period: 3, unit: "km", target_amount: 15, target_scope: "each_period"},
+      description: "Three runs a week, 15 km between them, any pace. Log the distance and post a photo or your route. Whoever misses the most weeks buys lunch."
     },
     hundred_km: {
       emoji: "🏅", title: "100 km in four weeks", days: 28,
@@ -20,7 +20,7 @@ class ChallengeStory::Template
     },
     read: {
       emoji: "📚", title: "Read 20 pages a day", days: 30,
-      goal: {cadence: "daily", unit: "pages", target_amount: 20, target_scope: "each_time"},
+      goal: {cadence: "daily", unit: "pages", target_amount: 20, target_scope: "each_period"},
       description: "Any book counts. Log your pages and share a line you liked."
     },
     gym: {
@@ -30,12 +30,12 @@ class ChallengeStory::Template
     },
     meditate: {
       emoji: "🧘", title: "Meditate for 21 days", days: 21,
-      goal: {cadence: "daily", unit: "minutes", target_amount: 10, target_scope: "each_time"},
+      goal: {cadence: "daily", unit: "minutes", target_amount: 10, target_scope: "each_period"},
       description: "Ten quiet minutes a day, with an app or without. Log your minutes."
     },
     fasting: {
       emoji: "🍽️", title: "Intermittent fasting, 5× a week", days: 21,
-      goal: {cadence: "weekly", times_per_period: 5, unit: "hours", target_amount: 14, target_scope: "each_time"},
+      goal: {cadence: "weekly", times_per_period: 5, unit: "hours"},
       description: "Five fasts a week of 14 hours or more, last bite to first bite. Log the hours and post your fasting app or your first meal. Whoever misses the most weeks buys brunch."
     }
   }.freeze

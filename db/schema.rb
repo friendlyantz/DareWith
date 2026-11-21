@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -25,7 +25,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_140000) do
   create_enum "challenge_penalty_mode", ["per_miss", "most_misses"]
   create_enum "challenge_reward_kind", ["pledge", "penalty"]
   create_enum "challenge_reward_status", ["pending", "fulfilled", "canceled"]
-  create_enum "challenge_target_scope", ["each_time", "total"]
+  create_enum "challenge_target_scope", ["each_period", "total"]
   create_enum "challenge_unit", ["reps", "minutes", "hours", "km", "pages"]
   create_enum "device_sign_in_state", ["pending", "approved", "used"]
 

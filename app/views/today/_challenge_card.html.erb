@@ -8,7 +8,7 @@
         <% if challenge_story.weekly? %>
           <%= week_progress(participant) %>
         <% else %>
-          <%= challenge_story.goal.progress_label %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
+          <%= challenge_story.goal.progress_label %><% if challenge_story.each_period? %> · <%= amount_progress(participant) %> today<% end %> · ends <%= challenge_story.finish.strftime("%-d %b") %>
         <% end %>
         <%= render "shared/streak", challenge_story:, count: participant.streak.current, freezes: participant.streak.freezes, css: "ml-1" %>
       </p>

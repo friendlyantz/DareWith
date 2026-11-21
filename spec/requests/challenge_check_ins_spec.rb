@@ -146,7 +146,7 @@ RSpec.describe "ChallengeCheckIns", type: :request do
       end
 
       it "pre-fills the target and steps in whole reps" do
-        story.update!(unit: :reps, target_amount: 50, target_scope: :each_time)
+        story.update!(unit: :reps, target_amount: 50, target_scope: :each_period)
 
         get new_challenge_story_challenge_check_in_path(story)
 

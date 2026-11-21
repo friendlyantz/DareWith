@@ -52,6 +52,15 @@ RSpec.describe ChallengeParticipant, type: :model do
       travel_to(start + 5.days) { expect(participant.reload.reminder_due_today?).to be true }
     end
 
+    it "keeps showing the last week on the grace day after the end" do
+      check_in(21, 22, 23)
+
+      travel_to(start + 28.days) do
+        expect(participant.reload.check_ins_this_period).to eq 3
+        expect(participant).to be_done_for_now
+      end
+    end
+
     it "counts weeks kept for the leaderboard" do
       check_in(0, 1, 2, 7, 8, 14, 15, 16)
 
@@ -215,6 +224,33 @@ RSpec.describe ChallengeParticipant, type: :model do
       create(:challenge_reward, giver: participant1, receiver: participant2, challenge_story: story)
 
       expect(participant1.missing_pledges?).to be false
+    end
+  end
+
+  describe "weekly targets" do
+    let(:start) { Date.new(2026, 11, 18) }
+    let(:story) { create(:challenge_story, :weekly, start:, times_per_period: 3, unit: :km, target_amount: 15, target_scope: :each_period) }
+    let(:participant) { create(:challenge_participant, challenge_story: story) }
+
+    def check_in(*days_from_start, amount:)
+      days_from_start.each { create(:challenge_check_in, challenge_participant: participant, challenge_story: story, checked_in_on: start + it, amount:) }
+    end
+
+    it "reminds on the last day when the days are done but the distance isn't" do
+      check_in(0, 1, 2, amount: 4)
+
+      travel_to(start + 5.days) { expect(participant.reload.reminder_due_today?).to be false }
+      travel_to(start + 6.days) { expect(participant.reload.reminder_due_today?).to be true }
+    end
+
+    it "counts the grace day toward the last week's distance" do
+      check_in(21, 22, 23, amount: 4)
+      check_in(28, amount: 3)
+
+      travel_to(start + 28.days) do
+        expect(participant.reload.amount_this_period).to eq 15
+        expect(participant).to be_period_kept
+      end
     end
   end
 end

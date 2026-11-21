@@ -51,7 +51,7 @@ RSpec.describe "Challenge Stories", type: :system do
         finish_date: Time.zone.today + 30.days
       )
 
-      expect(new_challenge_page.goal_summary).to have_text("Every day · 30 minutes each time")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · 30 minutes a day")
       new_challenge_page.submit
 
       expect(page).to have_content("Walk the dog")

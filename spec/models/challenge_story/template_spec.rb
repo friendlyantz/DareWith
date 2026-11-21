@@ -18,7 +18,7 @@ RSpec.describe ChallengeStory::Template do
     it "copies the goal" do
       challenge_story = described_class.find(:run).build
 
-      expect(challenge_story.goal.summary).to eq "3× a week · 5 km each time"
+      expect(challenge_story.goal.summary).to eq "3× a week · 15 km a week"
     end
   end
 

@@ -5,7 +5,7 @@ const AMOUNT_AND_UNIT = /(\d+(?:\.\d+)?)\s*\+?\s*-?\s*(minutes?|mins?|hours?|hrs
 const UNITS = { min: "minutes", h: "hours", k: "km", p: "pages", r: "reps" }
 
 // Picks what to count from the title and rules as they're typed ("walk the dog 30+ minutes"
-// counts minutes, 30 each time) until the person picks a unit themselves,
+// counts minutes, 30 a day) until the person picks a unit themselves,
 // and spells the goal out next to the submit button so a wrong pick is easy to spot
 export default class extends Controller {
   static targets = ["text", "cadence", "timesPerPeriod", "unit", "targetAmount", "targetScope", "summary"]
@@ -33,6 +33,7 @@ export default class extends Controller {
 
   summarize() {
     const often = this.cadenceTarget.value === "weekly" ? `${this.timesPerPeriodTarget.value}× a week` : "Every day"
+    this.targetScopeTarget.querySelector("option[value='each_period']").text = `a ${this.periodName()}`
     this.summaryTarget.textContent = [often, this.target()].join(" · ")
   }
 
@@ -43,7 +44,11 @@ export default class extends Controller {
     if (!amount) return `counting ${unit}`
 
     const label = (Number(amount) === 1 && unit !== "km") ? unit.replace(/s$/, "") : unit
-    return `${amount} ${label} ${this.targetScopeTarget.value === "total" ? "each by the end" : "each time"}`
+    return `${amount} ${label} ${this.targetScopeTarget.value === "total" ? "each by the end" : `a ${this.periodName()}`}`
+  }
+
+  periodName() {
+    return this.cadenceTarget.value === "weekly" ? "week" : "day"
   }
 
   unitFor(word) {

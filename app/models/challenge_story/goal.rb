@@ -8,7 +8,7 @@ class ChallengeStory::Goal
   private attr_reader :challenge_story
 
   delegate :cadence, :times_per_period, :unit, :target_amount, :target_scope,
-    :weekly?, :each_time?, :total?, :start, :finish, :duration_in_days, to: :challenge_story
+    :weekly?, :each_period?, :total?, :start, :finish, :duration_in_days, to: :challenge_story
 
   def initialize(challenge_story)
     @challenge_story = challenge_story
@@ -46,16 +46,17 @@ class ChallengeStory::Goal
     "#{period_name.capitalize} #{current_period_number(today)} of #{period_count}"
   end
 
+  # The grace day after the end is the last day of the last period
   def days_left_in_period(today = Time.zone.today)
+    return 1 if today > finish
+
     period_length - (today - start).to_i.modulo(period_length)
   end
 
-  # Check-ins on the grace day after the end count toward the last period.
-  # Ones before the start keep their negative index, so they can still begin a streak.
-  def kept_period_indexes(dates)
-    dates.uniq
-      .map { [period_index(it), period_count - 1].min }
-      .tally.select { |_index, check_ins| check_ins >= times_per_period }
+  # Ones before the start keep their negative index, so they can still begin a streak
+  def kept_period_indexes(check_ins)
+    check_ins.group_by { counted_period_index(it.checked_in_on) }
+      .select { |_index, period_check_ins| kept?(period_check_ins) }
       .keys.sort
   end
 
@@ -65,8 +66,27 @@ class ChallengeStory::Goal
     (0...closed).to_a
   end
 
-  def check_ins_in_period(dates, today = Time.zone.today)
-    dates.uniq.count { period_index(it) == period_index(today) }
+  def period_kept?(check_ins, today = Time.zone.today)
+    kept?(in_period(check_ins, today))
+  end
+
+  # Days checked in, however many check-ins each had
+  def check_ins_in_period(check_ins, today = Time.zone.today)
+    in_period(check_ins, today).map(&:checked_in_on).uniq.size
+  end
+
+  def amount_in_period(check_ins, today = Time.zone.today)
+    in_period(check_ins, today).sum { it.amount || 0 }
+  end
+
+  # "Weeks with 3 check-ins and 15 km", "Days with 50 reps", "Days checked in"
+  def kept_rule
+    requirements = []
+    requirements << "#{times_per_period} check-ins" if weekly?
+    requirements << format_amount(target_amount) if each_period?
+    return "Days checked in" if requirements.empty?
+
+    "#{period_name.pluralize.capitalize} with #{requirements.to_sentence}"
   end
 
   def measured?
@@ -82,12 +102,15 @@ class ChallengeStory::Goal
     measured? && DECIMAL_UNITS.exclude?(unit)
   end
 
-  # Pre-fills the check-in so hitting the target is one tap
+  # Pre-fills the check-in so hitting the target is one tap, or for a weekly target, an even share of it
   def suggested_amount
-    target_amount if each_time?
+    return unless each_period?
+
+    share = target_amount / times_per_period
+    whole_numbers? ? share.ceil : share.round(2)
   end
 
-  # "3× a week · 5 km each time", or nil for a plain daily challenge
+  # "3× a week · 15 km a week", or nil for a plain daily challenge
   def summary
     [frequency, target].compact.join(" · ").presence
   end
@@ -108,6 +131,23 @@ class ChallengeStory::Goal
 
   private
 
+  # Check-ins on the grace day after the end count toward the last period
+  def counted_period_index(date)
+    [period_index(date), period_count - 1].min
+  end
+
+  # So on the grace day, "this week" is still the last week
+  def in_period(check_ins, today)
+    check_ins.select { counted_period_index(it.checked_in_on) == counted_period_index(today) }
+  end
+
+  # Enough days checked in and, with a target each period, enough counted between them,
+  # so two short runs on one day count the same as one long one
+  def kept?(check_ins)
+    check_ins.map(&:checked_in_on).uniq.size >= times_per_period &&
+      (!each_period? || check_ins.sum { it.amount || 0 } >= target_amount)
+  end
+
   def frequency
     "#{times_per_period}× a week" if weekly?
   end
@@ -116,6 +156,6 @@ class ChallengeStory::Goal
     return unless measured?
     return "counting #{unit_label}" unless targeted?
 
-    "#{format_amount(target_amount)} #{each_time? ? "each time" : "each by the end"}"
+    "#{format_amount(target_amount)} #{each_period? ? "a #{period_name}" : "each by the end"}"
   end
 end

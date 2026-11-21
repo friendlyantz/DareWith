@@ -10,8 +10,8 @@ RSpec.describe ChallengeStory::Goal do
       expect(build(:challenge_story, unit: :km).goal.summary).to eq "counting km"
     end
 
-    it "describes a target each time" do
-      expect(build(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_time).goal.summary).to eq "50 reps each time"
+    it "describes a target each day" do
+      expect(build(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_period).goal.summary).to eq "50 reps a day"
     end
 
     it "describes a total target" do
@@ -19,9 +19,9 @@ RSpec.describe ChallengeStory::Goal do
     end
 
     it "describes a weekly cadence" do
-      story = build(:challenge_story, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5.5, target_scope: :each_time)
+      story = build(:challenge_story, cadence: :weekly, times_per_period: 3, unit: :km, target_amount: 5.5, target_scope: :each_period)
 
-      expect(story.goal.summary).to eq "3× a week · 5.5 km each time"
+      expect(story.goal.summary).to eq "3× a week · 5.5 km a week"
     end
   end
 
@@ -73,17 +73,64 @@ RSpec.describe ChallengeStory::Goal, "periods" do
   it "knows how many days are left in the week" do
     expect(weekly.days_left_in_period(start)).to eq 7
     expect(weekly.days_left_in_period(start + 6.days)).to eq 1
+    expect(weekly.days_left_in_period(start + 28.days)).to eq 1
+  end
+
+  def check_ins(*days, amount: nil)
+    days.map { ChallengeCheckIn.new(checked_in_on: start + it, amount:) }
   end
 
   it "keeps a week once it has enough check-ins" do
-    dates = [start, start + 2.days, start + 4.days, start + 8.days]
+    expect(weekly.kept_period_indexes(check_ins(0, 2, 4, 8))).to eq [0]
+  end
 
-    expect(weekly.kept_period_indexes(dates)).to eq [0]
+  it "counts days, not check-ins" do
+    expect(weekly.kept_period_indexes(check_ins(0, 0, 0))).to eq []
   end
 
   it "counts the grace day after the end toward the last week" do
-    last_week = (start + 21.days..start + 22.days).to_a
+    expect(weekly.kept_period_indexes(check_ins(21, 22, 28))).to eq [3]
+  end
 
-    expect(weekly.kept_period_indexes(last_week + [start + 28.days])).to eq [3]
+  context "with a target each week" do
+    let(:weekly) { build(:challenge_story, :weekly, start:, times_per_period: 3, unit: :km, target_amount: 15, target_scope: :each_period).goal }
+
+    it "keeps a week once its check-ins add up to the target" do
+      expect(weekly.kept_period_indexes(check_ins(0, 0, 2, 4, amount: 4))).to eq [0]
+    end
+
+    it "misses a week short of the target, however many check-ins" do
+      expect(weekly.kept_period_indexes(check_ins(0, 2, 4, amount: 4))).to eq []
+    end
+
+    it "misses a week that hit the target in too few days" do
+      expect(weekly.kept_period_indexes(check_ins(0, 2, amount: 10))).to eq []
+    end
+
+    it "suggests an even share of the target" do
+      expect(weekly.suggested_amount).to eq 5
+    end
+  end
+
+  context "with a target each day" do
+    let(:daily) { build(:challenge_story, start:, finish: start + 9.days, unit: :reps, target_amount: 50, target_scope: :each_period).goal }
+
+    it "adds up a day's check-ins" do
+      expect(daily.kept_period_indexes(check_ins(0, 0, 1, amount: 25))).to eq [0]
+    end
+
+    it "knows whether today is done" do
+      expect(daily.period_kept?(check_ins(0, amount: 30), start)).to be false
+      expect(daily.period_kept?(check_ins(0, 0, amount: 30), start)).to be true
+    end
+
+    it "describes what keeps a day" do
+      expect(daily.kept_rule).to eq "Days with 50 reps"
+    end
+  end
+
+  it "describes what keeps a week" do
+    expect(weekly.kept_rule).to eq "Weeks with 3 check-ins"
+    expect(daily.kept_rule).to eq "Days checked in"
   end
 end

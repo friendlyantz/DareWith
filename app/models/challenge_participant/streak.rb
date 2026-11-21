@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Runs of consecutive kept periods (days, or weeks that hit the weekly count) within one challenge.
+# Runs of consecutive kept periods (days or weeks that hit the goal) within one challenge.
 # In daily challenges every 7 days in a row earn a freeze, and a freeze covers one missed day,
 # so a long streak survives a slip. A covered day keeps the streak alive but doesn't add to it.
 class ChallengeParticipant::Streak
@@ -12,9 +12,9 @@ class ChallengeParticipant::Streak
 
   private attr_reader :goal, :kept_indexes
 
-  def initialize(dates, goal)
+  def initialize(check_ins, goal)
     @goal = goal
-    @kept_indexes = goal.kept_period_indexes(dates)
+    @kept_indexes = goal.kept_period_indexes(check_ins)
   end
 
   # Still counts until the current period ends, so a streak isn't broken before you've had the chance to keep it

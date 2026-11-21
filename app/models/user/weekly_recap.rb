@@ -59,15 +59,20 @@ class User::WeeklyRecap
     "🔥 #{streak}-#{best.challenge_story.goal.period_name} streak in #{best.challenge_story.title}"
   end
 
-  # "Run: 2 of 3 this week", for weekly challenges still running
+  # "Run: 2 of 3 this week · 9 of 15 km", for weekly challenges still running
   def weekly_lines
     participants
       .select { it.challenge_story.weekly? && it.challenge_story.finish >= today }
-      .map { "#{it.challenge_story.title}: #{it.challenge_story.goal.check_ins_in_period(check_in_dates(it), today)} of #{it.challenge_story.times_per_period} this week" }
+      .map { weekly_line(it) }
   end
 
-  def check_in_dates(participant)
-    participant.check_in_days.map(&:checked_in_on)
+  def weekly_line(participant)
+    challenge_story = participant.challenge_story
+    goal = challenge_story.goal
+    line = "#{challenge_story.title}: #{goal.check_ins_in_period(participant.check_in_days, today)} of #{challenge_story.times_per_period} this week"
+    return line unless challenge_story.each_period?
+
+    "#{line} · #{goal.format_number(goal.amount_in_period(participant.check_in_days, today))} of #{goal.format_amount(challenge_story.target_amount)}"
   end
 
   def friends_line

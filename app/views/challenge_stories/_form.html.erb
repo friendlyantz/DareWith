@@ -64,11 +64,12 @@
           placeholder: "e.g. 50",
           data: {challenge_goal_target: "targetAmount"} %>
         <%= form.select :target_scope,
-          [["each time", "each_time"], ["by the end", "total"]],
+          [["a #{challenge_story.goal.period_name}", "each_period"], ["by the end", "total"]],
           {},
           class: "select w-full",
           data: {challenge_goal_target: "targetScope"} %>
       </div>
+      <p class="mt-1.5 text-sm text-base-content/70 group-has-[option[value='total']:checked]/goal:hidden">Check-ins in the same day or week add up, so two short runs count the same as one long one.</p>
       <p class="mt-1.5 text-sm text-base-content/70 hidden group-has-[option[value='total']:checked]/goal:block">Everyone aims for this much by the end date, counting all their check-ins.</p>
       <% challenge_story.errors.full_messages_for(:target_amount).each do |message| %>
         <p class="mt-1 text-sm text-error"><%= message %></p>

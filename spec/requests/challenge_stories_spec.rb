@@ -199,11 +199,11 @@ RSpec.describe "ChallengeStories", type: :request do
       end
 
       it "saves the goal" do
-        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(unit: "reps", target_amount: "50", target_scope: "each_time")}
+        post challenge_stories_path, params: {challenge_story: valid_params[:challenge_story].merge(unit: "reps", target_amount: "50", target_scope: "each_period")}
 
-        expect(ChallengeStory.last).to have_attributes(unit: "reps", target_amount: 50, target_scope: "each_time")
+        expect(ChallengeStory.last).to have_attributes(unit: "reps", target_amount: 50, target_scope: "each_period")
         follow_redirect!
-        expect(response.body).to include("50 reps each time")
+        expect(response.body).to include("50 reps a day")
       end
 
       it "saves a penalty and shows it as a rule" do
@@ -318,7 +318,7 @@ RSpec.describe "ChallengeStories", type: :request do
     end
 
     it "changes the dates once the goal is locked" do
-      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_time)
+      story = create(:challenge_story, unit: :reps, target_amount: 50, target_scope: :each_period)
       participant = create(:challenge_participant, user:, challenge_story: story)
       create(:challenge_check_in, challenge_participant: participant, amount: 50)
       new_finish = story.finish + 1.day
@@ -366,6 +366,13 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include("Round 2")
       expect(response.body).to include('value="Gym"')
       expect(response.body).to match(/name="previous_challenge_story_id"[^>]*value="#{round_one.id}"/)
+    end
+
+    it "starts the prefilled round today, as long as the previous one" do
+      get new_challenge_story_path(previous_challenge_story_id: round_one.id)
+
+      expect(response.body).to match(/value="#{Time.zone.today.iso8601}"[^>]*name="challenge_story\[start\]"/)
+      expect(response.body).to match(/value="#{(Time.zone.today + (round_one.duration_in_days - 1).days).iso8601}"[^>]*name="challenge_story\[finish\]"/)
     end
 
     it "starts the next round and invites the others" do

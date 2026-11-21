@@ -6,7 +6,7 @@ RSpec.describe ChallengeParticipant::Streak do
   let(:daily) { build(:challenge_story, start: today - 30.days, finish: today + 30.days).goal }
 
   def streak(*days_ago)
-    described_class.new(days_ago.map { today - it }, daily)
+    described_class.new(days_ago.map { ChallengeCheckIn.new(checked_in_on: today - it) }, daily)
   end
 
   describe "#current" do
@@ -129,7 +129,7 @@ RSpec.describe ChallengeParticipant::Streak, "weekly" do
   let(:goal) { build(:challenge_story, :weekly, start:, finish: start + 55.days, times_per_period: 2).goal }
 
   def streak(*days_from_start)
-    described_class.new(days_from_start.map { start + it }, goal)
+    described_class.new(days_from_start.map { ChallengeCheckIn.new(checked_in_on: start + it) }, goal)
   end
 
   it "counts weeks that hit the weekly count" do

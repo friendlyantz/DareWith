@@ -10,7 +10,7 @@
     <% elsif challenge_story.total? %>
       Totals so far, aiming for <%= goal.format_amount(challenge_story.target_amount) %> each
     <% else %>
-      <%= challenge_story.weekly? ? "Weeks with #{challenge_story.times_per_period} check-ins" : "Days checked in" %>, out of <%= so_far %> so far
+      <%= goal.kept_rule %>, out of <%= so_far %> so far
     <% end %>
   </p>
   <ol class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
@@ -45,6 +45,7 @@
           <% end %>
           <% details = [] %>
           <% details << "#{participant.check_ins_this_period} of #{challenge_story.times_per_period} this week" if challenge_story.weekly? %>
+          <% details << "#{amount_progress(participant)} #{challenge_story.weekly? ? "this week" : "today"}" if challenge_story.each_period? %>
           <% details << "#{goal.format_amount(participant.total_amount)} in total" if goal.measured? && !challenge_story.total? %>
           <% forecast = forecast_line(participant) if participant == mine %>
           <% misses = misses_line(participant) %>

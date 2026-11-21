@@ -31,23 +31,23 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   def streak
-    @streak ||= Streak.new(check_in_dates, challenge_story.goal)
+    @streak ||= Streak.new(check_in_days, challenge_story.goal)
   end
 
   def pending_rewards_count
     given_rewards.pending.count + received_rewards.pending.count
   end
 
-  # Days with a check-in, or weeks that hit the weekly count
+  # Days or weeks that hit the goal
   def periods_kept
-    challenge_story.goal.kept_period_indexes(check_in_dates).count { it >= 0 }
+    challenge_story.goal.kept_period_indexes(check_in_days).count { it >= 0 }
   end
 
-  # Days, or weeks short of the weekly count, that are over and that no freeze covered.
+  # Days or weeks short of the goal that are over and that no freeze covered.
   # Only ones since joining count; a week you joined partway through doesn't.
   def misses
     goal = challenge_story.goal
-    missed = goal.closed_period_indexes - goal.kept_period_indexes(check_in_dates) - streak.frozen_indexes
+    missed = goal.closed_period_indexes - goal.kept_period_indexes(check_in_days) - streak.frozen_indexes
     missed.count { it >= goal.first_full_period_from(joined_on) }
   end
 
@@ -68,24 +68,30 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   def check_ins_this_period
-    challenge_story.goal.check_ins_in_period(check_in_dates)
+    challenge_story.goal.check_ins_in_period(check_in_days)
+  end
+
+  def amount_this_period
+    challenge_story.goal.amount_in_period(check_in_days)
   end
 
   def period_kept?
-    check_ins_this_period >= challenge_story.times_per_period
+    challenge_story.goal.period_kept?(check_in_days)
   end
 
-  # Nothing left to do today: checked in, or this week's check-ins are done
+  # Nothing left to do today: today or this week hit the goal, or in a weekly challenge, checked in today
   def done_for_now?
-    checked_in_today? || period_kept?
+    period_kept? || (challenge_story.weekly? && checked_in_today?)
   end
 
-  # Daily: any day without a check-in. Weekly: only once the days left are just enough
+  # Daily: any day short of the goal. Weekly: once the days left are just enough,
+  # or on the last day when the days are done but the target isn't
   def reminder_due_today?
     return false if done_for_now?
     return true if challenge_story.daily?
 
-    challenge_story.times_per_period - check_ins_this_period >= challenge_story.goal.days_left_in_period
+    days_left = challenge_story.goal.days_left_in_period
+    days_left == 1 || challenge_story.times_per_period - check_ins_this_period >= days_left
   end
 
   def local_today
@@ -160,10 +166,6 @@ class ChallengeParticipant < ApplicationRecord
   end
 
   private
-
-  def check_in_dates
-    @check_in_dates ||= check_in_days.map(&:checked_in_on).uniq
-  end
 
   def set_default_name
     self.name = user.username if user.present?
