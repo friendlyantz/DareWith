@@ -8,4 +8,11 @@ module ChallengeStoriesHelper
       challenge_story.description.truncate(120)
     ].compact_blank.join(" · ")
   end
+
+  # "Starts tomorrow", "Starts in 3 days"
+  def starts_in(challenge_story)
+    return "Starts tomorrow" if challenge_story.days_until_start == 1
+
+    "Starts in #{pluralize(challenge_story.days_until_start, "day")}"
+  end
 end

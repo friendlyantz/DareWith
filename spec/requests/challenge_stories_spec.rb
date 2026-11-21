@@ -37,6 +37,18 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include(story.title)
     end
 
+    it "counts down to the start instead of offering a check-in" do
+      story.update!(start: Time.zone.today + 3.days, finish: Time.zone.today + 10.days)
+      user = create(:user)
+      create(:challenge_participant, user:, challenge_story: story)
+      sign_in_as(user)
+
+      get challenge_story_path(story)
+
+      expect(response.body).to include("Starts in 3 days · #{story.start.strftime("%a %-d %b")}")
+      expect(response.body).not_to include("btn btn-primary btn-lg btn-block")
+    end
+
     it "shows totals and your pace for a target by the end" do
       story.update!(start: Time.zone.today - 1.day, finish: Time.zone.today + 28.days, unit: :km, target_amount: 100, target_scope: :total)
       user = create(:user)

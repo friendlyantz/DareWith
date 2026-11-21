@@ -27,7 +27,7 @@
     </div>
 
     <%= render partial: "today/challenge_card", collection: @challenge_stories, as: :challenge_story %>
-  <% else %>
+  <% elsif @upcoming_challenge_stories.none? %>
     <div class="card bg-base-100 border border-base-300">
       <div class="card-body items-center text-center">
         <h2 class="font-display text-xl font-semibold">No active challenges</h2>
@@ -37,6 +37,13 @@
         <% end %>
       </div>
     </div>
+  <% end %>
+
+  <% if @upcoming_challenge_stories.any? %>
+    <section class="flex flex-col gap-3 mt-2">
+      <h2 class="text-sm font-semibold text-base-content/70">Coming up</h2>
+      <%= render partial: "today/challenge_card", collection: @upcoming_challenge_stories, as: :challenge_story %>
+    </section>
   <% end %>
 
   <% if @just_finished.any? %>

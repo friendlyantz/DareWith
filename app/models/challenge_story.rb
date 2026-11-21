@@ -97,6 +97,15 @@ class ChallengeStory < ApplicationRecord
     new_record? || challenge_check_ins_count.zero?
   end
 
+  # Check-ins open on the start date, so nobody gets a head start or locks the goal before day 1
+  def started?
+    start <= Time.zone.today
+  end
+
+  def days_until_start
+    [(start - Time.zone.today).to_i, 0].max
+  end
+
   def finished?
     finish < Time.zone.today
   end

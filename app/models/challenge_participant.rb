@@ -115,7 +115,7 @@ class ChallengeParticipant < ApplicationRecord
     participant.present? && participant != self &&
       participant.active? && active? &&
       participant.challenge_story_id == challenge_story_id &&
-      challenge_story.accepting_check_ins? && challenge_story.start <= Time.zone.today &&
+      challenge_story.accepting_check_ins? && challenge_story.started? &&
       participant.checked_in_today? && !done_for_now?
   end
 

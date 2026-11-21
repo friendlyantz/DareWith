@@ -84,7 +84,7 @@ class User < ApplicationRecord
       active_challenge_stories.includes(active_participants: [:user, :todays_check_ins, :check_in_days, :recent_nudges]).select do |challenge_story|
         participant = challenge_story.participant_for(self)
         challenge_story.accepting_check_ins? &&
-          challenge_story.start <= Time.zone.today &&
+          challenge_story.started? &&
           participant.reminder_due_today? &&
           !participant.nudged_today?
       end

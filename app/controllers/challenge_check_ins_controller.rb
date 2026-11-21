@@ -27,6 +27,10 @@ class ChallengeCheckInsController < ApplicationController
       return redirect_to challenge_story_path(@challenge_story),
         alert: "Cannot add check-ins to completed challenges"
     end
+    unless @challenge_story.started?
+      return redirect_to challenge_story_path(@challenge_story),
+        alert: "Check-ins open when the challenge starts"
+    end
 
     @challenge_participant = @challenge_story.find_or_activate_participant!(current_user)
     @challenge_check_in = @challenge_participant.challenge_check_ins.build(challenge_check_in_params)

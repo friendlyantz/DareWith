@@ -1,6 +1,10 @@
 <%# locals: (challenge_story:, participant:) %>
 <div class="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t border-base-300 bg-base-200 px-5 py-3">
-  <% if participant.checked_in_today? %>
+  <% if !challenge_story.started? %>
+    <div class="flex h-12 items-center justify-center gap-2 rounded-field bg-base-100 font-semibold">
+      <%= starts_in(challenge_story) %> · <%= challenge_story.start.strftime("%a %-d %b") %>
+    </div>
+  <% elsif participant.checked_in_today? %>
     <div class="flex items-center gap-2">
       <div class="flex h-12 flex-1 items-center justify-center gap-2 rounded-field bg-info/10 font-semibold text-info">
         <%= icon(:check) %> You checked in today

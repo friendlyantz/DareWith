@@ -6,6 +6,7 @@ class TodayController < ApplicationController
       .includes(active_participants: [{user: {avatar_attachment: :blob}}, :todays_check_ins, :check_in_days, {recent_nudges: {sender: {user: {avatar_attachment: :blob}}}}])
       .order(:finish)
       .select(&:accepting_check_ins?)
+    @upcoming_challenge_stories, @challenge_stories = @challenge_stories.partition { !it.started? }
 
     @done_count = @challenge_stories.count { it.participant_for(current_user).done_for_now? }
     @round_invites = current_user.next_round_invites

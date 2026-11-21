@@ -36,7 +36,9 @@
       </span>
     </div>
 
-    <% if participant.done_for_now? %>
+    <% if !challenge_story.started? %>
+      <span class="badge badge-ghost badge-lg font-semibold shrink-0"><%= starts_in(challenge_story) %></span>
+    <% elsif participant.done_for_now? %>
       <span class="badge badge-info badge-soft badge-lg font-semibold shrink-0">
         <%= icon(:check, css: "size-4") %> <%= participant.checked_in_today? ? "Done" : "Week done" %>
       </span>

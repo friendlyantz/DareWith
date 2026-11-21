@@ -289,6 +289,19 @@ RSpec.describe "ChallengeCheckIns", type: :request do
       end
     end
 
+    context "when the challenge hasn't started" do
+      before { story.update!(start: Time.zone.today + 1.day, finish: Time.zone.today + 7.days) }
+
+      it "redirects with alert and saves nothing" do
+        expect do
+          post challenge_story_challenge_check_ins_path(story), params: {challenge_check_in: {message: "Too early"}}
+        end.not_to change(ChallengeCheckIn, :count)
+
+        expect(response).to redirect_to(challenge_story_path(story))
+        expect(flash[:alert]).to include("when the challenge starts")
+      end
+    end
+
     context "when already checked in today" do
       before do
         create(:challenge_check_in, challenge_participant: participant, challenge_story: story)

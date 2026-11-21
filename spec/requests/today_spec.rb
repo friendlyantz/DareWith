@@ -63,6 +63,17 @@ RSpec.describe "Today", type: :request do
         expect(response.body).to include(new_challenge_story_challenge_check_in_path(story))
       end
 
+      it "counts down to a challenge that hasn't started, outside the daily count" do
+        story.update!(start: Time.zone.today + 3.days, finish: Time.zone.today + 10.days)
+
+        get today_path
+
+        expect(response.body).to include("Coming up")
+        expect(response.body).to include("Starts in 3 days")
+        expect(response.body).not_to include("done today")
+        expect(response.body).not_to include(new_challenge_story_challenge_check_in_path(story))
+      end
+
       it "shows challenges already checked in today as done" do
         create(:challenge_check_in, challenge_participant: participant)
 

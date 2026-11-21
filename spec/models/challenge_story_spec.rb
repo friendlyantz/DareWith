@@ -51,6 +51,16 @@ RSpec.describe ChallengeStory, type: :model do
     end
   end
 
+  describe "#started?" do
+    it "is true from the start date" do
+      expect(build(:challenge_story, start: Time.zone.today)).to be_started
+    end
+
+    it "is false before it" do
+      expect(build(:challenge_story, start: Time.zone.today + 1.day)).not_to be_started
+    end
+  end
+
   describe "#accepting_check_ins?" do
     it "is true while the challenge runs" do
       expect(build(:challenge_story)).to be_accepting_check_ins
