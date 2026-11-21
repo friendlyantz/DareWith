@@ -12,7 +12,7 @@ class ChallengeStory::Penalty
     @challenge_story = challenge_story
   end
 
-  # "Each miss: owe everyone a coffee"
+  # "Each miss: owe everyone coffee"
   def summary
     "#{per_miss? ? "Each miss" : "Most misses"}: owe everyone #{penalty}"
   end
@@ -24,7 +24,7 @@ class ChallengeStory::Penalty
     worst_missers.include?(participant) ? 1 : 0
   end
 
-  # "a coffee", "a coffee × 2", or nil when nothing's owed
+  # "coffee", "coffee × 2", or nil when nothing's owed
   def owed_by(participant)
     times = times_owed_by(participant)
     return if times.zero?

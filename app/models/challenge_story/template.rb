@@ -6,7 +6,7 @@ class ChallengeStory::Template
   CATALOGUE = {
     push_ups: {
       emoji: "💪", chip: "Push-ups", title: "30 days of push-ups", days: 30,
-      goal: {cadence: "daily", unit: "reps", target_amount: 50, target_scope: "each_period", penalty_mode: "per_miss", penalty: "a coffee"},
+      goal: {cadence: "daily", unit: "reps", target_amount: 50, target_scope: "each_period", penalty_mode: "per_miss", penalty: "coffee"},
       description: "In as many sets as you like."
     },
     run: {
@@ -31,7 +31,7 @@ class ChallengeStory::Template
     },
     meditate: {
       emoji: "🧘", chip: "Meditate", title: "Meditate for 21 days", days: 21,
-      goal: {cadence: "daily", unit: "minutes", target_amount: 10, target_scope: "each_period", penalty_mode: "per_miss", penalty: "a coffee"},
+      goal: {cadence: "daily", unit: "minutes", target_amount: 10, target_scope: "each_period", penalty_mode: "per_miss", penalty: "coffee"},
       description: "With an app or without."
     },
     fasting: {
@@ -46,7 +46,7 @@ class ChallengeStory::Template
     },
     make_bed: {
       emoji: "🛏️", chip: "Make bed", title: "Make your bed every day", days: 30,
-      goal: {cadence: "daily", penalty_mode: "per_miss", penalty: "a coffee"},
+      goal: {cadence: "daily", penalty_mode: "per_miss", penalty: "coffee"},
       description: "Before you leave the room. Post a photo."
     }
   }.freeze

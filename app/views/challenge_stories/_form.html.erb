@@ -130,7 +130,7 @@
         <%= form.text_field :penalty,
           maxlength: 100,
           class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
-          placeholder: "e.g. a coffee, $5, a candy bar",
+          placeholder: "e.g. coffee, $5, chocolate",
           data: {challenge_goal_target: "penalty"} %>
         <p class="mt-1.5 text-sm text-base-content/70">The app keeps the tally. You settle up at the end, like rewards.</p>
         <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>

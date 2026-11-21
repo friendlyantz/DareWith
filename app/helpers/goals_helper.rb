@@ -38,12 +38,12 @@ module GoalsHelper
     "#{goal.format_number(participant.amount_this_period)} of #{goal.format_amount(participant.challenge_story.target_amount)}"
   end
 
-  # "Each miss: owe everyone a coffee"
+  # "Each miss: owe everyone coffee"
   def penalty_summary(challenge_story)
     challenge_story.penalty_rule&.summary
   end
 
-  # "2 misses · owes a coffee × 2". Most misses can still change hands until check-ins close.
+  # "2 misses · owes coffee × 2". Most misses can still change hands until check-ins close.
   def misses_line(participant)
     challenge_story = participant.challenge_story
     owed = challenge_story.penalty_rule&.owed_by(participant)

@@ -306,7 +306,7 @@ class ChallengeStory < ApplicationRecord
     errors.add(:finish, "can't be earlier than today")
   end
 
-  # "Ends 30 Nov · Each miss: owe everyone a coffee", from the last save
+  # "Ends 30 Nov · Each miss: owe everyone coffee", from the last save
   def changes_summary
     [
       ("Starts #{start.strftime("%-d %b")}" if saved_change_to_start?),
