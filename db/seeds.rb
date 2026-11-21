@@ -11,6 +11,8 @@ print_counts = lambda do
   puts "  Check-ins: #{ChallengeCheckIn.count}"
   puts "  Check-in Likes: #{ChallengeCheckInLike.count}"
   puts "  Check-in Replies: #{ChallengeCheckInReply.count}"
+  puts "  Check-in Doubts: #{ChallengeCheckInDoubt.count}"
+  puts "  Nudges: #{ChallengeNudge.count}"
   puts "  Rewards: #{ChallengeReward.count}"
   puts "  Story Likes: #{ChallengeStoryLike.count}"
   puts "  Badges: #{Badge.count}"
@@ -87,21 +89,27 @@ not_after_now = ->(time, minutes_early) { [time, Time.current - minutes_early.mi
 challenge_data = {
   "00000000-0000-4000-8000-000000000001" => {
     title: "30-Day Gym Challenge(DEMO)",
-    description: "Hit the gym every day for 30 days, 45 minutes a session. Build strength, endurance, and healthy habits together. 💪",
+    description: "Hit the gym every day for 30 days, 45 minutes a day, in one go or a few sessions. Each miss costs everyone a coffee. 💪",
     start_offset: -6,
     days: 30,
     unit: :minutes,
     target_amount: 45,
-    target_scope: :each_time,
+    target_scope: :each_period,
+    penalty_mode: :per_miss,
+    penalty: "a coffee",
     participants: %i[alice bob charlie],
+    # Alice keeps all 7 days and earns a streak freeze; Bob and Charlie each have days short of 45 minutes
     check_ins: {
       alice: [
         {day: 1, message: "Day 1: Gym session complete! 💪", amount: 45},
         {day: 2, message: "Day 2: Feeling stronger already! 🏋️‍♀️", amount: 50},
         {day: 3, message: "Day 3: Leg day was tough but worth it! 🦵", amount: 45},
         {day: 4, message: "Upper body and a long stretch 🧘‍♀️", amount: 55},
-        {day: 5, message: "Short one, but it counts ⏱️", amount: 30},
-        {day: 6, message: "Rowing intervals, lungs on fire 🚣‍♀️", amount: 45},
+        {day: 5, message: "Short one before work ⏱️", amount: 30, hour: 7},
+        {day: 5, message: "Topped it up with a lunchtime swim 🏊‍♀️", amount: 20, hour: 13},
+        {day: 6, message: "Rowing intervals, lungs on fire 🚣‍♀️", amount: 45,
+         doubts: [[:charlie, "45 minutes of rowing? Pics or it didn't happen 😏"]],
+         replies: [[:alice, "Strava says 46, check the group chat 🚣‍♀️"], [:charlie, "Fine, fine, I believe you 🙏"]]},
         {day: 7, message: "One week in a row! 🔥", amount: 60, photo: :dumbbell_rack,
          replies: [[:bob, "Look at you go! See you there tomorrow 🙌"], [:alice, "6am, don't be late 😤"]]}
       ],
@@ -109,7 +117,9 @@ challenge_data = {
         {day: 1, message: "First workout! 🚀", amount: 40},
         {day: 2, message: "Morning grind 🌅", amount: 35},
         {day: 3, message: "Bench press 💪", amount: 45},
-        {day: 5, message: "PR today! 🎯", amount: 45, photo: :bicep_curl},
+        {day: 5, message: "PR today, 200 kg deadlift! 🎯", amount: 45, photo: :bicep_curl,
+         doubts: [[:alice, "That's a bicep curl, not a deadlift 🤨"], [:charlie, nil]],
+         replies: [[:bob, "The deadlift photo didn't upload, I swear 😅"]]},
         {day: 6, message: "Leg day! 🏋️‍♂️", amount: 50, photo: :deadlift,
          replies: [[:charlie, "That form though 👀"], [:bob, "Years of practice lifting bricks 🧱"]]},
         {day: 7, message: "Quick cardio before work 🏃‍♂️", amount: 25, hour: 7},
@@ -123,6 +133,7 @@ challenge_data = {
          replies: [[:alice, "Proud of you! What a comeback 💛"]]}
       ]
     },
+    nudges: [[:alice, :charlie], [:bob, :charlie]],
     rewards: [
       {giver: :bob, receiver: :alice, description: "I'll buy you a protein smoothie if you don't miss a single day! 🥤"},
       {giver: :alice, receiver: :charlie, description: "Complete 20 days and I'll get you those gym gloves you wanted! 🧤"}
@@ -130,7 +141,7 @@ challenge_data = {
   },
   "00000000-0000-4000-8000-000000000002" => {
     title: "Read Books Challenge(DEMO)",
-    description: "Read at least twice a week for three weeks and log your pages. 300 pages each by the end. Share insights and recommendations! 📚",
+    description: "Read at least twice a week for three weeks and log your pages. 300 pages each by the end. Whoever misses the most weeks buys lunch. 📚",
     start_offset: -25,
     days: 21,
     completed: true,
@@ -139,6 +150,8 @@ challenge_data = {
     unit: :pages,
     target_amount: 300,
     target_scope: :total,
+    penalty_mode: :most_misses,
+    penalty: "lunch",
     participants: %i[alice bob dora],
     check_ins: {
       alice: [
@@ -170,9 +183,12 @@ challenge_data = {
   "00000000-0000-4000-8000-000000000004" => {
     previous: "00000000-0000-4000-8000-000000000002",
     title: "Read Books Challenge(DEMO)",
-    description: "Read at least twice a week for three weeks and log your pages. 300 pages each by the end. Share insights and recommendations! 📚",
+    description: "Read at least twice a week for three weeks and log your pages. 300 pages each by the end. Whoever misses the most weeks buys lunch. 📚",
     start_offset: -4,
     days: 21,
+    repeats: true,
+    penalty_mode: :most_misses,
+    penalty: "lunch",
     cadence: :weekly,
     times_per_period: 2,
     unit: :pages,
@@ -191,14 +207,15 @@ challenge_data = {
   },
   "00000000-0000-4000-8000-000000000003" => {
     title: "4-Week Meditation & Mindfulness(DEMO)",
-    description: "Meditate four times a week, at least 10 minutes a sit. Find inner peace together! 🧘‍♂️✨",
+    description: "Meditate four times a week, 45 minutes between the sits. Find inner peace together! 🧘‍♂️✨",
     start_offset: -9,
     days: 28,
     cadence: :weekly,
     times_per_period: 4,
     unit: :minutes,
-    target_amount: 10,
-    target_scope: :each_time,
+    target_amount: 45,
+    target_scope: :each_period,
+    # Week 1: Bob and Dora keep it, Charlie sits only three times. Week 2 is under way.
     participants: %i[bob charlie dora],
     check_ins: {
       bob: [
@@ -235,20 +252,49 @@ challenge_data = {
   },
   "00000000-0000-4000-8000-000000000005" => {
     title: "Couch to 5K(DEMO)",
-    description: "Run three times a week for six weeks. Any pace, aim for 3 km a run. 🏃‍♀️",
+    description: "Run three times a week for six weeks, 9 km a week between the runs. Any pace. 🏃‍♀️",
     start_offset: -2,
     days: 42,
     cadence: :weekly,
     times_per_period: 3,
     unit: :km,
-    target_amount: 3,
-    target_scope: :each_time,
+    target_amount: 9,
+    target_scope: :each_period,
     participants: %i[dora],
     check_ins: {
       dora: [
         {day: 1, message: "First run in ages, walked a bit 🏃‍♀️", amount: 2.4},
         {day: 3, message: "Made it to 3.2 km without stopping! 🎉", amount: 3.2}
       ]
+    }
+  },
+  # Ended yesterday, so today is the grace day: Bob saves his last day, and Charlie left after a few days
+  "00000000-0000-4000-8000-000000000006" => {
+    title: "Two weeks of push-ups(DEMO)",
+    description: "50 push-ups a day, in as many sets as you like. Log how many you did. Whoever misses the most days buys the drinks. 🍻",
+    start_offset: -14,
+    days: 14,
+    unit: :reps,
+    target_amount: 50,
+    target_scope: :each_period,
+    penalty_mode: :most_misses,
+    penalty: "the drinks",
+    participants: %i[alice bob charlie dora],
+    left: %i[charlie],
+    check_ins: {
+      alice: (1..14).flat_map do |day|
+        if day.even?
+          [{day:, message: "Morning set 💪", amount: 30, hour: 7}, {day:, message: "Evening set, 50 done ✅", amount: 20, hour: 20}]
+        else
+          [{day:, message: "All 50 in one go 🔥", amount: 50}]
+        end
+      end,
+      bob: (1..13).map { {day: it, message: "50 before breakfast 🍳", amount: 50} } +
+        [{day: 15, message: "Forgot yesterday! Grace day save 😅", amount: 50}],
+      charlie: (1..3).map { {day: it, message: "Day #{it}, arms are jelly 🫠", amount: 50} },
+      dora: (1..14).map do |day|
+        (day == 6) ? {day:, message: "Only 40 today, wrist is sore 🤕", amount: 40} : {day:, message: "Push-ups done 💥", amount: 50}
+      end
     }
   }
 }
@@ -271,11 +317,14 @@ challenge_data.each do |id, data|
     unit: data[:unit],
     target_amount: data[:target_amount],
     target_scope: data[:target_scope],
+    penalty_mode: data[:penalty_mode],
+    penalty: data[:penalty],
+    repeats: data.fetch(:repeats, false),
     created_at: start.in_time_zone
   )
 
   participants = data[:participants].to_h do |key|
-    [key, challenge.challenge_participants.create!(user: users[key], status: :active)]
+    [key, challenge.challenge_participants.create!(user: users[key], status: :active, created_at: start.in_time_zone)]
   end
 
   data[:check_ins].each do |key, entries|
@@ -290,6 +339,16 @@ challenge_data.each do |id, data|
         checked_in_on: date,
         created_at: not_after_now.call(date.in_time_zone.change(hour:), 24 - hour)
       ) { attach_demo_photo.call(it, entry[:photo]) if entry[:photo] }
+
+      # Doubted before the replies, so the author's reply reads as their proof
+      entry[:doubts]&.each_with_index do |(doubter, note), index|
+        check_in.challenge_check_in_doubts.create!(
+          user: users[doubter],
+          note:,
+          created_at: not_after_now.call(check_in.created_at + (index + 1) * 10.minutes, 10 - index)
+        )
+      end
+      check_in.settle_dispute! if entry[:doubts]
 
       entry[:replies]&.each_with_index do |(replier, body), index|
         check_in.challenge_check_in_replies.create!(
@@ -313,6 +372,15 @@ challenge_data.each do |id, data|
     )
     reward.fulfill! if reward_data[:fulfilled]
   end
+
+  data[:nudges]&.each do |sender, receiver|
+    ChallengeNudge.create!(sender: participants[sender].reload, receiver: participants[receiver].reload)
+  end
+
+  data[:left]&.each { participants[it].leave! }
+
+  # Quietly, without the pushes a real completion sends
+  challenge.penalty_rule&.charge! if challenge.completed?
 
   ChallengeStoryLike.create!(challenge_story: challenge, user: users[data[:participants].first])
 
