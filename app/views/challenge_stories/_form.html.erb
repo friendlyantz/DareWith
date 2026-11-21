@@ -109,9 +109,9 @@
   </div>
 
   <details class="collapse collapse-arrow border border-base-300" <%= "open" if challenge_story.errors[:penalty].any? %>>
-    <summary class="collapse-title flex flex-col pe-12 min-h-0 py-3">
-      <span class="text-sm font-semibold">If someone misses</span>
-      <span class="text-sm text-base-content/70 truncate" data-challenge-goal-target="penaltyHint"></span>
+    <summary class="collapse-title min-w-0 pe-12 min-h-0 py-3">
+      <span class="block text-sm font-semibold">If someone misses</span>
+      <span class="block truncate text-sm text-base-content/70" data-challenge-goal-target="penaltyHint"></span>
     </summary>
     <fieldset class="collapse-content group/penalty flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
       <div>
@@ -138,9 +138,9 @@
   </details>
 
   <details class="collapse collapse-arrow border border-base-300" <%= "open" if challenge_story.errors[:description].any? %>>
-    <summary class="collapse-title flex flex-col pe-12 min-h-0 py-3">
-      <span class="text-sm font-semibold">What counts?</span>
-      <span class="text-sm text-base-content/70 truncate" data-challenge-goal-target="notesHint"></span>
+    <summary class="collapse-title min-w-0 pe-12 min-h-0 py-3">
+      <span class="block text-sm font-semibold">What counts?</span>
+      <span class="block truncate text-sm text-base-content/70" data-challenge-goal-target="notesHint"></span>
     </summary>
     <div class="collapse-content">
       <%= form.label :description, "What counts?", class: "sr-only" %>

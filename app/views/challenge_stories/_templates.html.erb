@@ -5,8 +5,9 @@
     <% ChallengeStory::Template.all.each do |template| %>
       <%= link_to new_challenge_story_path(template: template.key),
         class: class_names("btn btn-sm rounded-full", "btn-primary": template.key == selected&.key, "bg-base-100": template.key != selected&.key),
-        aria: {current: (template.key == selected&.key) || nil} do %>
-        <span aria-hidden="true"><%= template.emoji %></span> <%= template.title %>
+        title: template.title,
+        aria: {current: (template.key == selected&.key) || nil, label: template.title} do %>
+        <span aria-hidden="true"><%= template.emoji %></span> <%= template.chip %>
       <% end %>
     <% end %>
     <% if selected %>

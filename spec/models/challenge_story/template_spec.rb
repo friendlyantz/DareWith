@@ -28,6 +28,14 @@ RSpec.describe ChallengeStory::Template do
     end
   end
 
+  describe "#chip" do
+    ChallengeStory::Template::CATALOGUE.each_key do |key|
+      it "gives #{key} a short chip label" do
+        expect(described_class.find(key).chip.length).to be <= 10
+      end
+    end
+  end
+
   describe ".find" do
     it "finds a template by its key as a string" do
       expect(described_class.find("read").title).to eq "Read 20 pages a day"
