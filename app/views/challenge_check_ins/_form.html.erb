@@ -48,7 +48,7 @@
             <span class="label"><%= challenge_story.goal.unit_label %></span>
           </label>
           <% challenge_check_in.errors.full_messages_for(:amount).each do |message| %>
-            <p class="label text-error"><%= message %></p>
+            <p class="label text-error whitespace-normal"><%= message %></p>
           <% end %>
         </fieldset>
       <% end %>
@@ -61,7 +61,7 @@
           required: true,
           placeholder: "e.g. 5 sets of squats, felt strong",
           class: ["textarea w-full text-base", {"textarea-error": challenge_check_in.errors[:message].any?}] %>
-        <p class="label">Made a mistake? You can delete a check-in on the day you posted it.</p>
+        <p class="label whitespace-normal">Made a mistake? You can delete a check-in on the day you posted it.</p>
       </fieldset>
 
       <%= form.submit "Post check-in", class: "btn btn-primary btn-lg btn-block", id: "submit" %>
