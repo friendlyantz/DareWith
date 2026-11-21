@@ -1,6 +1,7 @@
 <%# locals: (challenge_story:, submit_text:) %>
-<%= form_with(model: challenge_story, class: "flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5",
-  data: {controller: "challenge-goal", action: "input->challenge-goal#summarize change->challenge-goal#summarize"}) do |form| %>
+<% length_choice = challenge_length_choice(challenge_story) %>
+<%= form_with(model: challenge_story, class: "group/form flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5",
+  data: {controller: "challenge-goal challenge-length", action: "input->challenge-goal#summarize change->challenge-goal#summarize"}) do |form| %>
   <% if challenge_story.new_record? && challenge_story.previous_challenge_story_id %>
     <%= hidden_field_tag :previous_challenge_story_id, challenge_story.previous_challenge_story_id %>
   <% end %>
@@ -24,13 +25,13 @@
     <div class="group/often grid grid-cols-2 gap-3">
       <div class="col-span-2 group-has-[option[value='weekly']:checked]/often:col-span-1">
         <%= form.label :cadence, "How often?", class: "text-sm font-semibold" %>
-        <%= form.select :cadence, [["Every day", "daily"], ["Weekly", "weekly"]], {}, class: "select w-full mt-1.5", data: {challenge_goal_target: "cadence"} %>
+        <%= form.select :cadence, [["Every day", "daily"], ["Weekly", "weekly"]], {}, class: "select w-full mt-1.5",
+          data: {challenge_goal_target: "cadence", challenge_length_target: "cadence", action: "change->challenge-length#keepWholeWeeks"} %>
       </div>
       <div class="hidden group-has-[option[value='weekly']:checked]/often:block">
         <%= form.label :times_per_period, "Times a week", class: "text-sm font-semibold" %>
         <%= form.select :times_per_period, (1..6).map { ["#{it}× a week", it] }, {selected: challenge_story.weekly? ? challenge_story.times_per_period : 3}, class: "select w-full mt-1.5", data: {challenge_goal_target: "timesPerPeriod"} %>
       </div>
-      <p class="col-span-2 hidden text-sm text-base-content/70 group-has-[option[value='weekly']:checked]/often:block">Weeks start on the start date, so pick an end date that makes whole weeks.</p>
     </div>
 
     <div>
@@ -57,8 +58,8 @@
           class: "select w-full",
           data: {challenge_goal_target: "targetScope"} %>
       </div>
-      <p class="mt-1.5 text-sm text-base-content/70 group-has-[option[value='total']:checked]/goal:hidden">Check-ins in the same day or week add up, so two short runs count the same as one long one.</p>
-      <p class="mt-1.5 text-sm text-base-content/70 hidden group-has-[option[value='total']:checked]/goal:block">Everyone aims for this much by the end date, counting all their check-ins.</p>
+      <p class="mt-1.5 text-sm text-base-content/70 group-has-[option[value='total']:checked]/goal:hidden">Check-ins on the same day or week add up.</p>
+      <p class="mt-1.5 text-sm text-base-content/70 hidden group-has-[option[value='total']:checked]/goal:block">Counts every check-in until the end.</p>
       <% challenge_story.errors.full_messages_for(:target_amount).each do |message| %>
         <p class="mt-1 text-sm text-error"><%= message %></p>
       <% end %>
@@ -69,66 +70,101 @@
     <% end %>
   </fieldset>
 
-  <div class="grid grid-cols-2 gap-3">
-    <div>
-      <%= form.label :start, "Starts", class: "text-sm font-semibold" %>
-      <%= form.date_field :start, disabled: !challenge_story.goal_editable?, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?), data: {challenge_goal_target: "start"} %>
-    </div>
-    <div>
-      <%= form.label :finish, "Ends", class: "text-sm font-semibold" %>
-      <%= form.date_field :finish, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:finish].any?), data: {challenge_goal_target: "finish"} %>
-    </div>
-  </div>
-  <% unless challenge_story.goal_editable? %>
-    <p class="-mt-2 text-sm text-base-content/70">The start is fixed once someone has checked in. The end can still move, just not before today.</p>
-  <% end %>
-  <% (challenge_story.errors.full_messages_for(:start) + challenge_story.errors.full_messages_for(:finish)).each do |message| %>
-    <p class="-mt-2 text-sm text-error"><%= message %></p>
-  <% end %>
-
-  <fieldset class="group/penalty flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
-    <div>
-      <%= form.label :penalty_mode, "If someone misses…", class: "text-sm font-semibold" %>
-      <%= form.select :penalty_mode,
-        [["Nothing happens", ""], ["They owe everyone, every miss", "per_miss"], ["Whoever misses most owes everyone", "most_misses"]],
-        {},
-        class: "select w-full mt-1.5",
-        data: {challenge_goal_target: "penaltyMode"} %>
-    </div>
-    <div class="group-has-[option[value='']:checked]/penalty:hidden">
-      <%= form.label :penalty, "What do they owe?", class: "text-sm font-semibold" %>
-      <%= form.text_field :penalty,
-        maxlength: 100,
-        class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
-        placeholder: "e.g. a coffee, $5, a candy bar",
-        data: {challenge_goal_target: "penalty"} %>
-      <p class="mt-1.5 text-sm text-base-content/70">The app counts the misses since each person joined. In daily challenges, <%= ChallengeParticipant::Streak::FREEZE_EVERY %> days in a row earn a streak freeze that covers a miss. It's settled between you at the end, like rewards.</p>
-      <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>
-        <p class="mt-1 text-sm text-error"><%= message %></p>
+  <div class="group/length">
+    <span class="text-sm font-semibold">How long?</span>
+    <div class="flex flex-wrap gap-2 mt-1.5" role="radiogroup" aria-label="How long?">
+      <% GoalsHelper::CHALLENGE_LENGTHS.each do |days, label| %>
+        <label class="<%= class_names("btn btn-sm rounded-full has-checked:btn-primary has-focus-visible:outline-2", "group-has-[option[value='weekly']:checked]/form:hidden": (days % 7).nonzero?) %>">
+          <%= radio_button_tag :length, days, length_choice == days, class: "sr-only",
+            data: {challenge_length_target: "choice", action: "change->challenge-length#choose"} %>
+          <%= label %>
+        </label>
       <% end %>
+      <label class="btn btn-sm rounded-full has-checked:btn-primary has-focus-visible:outline-2">
+        <%= radio_button_tag :length, "custom", length_choice.nil?, class: "sr-only",
+          data: {challenge_length_target: "choice", action: "change->challenge-length#choose"} %>
+        Custom
+      </label>
     </div>
-  </fieldset>
+    <p class="mt-1.5 text-sm text-base-content/70 group-has-[input[value='custom']:checked]/length:hidden" data-challenge-length-target="dates"></p>
 
-  <div>
-    <label class="flex items-center justify-between gap-3">
-      <span class="text-sm font-semibold">Repeat automatically</span>
-      <%= form.check_box :repeats, class: "toggle toggle-primary" %>
-    </label>
-    <p class="mt-1.5 text-sm text-base-content/70">The next round, same rules and length, is set up on the last day and starts the day after. Everyone stays in unless they leave it. Turn this off to stop after this round.</p>
-  </div>
-
-  <div>
-    <%= form.label :description, "What counts? (optional)", class: "text-sm font-semibold" %>
-    <%= form.text_area :description,
-      rows: 3,
-      class: class_names("textarea w-full mt-1.5 text-base", "textarea-error": challenge_story.errors[:description].any?),
-      placeholder: "Anything the settings above don't cover.\ne.g. Any workout of 30+ minutes. Post a photo." %>
-    <% challenge_story.errors.full_messages_for(:description).each do |message| %>
+    <div class="mt-3 hidden grid-cols-2 gap-3 group-has-[input[value='custom']:checked]/length:grid">
+      <div>
+        <%= form.label :start, "Starts", class: "text-sm font-semibold" %>
+        <%= form.date_field :start, disabled: !challenge_story.goal_editable?, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:start].any?),
+          data: {challenge_goal_target: "start", challenge_length_target: "start"} %>
+      </div>
+      <div>
+        <%= form.label :finish, "Ends", class: "text-sm font-semibold" %>
+        <%= form.date_field :finish, class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:finish].any?),
+          data: {challenge_goal_target: "finish", challenge_length_target: "finish"} %>
+      </div>
+    </div>
+    <% unless challenge_story.goal_editable? %>
+      <p class="mt-1.5 text-sm text-base-content/70">The start is fixed once someone has checked in. The end can still move, just not before today.</p>
+    <% end %>
+    <% (challenge_story.errors.full_messages_for(:start) + challenge_story.errors.full_messages_for(:finish)).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>
     <% end %>
   </div>
 
-  <p class="mt-2 text-sm text-base-content/70">Rules: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
+  <details class="collapse collapse-arrow border border-base-300" <%= "open" if challenge_story.errors[:penalty].any? %>>
+    <summary class="collapse-title flex flex-col pe-12 min-h-0 py-3">
+      <span class="text-sm font-semibold">If someone misses</span>
+      <span class="text-sm text-base-content/70 truncate" data-challenge-goal-target="penaltyHint"></span>
+    </summary>
+    <fieldset class="collapse-content group/penalty flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
+      <div>
+        <%= form.label :penalty_mode, "What happens?", class: "sr-only" %>
+        <%= form.select :penalty_mode,
+          [["Nothing happens", ""], ["They owe everyone, every miss", "per_miss"], ["Whoever misses most owes everyone", "most_misses"]],
+          {},
+          class: "select w-full",
+          data: {challenge_goal_target: "penaltyMode"} %>
+      </div>
+      <div class="group-has-[option[value='']:checked]/penalty:hidden">
+        <%= form.label :penalty, "What do they owe?", class: "text-sm font-semibold" %>
+        <%= form.text_field :penalty,
+          maxlength: 100,
+          class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:penalty].any?),
+          placeholder: "e.g. a coffee, $5, a candy bar",
+          data: {challenge_goal_target: "penalty"} %>
+        <p class="mt-1.5 text-sm text-base-content/70">The app keeps the tally. You settle up at the end, like rewards.</p>
+        <% challenge_story.errors.full_messages_for(:penalty).each do |message| %>
+          <p class="mt-1 text-sm text-error"><%= message %></p>
+        <% end %>
+      </div>
+    </fieldset>
+  </details>
 
-  <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block mt-2" %>
+  <details class="collapse collapse-arrow border border-base-300" <%= "open" if challenge_story.errors[:description].any? %>>
+    <summary class="collapse-title flex flex-col pe-12 min-h-0 py-3">
+      <span class="text-sm font-semibold">What counts?</span>
+      <span class="text-sm text-base-content/70 truncate" data-challenge-goal-target="notesHint"></span>
+    </summary>
+    <div class="collapse-content">
+      <%= form.label :description, "What counts?", class: "sr-only" %>
+      <%= form.text_area :description,
+        rows: 3,
+        class: class_names("textarea w-full text-base", "textarea-error": challenge_story.errors[:description].any?),
+        placeholder: "Anything the settings don't cover.\ne.g. Any workout of 30+ minutes. Post a photo.",
+        data: {challenge_goal_target: "notes"} %>
+      <% challenge_story.errors.full_messages_for(:description).each do |message| %>
+        <p class="mt-1 text-sm text-error"><%= message %></p>
+      <% end %>
+    </div>
+  </details>
+
+  <div>
+    <label class="flex items-center justify-between gap-3">
+      <span class="text-sm font-semibold">Repeat automatically</span>
+      <%= form.check_box :repeats, class: "toggle toggle-primary", data: {challenge_goal_target: "repeats"} %>
+    </label>
+    <p class="mt-1.5 text-sm text-base-content/70">Next round starts the day after this one ends. Everyone stays in.</p>
+  </div>
+
+  <div class="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-5 -mb-5 mt-2 flex flex-col gap-2 rounded-b-box border-t border-base-300 bg-base-200 px-5 py-3">
+    <p class="text-sm text-base-content/70">Rules: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
+    <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block" %>
+  </div>
 <% end %>

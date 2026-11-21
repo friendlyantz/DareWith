@@ -72,14 +72,42 @@ RSpec.describe "Challenge Stories", type: :system do
       new_challenge_page.load
 
       new_challenge_page.fill_form(title: "Gym", start_date: Time.zone.today, finish_date: Time.zone.today + 27.days)
-      new_challenge_page.penalty_mode_field.select("They owe everyone, every miss")
-      new_challenge_page.penalty_field.set("$5")
+      new_challenge_page.set_penalty("They owe everyone, every miss", "$5")
+      check "Repeat automatically"
 
-      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: owe everyone $5 · 28 days")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: owe everyone $5 · 28 days · repeats")
+      expect(page).to have_css("summary", text: "Each miss: owe everyone $5")
       new_challenge_page.submit
 
       expect(page).to have_content("Each miss: owe everyone $5")
       expect(ChallengeStory.last.description).to eq ""
+    end
+
+    scenario "a length chip sets the end date" do
+      new_challenge_page.load
+
+      expect(page).to have_checked_field("1 week", visible: :all)
+      new_challenge_page.title_field.set("Stretch")
+      new_challenge_page.choose_length("4 weeks")
+
+      finish = Time.zone.today + 27.days
+      expect(new_challenge_page.length_dates).to have_text("Starts today · ends #{finish.strftime("%a %-d %b")}")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · 28 days")
+      new_challenge_page.submit
+
+      expect(page).to have_content("Stretch")
+      expect(ChallengeStory.last).to have_attributes(start: Time.zone.today, finish:)
+    end
+
+    scenario "going weekly moves 30 days to whole weeks" do
+      new_challenge_page.load
+
+      new_challenge_page.choose_length("30 days")
+      new_challenge_page.cadence_field.select("Weekly")
+
+      expect(page).to have_checked_field("4 weeks", visible: :all)
+      expect(page).to have_no_css("label", text: "30 days")
+      expect(new_challenge_page.goal_summary).to have_text("3× a week · just check in · 4 weeks")
     end
   end
 

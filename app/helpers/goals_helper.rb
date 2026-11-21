@@ -1,4 +1,16 @@
 module GoalsHelper
+  # The lengths offered on the challenge form, in days. Weekly challenges only get whole weeks.
+  CHALLENGE_LENGTHS = {7 => "1 week", 14 => "2 weeks", 21 => "3 weeks", 28 => "4 weeks", 30 => "30 days"}.freeze
+
+  # The length the challenge already matches, or nil to show its dates instead
+  def challenge_length_choice(challenge_story)
+    return if challenge_story.start.blank? || challenge_story.finish.blank?
+    return if challenge_story.errors[:start].any? || challenge_story.errors[:finish].any?
+
+    days = challenge_story.duration_in_days
+    days if CHALLENGE_LENGTHS.key?(days) && (challenge_story.daily? || (days % 7).zero?)
+  end
+
   # "1 of 3 this week · 4 of 15 km · 4 days left"
   def week_progress(participant)
     goal = participant.challenge_story.goal

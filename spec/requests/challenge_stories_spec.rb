@@ -183,6 +183,12 @@ RSpec.describe "ChallengeStories", type: :request do
         expect(response.body).to include("Start blank")
       end
 
+      it "picks the template's length" do
+        get new_challenge_story_path(template: "push_ups")
+
+        expect(Capybara.string(response.body)).to have_checked_field("length_30", visible: :all)
+      end
+
       it "shows a blank form for an unknown template" do
         get new_challenge_story_path(template: "nope")
 

@@ -8,7 +8,7 @@ const UNITS = { min: "minutes", h: "hours", k: "km", p: "pages", r: "reps" }
 // counts minutes, 30 a day) until the person picks a unit themselves,
 // and spells the rules out next to the submit button so a wrong pick is easy to spot
 export default class extends Controller {
-  static targets = ["title", "cadence", "timesPerPeriod", "unit", "targetAmount", "targetScope", "start", "finish", "penaltyMode", "penalty", "summary"]
+  static targets = ["title", "cadence", "timesPerPeriod", "unit", "targetAmount", "targetScope", "start", "finish", "penaltyMode", "penalty", "repeats", "notes", "penaltyHint", "notesHint", "summary"]
 
   connect() {
     this.guessing = this.unitTarget.value === "" && !this.unitTarget.matches(":disabled")
@@ -34,7 +34,10 @@ export default class extends Controller {
   summarize() {
     const often = this.cadenceTarget.value === "weekly" ? `${this.timesPerPeriodTarget.value}× a week` : "Every day"
     this.targetScopeTarget.querySelector("option[value='each_period']").text = `a ${this.periodName()}`
-    this.summaryTarget.textContent = [often, this.target(), this.penalty(), this.length()].filter(Boolean).join(" · ")
+    const repeats = this.repeatsTarget.checked && "repeats"
+    this.summaryTarget.textContent = [often, this.target(), this.penalty(), this.length(), repeats].filter(Boolean).join(" · ")
+    this.penaltyHintTarget.textContent = this.penalty() || "Nothing happens"
+    this.notesHintTarget.textContent = this.notesTarget.value.trim() || "Optional note, e.g. post a photo"
   }
 
   // Mirrors ChallengeStory::Penalty#summary
