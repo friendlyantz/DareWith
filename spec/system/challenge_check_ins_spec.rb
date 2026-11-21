@@ -123,4 +123,17 @@ RSpec.describe "Challenge Check-ins", type: :system do
     within("article", text: "Did my run") { expect(page).to have_content("Doubted by #{user.username}") }
     within("article", text: "My own") { expect(page).to have_css("button[aria-label='Delete check-in']") }
   end
+
+  scenario "opening an alert about a check-in shows the Check-ins tab, even when another tab was last open" do
+    check_in = create(:challenge_check_in, challenge_participant: participant, message: "Linked check-in")
+    create(:notification, user:, title: "Sam doubts your check-in", path: challenge_story_path(challenge, anchor: "challenge_check_in_#{check_in.id}"))
+    show_page.load
+    find("#challenge_tab_leaderboard").click
+    expect(page).to have_no_content("Linked check-in")
+
+    visit notifications_path
+    click_on "Sam doubts your check-in"
+
+    expect(page).to have_content("Linked check-in")
+  end
 end
