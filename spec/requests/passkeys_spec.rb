@@ -14,6 +14,39 @@ RSpec.describe "Passkeys", type: :request do
       public_key: webauthn_credential.public_key)
   end
 
+  describe "signing up" do
+    # Picks a username, then answers with the fake authenticator's new passkey
+    def sign_up_with_passkey
+      post webauthn_registration_path, params: {registration: {username: "newbie"}}, as: :json
+      created = client.create(challenge: response.parsed_body["challenge"], user_verified: true)
+      post callback_webauthn_registration_path, params: created, as: :json
+    end
+
+    it "starts them on making their first challenge" do
+      sign_up_with_passkey
+
+      expect(response.parsed_body["redirect_to"]).to eq new_challenge_story_path
+    end
+
+    it "doesn't take them back to a demo challenge they looked at first" do
+      demo = create(:challenge_story, id: "#{ChallengeStory::DEMO_ID_PREFIX}000000000001")
+      get challenge_story_path(demo)
+
+      sign_up_with_passkey
+
+      expect(response.parsed_body["redirect_to"]).to eq new_challenge_story_path
+    end
+
+    it "takes them back to the challenge they were invited to" do
+      story = create(:challenge_story)
+      get challenge_story_path(story)
+
+      sign_up_with_passkey
+
+      expect(response.parsed_body["redirect_to"]).to eq challenge_story_path(story)
+    end
+  end
+
   describe "signing in" do
     let(:user_handle) { Base64.urlsafe_decode64(user.webauthn_id) }
 

@@ -23,7 +23,6 @@ class ChallengeStoriesController < ApplicationController
   end
 
   def show
-    remember_location unless current_user
     @challenge_story = ChallengeStory
       .includes(
         active_participants: [{user: [{avatar_attachment: :blob}, :web_push_notifications]}, :todays_check_ins, :check_in_days, {recent_nudges: {sender: {user: {avatar_attachment: :blob}}}}],
@@ -33,6 +32,8 @@ class ChallengeStoriesController < ApplicationController
       .find_by(id: params[:id])
     return redirect_to root_path, alert: "That challenge no longer exists" unless @challenge_story
 
+    # An invite brings them back here after signing up; a demo they browsed doesn't
+    remember_location unless current_user || @challenge_story.demo?
     @current_challenge_participant = @challenge_story.participant_for(current_user) if current_user
   end
 

@@ -92,7 +92,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       post verify_email_session_path, params: {token: token}
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(new_challenge_story_path)
       expect(session[:user_id]).to eq(user.id)
     end
 
@@ -122,7 +122,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       post verify_email_session_path, params: {token: user.generate_email_login_token!}
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(new_challenge_story_path)
     end
 
     it "clears token after successful verification" do
@@ -264,6 +264,25 @@ RSpec.describe "Sessions Email Authentication", type: :request do
       post confirm_email_session_path, params: {code:}
 
       expect(session[:user_id]).to eq(User.find_by(username: "newbie").id)
+    end
+
+    it "starts them on making their first challenge" do
+      perform_enqueued_jobs { post email_registration_path, params: {session: {email: "new@example.com", username: "newbie"}} }
+      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+
+      post confirm_email_session_path, params: {code:}
+
+      expect(response).to redirect_to(new_challenge_story_path)
+    end
+
+    it "sends someone already in a challenge to their day" do
+      create(:challenge_participant, user:)
+      perform_enqueued_jobs { post email_session_path, params: {session: {email: user.email}} }
+      code = ActionMailer::Base.deliveries.last.subject[/\d{6}/]
+
+      post confirm_email_session_path, params: {code:}
+
+      expect(response).to redirect_to(root_path)
     end
 
     it "emails the owner of a taken email instead of saying it's taken" do

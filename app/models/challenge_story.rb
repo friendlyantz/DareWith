@@ -10,6 +10,9 @@ class ChallengeStory < ApplicationRecord
   # Base58 leaves out 0, O, I and l, so a code read aloud or retyped comes out right
   SHARE_CODE_CHARACTERS = [*"1".."9", *"A".."H", *"J".."N", *"P".."Z", *"a".."k", *"m".."z"].freeze
   SHARE_CODE_LENGTH = 8
+  # The seeded demo challenges (db/seeds.rb) have made-up ids that all start like this
+  DEMO_ID_PREFIX = "00000000-0000-4000-8000-"
+  FEATURED_DEMO_IDS = %w[000000000001 000000000002 000000000003].map { DEMO_ID_PREFIX + it }.freeze
 
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
@@ -68,6 +71,7 @@ class ChallengeStory < ApplicationRecord
   # Scopes
   scope :active, -> { where(completed: false) }
   scope :completed, -> { where(completed: true) }
+  scope :featured_demos, -> { where(id: FEATURED_DEMO_IDS) }
   # On their last day, so friends hear the day before. A round nobody checked in to ends the series.
   scope :due_to_repeat, -> {
     where(repeats: true, finish: Time.zone.today)
@@ -76,6 +80,10 @@ class ChallengeStory < ApplicationRecord
   }
 
   # Public methods
+  def demo?
+    id.to_s.start_with?(DEMO_ID_PREFIX)
+  end
+
   def goal
     @goal ||= Goal.new(self)
   end

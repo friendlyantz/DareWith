@@ -1,10 +1,4 @@
-<% demo_challenges = ChallengeStory.includes(active_participants: {user: {avatar_attachment: :blob}}).where(
-  id: [
-    "00000000-0000-4000-8000-000000000001",
-    "00000000-0000-4000-8000-000000000002",
-    "00000000-0000-4000-8000-000000000003"
-  ]
-) %>
+<% demo_challenges = ChallengeStory.featured_demos.includes(active_participants: {user: {avatar_attachment: :blob}}) %>
 
 <% if demo_challenges.any? %>
   <section class="flex flex-col gap-3">

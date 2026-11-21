@@ -58,7 +58,10 @@ class ApplicationController < ActionController::Base
     session[:return_to] = path if path.start_with?("/") && !path.start_with?("//")
   end
 
+  # Someone not in any challenge yet (e.g. just signed up) starts by making one
   def after_sign_in_path
-    session.delete(:return_to).presence || root_path
+    return session.delete(:return_to) if session[:return_to].present?
+
+    current_user.challenge_participants.none? ? new_challenge_story_path : root_path
   end
 end
