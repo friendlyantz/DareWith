@@ -16,7 +16,7 @@
       data: {controller: "new-registration", turbo: false, action: "submit->new-registration#submit"} do |form| %>
       <%= form.label :username, "Username", class: "text-sm font-semibold" %>
       <div class="mdc-text-field mdc-text-field--fullwidth mt-1.5" data-controller="textfield" data-new-registration-target="usernameField">
-        <%= form.text_field :username, class: "input mdc-text-field__input w-full", placeholder: "e.g. anton", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
+        <%= form.text_field :username, class: "input mdc-text-field__input w-full", placeholder: "e.g. sloth_no_more", required: true, autocapitalize: "none", "aria-controls" => "username-helper-text" %>
       </div>
       <div class="mdc-text-field-helper-line">
         <div class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg text-sm text-error mt-1" id="username-helper-text"></div>

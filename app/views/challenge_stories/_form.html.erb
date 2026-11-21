@@ -14,7 +14,7 @@
     <%= form.label :title, "Title", class: "text-sm font-semibold" %>
     <%= form.text_field :title,
       class: class_names("input w-full mt-1.5", "input-error": challenge_story.errors[:title].any?),
-      placeholder: "e.g. 30 days at the gym",
+      placeholder: "e.g. 30 min workout every day",
       data: {challenge_goal_target: "title", action: "input->challenge-goal#guess"} %>
     <% challenge_story.errors.full_messages_for(:title).each do |message| %>
       <p class="mt-1 text-sm text-error"><%= message %></p>

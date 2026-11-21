@@ -21,7 +21,7 @@
       <div>
         <%= form.label :username, "Username", class: "text-sm font-semibold" %>
         <div data-controller="textfield" class="mt-1.5">
-          <%= form.text_field :username, value: params.dig(:session, :username), class: "input mdc-text-field__input w-full", placeholder: "e.g. anton", required: true, autocapitalize: "none" %>
+          <%= form.text_field :username, value: params.dig(:session, :username), class: "input mdc-text-field__input w-full", placeholder: "e.g. sloth_no_more", required: true, autocapitalize: "none" %>
         </div>
         <p class="text-xs text-base-content/70 mt-1">Friends see this name. It can't be changed later.</p>
       </div>
