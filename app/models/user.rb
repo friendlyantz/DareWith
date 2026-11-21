@@ -122,6 +122,11 @@ class User < ApplicationRecord
     web_push_notifications.any?
   end
 
+  # Creating, joining or checking in all make a participant, so there's someone to hear from
+  def in_a_challenge?
+    challenge_participants.exists?
+  end
+
   def notify(title:, body: nil, path: "/")
     notifications.create!(title:, body:, path:)
     web_push_notifications.each do |subscription|

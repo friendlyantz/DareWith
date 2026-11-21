@@ -6,6 +6,26 @@ RSpec.describe "WebPushNotifications", type: :request do
     {endpoint: "https://push.example.com/device-1", keys: {auth: "new-auth", p256dh: "new-p256dh"}}.to_json
   end
 
+  describe "the banner asking to turn on notifications" do
+    let(:banner) { "push-notifications:subscribed@window" }
+
+    before { sign_in_as(user) }
+
+    it "waits until the user is in a challenge, so there's no one to hear from yet" do
+      get notifications_path
+
+      expect(response.body).not_to include(banner)
+    end
+
+    it "shows once the user has created or joined a challenge" do
+      create(:challenge_participant, user: user)
+
+      get notifications_path
+
+      expect(response.body).to include(banner)
+    end
+  end
+
   describe "DELETE /web_push_notifications/:id" do
     before { sign_in_as(user) }
 

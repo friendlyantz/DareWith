@@ -1,7 +1,7 @@
 <%# locals: (message:, dismissable:, ask: true) %>
 <%# The push-notifications controller shows the one state that fits this browser, or removes the prompt %>
 <div data-push-notifications-target="banner" class="hidden w-full">
-  <div class="flex items-start gap-3 rounded-box border border-primary/30 bg-primary/10 p-3 text-left text-sm">
+  <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200 p-3 text-left text-sm">
     <%= icon(:bell, css: "mt-0.5 size-5 shrink-0 text-primary") %>
     <% if ask %>
       <div data-push-notifications-target="ask" hidden class="flex flex-1 flex-wrap items-center gap-2">
@@ -31,7 +31,7 @@
       <% end %>
     </div>
     <div data-push-notifications-target="blocked" hidden class="flex flex-1 flex-col gap-1">
-      <span>Notifications are blocked for DareWith</span>
+      <span class="font-semibold">Notifications are blocked for DareWith</span>
       <span class="text-base-content/70">Turn them back on in your phone's or browser's settings for this site, so friends' check-ins and nudges reach you.</span>
     </div>
     <% if dismissable %>

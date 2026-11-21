@@ -44,7 +44,7 @@
     <%= render "layouts/navbar" %>
     <%= render "layouts/flash" %>
 
-    <% if current_user && !current_page?(profile_path) %>
+    <% if current_user&.in_a_challenge? && !current_page?(profile_path) %>
       <%= render "web_push_notifications/banner" %>
     <% end %>
 
