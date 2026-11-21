@@ -11,7 +11,6 @@ class Library::NewChallengeStoryPage < BasePage
   element :length_dates, '[data-challenge-length-target="dates"]'
   element :unit_field, 'select[name="challenge_story[unit]"]'
   element :target_amount_field, 'input[name="challenge_story[target_amount]"]'
-  element :penalty_mode_field, 'select[name="challenge_story[penalty_mode]"]'
   element :penalty_field, 'input[name="challenge_story[penalty]"]'
   element :goal_summary, '[data-challenge-goal-target="summary"]'
   element :submit_button, 'button[type="submit"]'
@@ -30,7 +29,7 @@ class Library::NewChallengeStoryPage < BasePage
 
   def set_penalty(mode, owed)
     find("summary", text: "If someone misses").click
-    penalty_mode_field.select(mode)
+    choose(mode, allow_label_click: true)
     penalty_field.set(owed)
   end
 

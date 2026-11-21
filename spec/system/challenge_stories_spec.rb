@@ -72,7 +72,7 @@ RSpec.describe "Challenge Stories", type: :system do
       new_challenge_page.load
 
       new_challenge_page.fill_form(title: "Gym", start_date: Time.zone.today, finish_date: Time.zone.today + 27.days)
-      new_challenge_page.set_penalty("They owe everyone, every miss", "$5")
+      new_challenge_page.set_penalty("Every miss", "$5")
       check "Repeat automatically"
 
       expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: owe everyone $5 · 28 days · repeats")

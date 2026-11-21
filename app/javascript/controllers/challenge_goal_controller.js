@@ -42,10 +42,11 @@ export default class extends Controller {
 
   // Mirrors ChallengeStory::Penalty#summary
   penalty() {
+    const mode = this.penaltyModeTargets.find(radio => radio.checked)?.value
     const owed = this.penaltyTarget.value.trim()
-    if (!this.penaltyModeTarget.value || !owed) return
+    if (!mode || !owed) return
 
-    return `${this.penaltyModeTarget.value === "per_miss" ? "Each miss" : "Most misses"}: owe everyone ${owed}`
+    return `${mode === "per_miss" ? "Each miss" : "Most misses"}: owe everyone ${owed}`
   }
 
   length() {

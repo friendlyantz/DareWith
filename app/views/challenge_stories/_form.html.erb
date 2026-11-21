@@ -114,15 +114,18 @@
       <span class="block truncate text-sm text-base-content/70" data-challenge-goal-target="penaltyHint"></span>
     </summary>
     <fieldset class="collapse-content group/penalty flex flex-col gap-3" <%= "disabled" unless challenge_story.goal_editable? %>>
-      <div>
-        <%= form.label :penalty_mode, "What happens?", class: "sr-only" %>
-        <%= form.select :penalty_mode,
-          [["Nothing happens", ""], ["They owe everyone, every miss", "per_miss"], ["Whoever misses most owes everyone", "most_misses"]],
-          {},
-          class: "select w-full",
-          data: {challenge_goal_target: "penaltyMode"} %>
+      <div role="radiogroup" aria-label="What happens?" class="flex flex-col rounded-box border border-base-300 divide-y divide-base-300">
+        <% [["Nothing happens", nil, ""], ["Every miss", "They owe everyone, each time", "per_miss"], ["Most misses", "Whoever misses most owes everyone", "most_misses"]].each do |label, hint, mode| %>
+          <label class="flex cursor-pointer items-start gap-3 px-3 py-2.5">
+            <%= form.radio_button :penalty_mode, mode, class: "radio radio-primary radio-sm mt-0.5", data: {challenge_goal_target: "penaltyMode"} %>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium"><%= label %></span>
+              <% if hint %><span class="block text-sm text-base-content/70"><%= hint %></span><% end %>
+            </span>
+          </label>
+        <% end %>
       </div>
-      <div class="group-has-[option[value='']:checked]/penalty:hidden">
+      <div class="group-has-[input[type=radio][value='']:checked]/penalty:hidden">
         <%= form.label :penalty, "What do they owe?", class: "text-sm font-semibold" %>
         <%= form.text_field :penalty,
           maxlength: 100,
