@@ -236,7 +236,7 @@ RSpec.describe "ChallengeStories", type: :request do
 
         expect(ChallengeStory.last).to have_attributes(penalty_mode: "per_miss", penalty: "a coffee")
         follow_redirect!
-        expect(response.body).to include("Each miss: owe everyone a coffee")
+        expect(response.body).to include("Each miss: a coffee for everyone")
       end
 
       it "drops the penalty when nothing happens on a miss" do

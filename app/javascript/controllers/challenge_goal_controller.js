@@ -46,7 +46,7 @@ export default class extends Controller {
     const owed = this.penaltyTarget.value.trim()
     if (!mode || !owed) return
 
-    return `${mode === "per_miss" ? "Each miss" : "Most misses"}: owe everyone ${owed}`
+    return `${mode === "per_miss" ? "Each miss" : "Most misses"}: ${owed} for everyone`
   }
 
   length() {

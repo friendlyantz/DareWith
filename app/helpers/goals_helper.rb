@@ -38,7 +38,7 @@ module GoalsHelper
     "#{goal.format_number(participant.amount_this_period)} of #{goal.format_amount(participant.challenge_story.target_amount)}"
   end
 
-  # "Each miss: owe everyone coffee"
+  # "Each miss: coffee for everyone"
   def penalty_summary(challenge_story)
     challenge_story.penalty_rule&.summary
   end

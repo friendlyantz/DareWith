@@ -314,7 +314,7 @@ RSpec.describe ChallengeStory, type: :model do
 
       expect { story.announce_changes(by: creator.user) }
         .to have_enqueued_job(PushNotificationJob).exactly(:once)
-        .with(friend_device, title: "#{creator.user.username} changed Gym", body: "Ends #{new_finish.strftime("%-d %b")} · Each miss: owe everyone a coffee", path: "/challenge_stories/#{story.id}")
+        .with(friend_device, title: "#{creator.user.username} changed Gym", body: "Ends #{new_finish.strftime("%-d %b")} · Each miss: a coffee for everyone", path: "/challenge_stories/#{story.id}")
     end
 
     it "stays quiet when only the title or rules text changed" do

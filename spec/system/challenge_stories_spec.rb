@@ -75,11 +75,11 @@ RSpec.describe "Challenge Stories", type: :system do
       new_challenge_page.set_penalty("Every miss", "$5")
       check "Repeat automatically"
 
-      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: owe everyone $5 · 28 days · repeats")
-      expect(page).to have_css("summary", text: "Each miss: owe everyone $5")
+      expect(new_challenge_page.goal_summary).to have_text("Every day · just check in · Each miss: $5 for everyone · 28 days · repeats")
+      expect(page).to have_css("summary", text: "Each miss: $5 for everyone")
       new_challenge_page.submit
 
-      expect(page).to have_content("Each miss: owe everyone $5")
+      expect(page).to have_content("Each miss: $5 for everyone")
       expect(ChallengeStory.last.description).to eq ""
     end
 
