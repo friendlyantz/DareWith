@@ -106,7 +106,7 @@ export default class extends Controller {
     context.textBaseline = "alphabetic"
 
     context.font = `700 60px ${DISPLAY}`
-    context.fillText("darewith", PADDING, 190)
+    context.fillText("DareWith", PADDING, 190)
 
     // Built from the bottom up, so a long title pushes upwards
     let y = this.drawQrCode(context, 220)

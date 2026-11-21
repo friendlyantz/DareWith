@@ -32,7 +32,7 @@ export default class extends ShareCardController {
     context.textBaseline = "alphabetic"
 
     context.font = `700 60px ${DISPLAY}`
-    context.fillText("darewith", PADDING, 170)
+    context.fillText("DareWith", PADDING, 170)
 
     let y = HEIGHT - 130
     context.font = `600 44px ${SANS}`
