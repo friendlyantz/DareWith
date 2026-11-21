@@ -14,7 +14,7 @@ export const SANS = '"Inter", ui-sans-serif, system-ui, sans-serif'
 export default class extends Controller {
   static values = {
     title: String, name: String, headline: String, caption: String, emoji: String,
-    progressLabel: String, progress: Number, url: String, photoUrl: String
+    progressLabel: String, progress: Number, url: String, qrCode: Array, photoUrl: String
   }
 
   connect() {
@@ -109,12 +109,15 @@ export default class extends Controller {
     context.fillText("darewith", PADDING, 190)
 
     // Built from the bottom up, so a long title pushes upwards
-    let y = HEIGHT - 150
+    let y = this.drawQrCode(context, 220)
     context.font = `600 44px ${SANS}`
     context.globalAlpha = 0.85
-    context.fillText("Dare with me on darewith.app", PADDING, y)
+    context.fillText("Dare with me", PADDING, HEIGHT - 190)
+    context.globalAlpha = 1
+    context.font = `600 40px ${SANS}`
+    context.fillText(this.urlValue.replace(/^https?:\/\//, ""), PADDING, HEIGHT - 130)
 
-    y -= 150
+    y -= 70
     context.globalAlpha = 0.25
     this.roundedRect(context, PADDING, y, width, 28)
     context.globalAlpha = 1
@@ -162,6 +165,28 @@ export default class extends Controller {
     size = this.fitFontSize(context, this.headlineValue, PADDING + width - x, size)
     context.font = `700 ${size}px ${DISPLAY}`
     context.fillText(this.headlineValue, x, y)
+  }
+
+  // Dark squares on a white tile in the bottom corner, so a camera or a screenshot can open the challenge.
+  // Returns the tile's top, for what goes above it.
+  drawQrCode(context, size) {
+    const x = WIDTH - PADDING - size
+    const y = HEIGHT - 120 - size
+    context.fillStyle = "#ffffff"
+    context.beginPath()
+    context.roundRect(x, y, size, size, 24)
+    context.fill()
+
+    const rows = this.qrCodeValue
+    const module = Math.floor((size - 40) / rows.length)
+    const offset = (size - module * rows.length) / 2
+    context.fillStyle = NEUTRAL
+    rows.forEach((row, i) => [...row].forEach((cell, j) => {
+      if (cell === "1") context.fillRect(x + offset + j * module, y + offset + i * module, module, module)
+    }))
+    context.fillStyle = "#ffffff"
+
+    return y
   }
 
   fitFontSize(context, text, width, size) {

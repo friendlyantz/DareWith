@@ -20,6 +20,13 @@ RSpec.describe ShareCardsHelper, type: :helper do
       expect(values[:photo_url]).to be_nil
     end
 
+    it "carries a QR code of the share link as rows of squares" do
+      qr_code = helper.share_card_values(participant)[:qr_code]
+
+      expect(qr_code).to all(match(/\A[01]+\z/))
+      expect(qr_code.map(&:size).uniq).to eq [qr_code.size]
+    end
+
     it "has no emoji without a streak" do
       check_in(3)
 
