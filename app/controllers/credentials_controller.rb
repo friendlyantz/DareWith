@@ -34,7 +34,7 @@ class CredentialsController < ApplicationController
       )
 
       if credential.update(
-        nickname: params[:credential_nickname],
+        nickname: Credential.nickname_for(webauthn_credential.response.aaguid, request.user_agent),
         public_key: webauthn_credential.public_key,
         sign_count: webauthn_credential.sign_count,
         backed_up: webauthn_credential.backed_up?

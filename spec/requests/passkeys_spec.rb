@@ -90,10 +90,19 @@ RSpec.describe "Passkeys", type: :request do
     it "records a passkey that can't sync" do
       post credentials_path, as: :json
       created = client.create(challenge: response.parsed_body["challenge"], user_verified: true)
-      post callback_credentials_path, params: created.merge(credential_nickname: "Work laptop"), as: :json
+      post callback_credentials_path, params: created, as: :json
 
       expect(response.parsed_body["status"]).to eq "ok"
-      expect(user.credentials.find_by!(nickname: "Work laptop").backed_up).to be false
+      expect(user.credentials.last.backed_up).to be false
+    end
+
+    it "names the passkey after the browser it was made in when the password manager is unknown" do
+      post credentials_path, as: :json
+      created = client.create(challenge: response.parsed_body["challenge"], user_verified: true)
+      post callback_credentials_path, params: created, as: :json,
+        headers: {"User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}
+
+      expect(user.credentials.last.nickname).to eq "Chrome on Mac"
     end
   end
 
