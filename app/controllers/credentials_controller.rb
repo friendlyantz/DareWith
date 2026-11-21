@@ -13,7 +13,7 @@ class CredentialsController < ApplicationController
         name: current_user.username
       },
       exclude: current_user.credentials.pluck(:external_id),
-      authenticator_selection: {user_verification: "required"}
+      authenticator_selection: {user_verification: "required", resident_key: "required"}
     )
 
     session[:current_registration] = {challenge: create_options.challenge}

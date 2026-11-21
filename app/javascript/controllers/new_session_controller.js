@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Credential from "credential";
+import { showMessage } from "messenger";
 
 import { MDCTextField } from '@material/textfield';
 
@@ -57,6 +58,8 @@ export default class extends Controller {
       if (response.errors && response.errors[0]) {
         usernameField.helperTextContent = response.errors[0];
       }
+    } else if (response.errors && response.errors[0]) {
+      showMessage(response.errors[0]);
     }
   }
 }

@@ -15,12 +15,63 @@ RSpec.describe "Passkeys", type: :request do
   end
 
   describe "signing in" do
+    let(:user_handle) { Base64.urlsafe_decode64(user.webauthn_id) }
+
+    # Starts sign-in, then answers with the fake authenticator's passkey
+    def sign_in_with_passkey(username: nil, **assertion_options)
+      params = username ? {session: {username:}} : {}
+      post webauthn_session_path, params:, as: :json
+      assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true, **assertion_options)
+      post callback_webauthn_session_path, params: assertion, as: :json
+    end
+
+    it "finds the account from the passkey without a username" do
+      register_passkey
+
+      sign_in_with_passkey(user_handle:)
+
+      expect(response.parsed_body["status"]).to eq "ok"
+      expect(session[:user_id]).to eq user.id
+    end
+
+    it "offers every passkey when no username is given" do
+      register_passkey
+
+      post webauthn_session_path, as: :json
+
+      expect(response.parsed_body["allowCredentials"]).to eq []
+    end
+
+    it "still signs in with a username" do
+      register_passkey
+
+      sign_in_with_passkey(username: user.username)
+
+      expect(response.parsed_body["status"]).to eq "ok"
+    end
+
+    it "refuses a passkey for a different username than the one typed" do
+      register_passkey
+
+      sign_in_with_passkey(username: create(:user).username)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(session[:user_id]).to be_nil
+    end
+
+    it "refuses a passkey that says it was made for someone else" do
+      register_passkey
+
+      sign_in_with_passkey(user_handle: Base64.urlsafe_decode64(create(:user).webauthn_id))
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(session[:user_id]).to be_nil
+    end
+
     it "records whether the passkey syncs" do
       credential = register_passkey
 
-      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
-      assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true, backup_eligibility: true, backup_state: true)
-      post callback_webauthn_session_path, params: assertion, as: :json
+      sign_in_with_passkey(user_handle:, backup_eligibility: true, backup_state: true)
 
       expect(response.parsed_body["status"]).to eq "ok"
       expect(credential.reload.backed_up).to be true
@@ -29,6 +80,12 @@ RSpec.describe "Passkeys", type: :request do
 
   describe "adding a passkey" do
     before { sign_in_as(user) }
+
+    it "asks for a passkey that remembers the account, so sign-in needs no username" do
+      post credentials_path, as: :json
+
+      expect(response.parsed_body.dig("authenticatorSelection", "residentKey")).to eq "required"
+    end
 
     it "records a passkey that can't sync" do
       post credentials_path, as: :json

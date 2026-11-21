@@ -13,7 +13,7 @@ module Webauthn
           name: params[:registration][:username],
           id: user.webauthn_id
         },
-        authenticator_selection: {user_verification: "required"}
+        authenticator_selection: {user_verification: "required", resident_key: "required"}
       )
 
       if user.valid?
