@@ -18,14 +18,13 @@ RSpec.describe "Passkeys", type: :request do
     let(:user_handle) { Base64.urlsafe_decode64(user.webauthn_id) }
 
     # Starts sign-in, then answers with the fake authenticator's passkey
-    def sign_in_with_passkey(username: nil, **assertion_options)
-      params = username ? {session: {username:}} : {}
-      post webauthn_session_path, params:, as: :json
+    def sign_in_with_passkey(**assertion_options)
+      post webauthn_session_path, as: :json
       assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true, **assertion_options)
       post callback_webauthn_session_path, params: assertion, as: :json
     end
 
-    it "finds the account from the passkey without a username" do
+    it "finds the account from the passkey" do
       register_passkey
 
       sign_in_with_passkey(user_handle:)
@@ -34,29 +33,12 @@ RSpec.describe "Passkeys", type: :request do
       expect(session[:user_id]).to eq user.id
     end
 
-    it "offers every passkey when no username is given" do
+    it "lets the browser offer every passkey it holds" do
       register_passkey
 
       post webauthn_session_path, as: :json
 
       expect(response.parsed_body["allowCredentials"]).to eq []
-    end
-
-    it "still signs in with a username" do
-      register_passkey
-
-      sign_in_with_passkey(username: user.username)
-
-      expect(response.parsed_body["status"]).to eq "ok"
-    end
-
-    it "refuses a passkey for a different username than the one typed" do
-      register_passkey
-
-      sign_in_with_passkey(username: create(:user).username)
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(session[:user_id]).to be_nil
     end
 
     it "refuses a passkey that says it was made for someone else" do
@@ -116,23 +98,6 @@ RSpec.describe "Passkeys", type: :request do
 
       expect(response.body).not_to include("Old iPhone")
       expect(response.body).to include("We moved to #{Rails.configuration.app_host}")
-    end
-
-    it "tells them to sign in with email instead of offering a passkey that can't work" do
-      user.update!(email: "old-passkey@example.com")
-
-      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"].first).to include("Sign in with email once")
-    end
-
-    it "tells people without an email to ask for a sign-in link" do
-      user.update!(email: nil)
-
-      post webauthn_session_path, params: {session: {username: user.username}}, as: :json
-
-      expect(response.parsed_body["errors"].first).to include("ask whoever invited you")
     end
 
     it "sends them to add a new passkey once they sign in by email" do

@@ -5,19 +5,12 @@ module Webauthn
     def new
     end
 
-    # Without a username the browser offers every passkey it holds for this site
+    # The browser offers every passkey it holds for this site, and the one picked says whose it is
     def create
-      return start_authentication if session_params[:username].blank?
+      get_options = WebAuthn::Credential.options_for_get(user_verification: "required")
+      session[:current_authentication] = {challenge: get_options.challenge}
 
-      user = User.find_by(username: session_params[:username])
-
-      if user&.passkeys_left_on_old_domain?
-        render json: {errors: [moved_domain_message(user)]}, status: :unprocessable_content
-      elsif user
-        start_authentication(user)
-      else
-        render json: {errors: ["Username doesn't exist"]}, status: :unprocessable_content
-      end
+      render json: get_options
     end
 
     def callback
@@ -26,7 +19,7 @@ module Webauthn
 
       credential = Credential.on_this_domain.find_by(external_id: Base64.urlsafe_encode64(webauthn_credential.raw_id, padding: false))
       return render json: "That passkey isn't for #{Rails.configuration.app_host}", status: :unprocessable_content unless credential
-      return render json: "That passkey belongs to another account", status: :unprocessable_content unless started_by?(credential.user, webauthn_credential)
+      return render json: "That passkey belongs to another account", status: :unprocessable_content unless made_for?(credential.user, webauthn_credential)
 
       begin
         webauthn_credential.verify(
@@ -64,35 +57,9 @@ module Webauthn
 
     private
 
-    def start_authentication(user = nil)
-      get_options = WebAuthn::Credential.options_for_get(
-        allow: user&.credentials&.pluck(:external_id),
-        user_verification: "required"
-      )
-
-      session[:current_authentication] = {challenge: get_options.challenge, username: user&.username}
-
-      render json: get_options
-    end
-
-    # The passkey must be for the username they typed, and the user it says it was made for
-    def started_by?(user, webauthn_credential)
-      username = session[:current_authentication]["username"]
-      return false if username && username != user.username
-
+    # The passkey must say it was made for the account it's saved against
+    def made_for?(user, webauthn_credential)
       webauthn_credential.user_handle.nil? || webauthn_credential.user_handle == user.webauthn_id
-    end
-
-    # Without an email they can't sign in alone, so the admin sends them a sign-in link
-    def moved_domain_message(user)
-      moved = "We moved to #{Rails.configuration.app_host}, so your passkey needs replacing."
-      return "#{moved} Sign in with email once, then add a new one." if user.email.present?
-
-      "#{moved} Your account has no email, so ask whoever invited you to DareWith for a sign-in link."
-    end
-
-    def session_params
-      params.fetch(:session, {}).permit(:username)
     end
   end
 end

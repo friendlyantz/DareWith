@@ -2,11 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import * as Credential from "credential";
 import { showMessage } from "messenger";
 
-import { MDCTextField } from '@material/textfield';
-
 export default class extends Controller {
-  static targets = ["usernameField"]
-
   submit(event) {
     event.preventDefault();
     
@@ -52,13 +48,7 @@ export default class extends Controller {
     // Re-enable submit button
     if (submitButton) submitButton.disabled = false;
     
-    if (this.hasUsernameFieldTarget) {
-      let usernameField = new MDCTextField(this.usernameFieldTarget);
-      usernameField.valid = false;
-      if (response.errors && response.errors[0]) {
-        usernameField.helperTextContent = response.errors[0];
-      }
-    } else if (response.errors && response.errors[0]) {
+    if (response.errors && response.errors[0]) {
       showMessage(response.errors[0]);
     }
   }
