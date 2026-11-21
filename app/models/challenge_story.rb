@@ -7,6 +7,9 @@ class ChallengeStory < ApplicationRecord
   # How long a challenge stays on Today after it ends
   JUST_FINISHED_FOR = 7.days
   GOAL_ATTRIBUTES = %w[cadence times_per_period unit target_amount target_scope penalty_mode penalty].freeze
+  # Base58 leaves out 0, O, I and l, so a code read aloud or retyped comes out right
+  SHARE_CODE_CHARACTERS = [*"1".."9", *"A".."H", *"J".."N", *"P".."Z", *"a".."k", *"m".."z"].freeze
+  SHARE_CODE_LENGTH = 8
 
   # Associations
   belongs_to :previous_challenge_story, class_name: "ChallengeStory", optional: true
@@ -52,6 +55,10 @@ class ChallengeStory < ApplicationRecord
     self.target_amount = nil if unit.blank?
     self.target_scope = nil if target_amount.blank?
     self.penalty = nil if penalty_mode.blank?
+  end
+
+  before_validation on: :create do
+    self.share_code ||= SecureRandom.alphanumeric(SHARE_CODE_LENGTH, chars: SHARE_CODE_CHARACTERS)
   end
 
   before_create do

@@ -14,7 +14,7 @@ module ShareCardsHelper
       emoji:,
       progress_label: goal.progress_label,
       progress: share_card_progress(participant),
-      url: challenge_story_url(challenge_story),
+      url: challenge_story_share_url(challenge_story.share_code),
       photo_url: photo && cl_image_path(photo.key, width: 1080, height: 1920, crop: :fill, secure: true)
     }
   end

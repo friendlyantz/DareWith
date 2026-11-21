@@ -1,4 +1,5 @@
 <% content_for :title, @challenge_story.title %>
+<%= render "challenge_stories/preview_tags", challenge_story: @challenge_story %>
 <% turbo_refreshes_with method: :morph, scroll: :preserve %>
 <%= turbo_stream_from @challenge_story %>
 

@@ -28,6 +28,9 @@ Rails.application.routes.draw do
     resource :challenge_finale, only: %i[show], path: "finale"
   end
 
+  # Short invite link: /c/k3Fx9aQm
+  get "c/:share_code", to: "challenge_story_shares#show", as: :challenge_story_share
+
   resources :challenge_check_ins, only: %i[index] do
     resource :challenge_check_in_like, only: %i[create destroy]
     resources :challenge_check_in_replies, only: %i[create]

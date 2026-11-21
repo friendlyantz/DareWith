@@ -7,7 +7,7 @@
   <div class="flex items-center">
     <%= render "challenge_stories/likes", challenge_story: challenge_story %>
 
-    <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_url(challenge_story) %>">
+    <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_share_url(challenge_story.share_code) %>">
       <button data-action="share-link#nativeShare" class="btn btn-ghost btn-circle" aria-label="Share invite link">
         <%= icon(:share) %>
       </button>

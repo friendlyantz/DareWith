@@ -41,7 +41,7 @@ module ChallengeFinalesHelper
       emoji: "🎉",
       progress: finale_fraction(participant),
       stats: stats.first(2),
-      url: challenge_story_url(challenge_story),
+      url: challenge_story_share_url(challenge_story.share_code),
       photo_urls: finale.collage.map { cl_image_path(it.photo.key, width: 540, height: 540, crop: :fill, secure: true) }
     }
   end

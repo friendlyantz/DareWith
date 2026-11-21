@@ -16,7 +16,7 @@ RSpec.describe ShareCardsHelper, type: :helper do
 
       expect(values).to include(title: "Push-ups", headline: "3", emoji: "🔥", caption: "days in a row", progress_label: "Day 10 of 30")
       expect(values[:progress]).to eq 0.333
-      expect(values[:url]).to end_with "/challenge_stories/#{challenge_story.id}"
+      expect(values[:url]).to end_with "/c/#{challenge_story.share_code}"
       expect(values[:photo_url]).to be_nil
     end
 

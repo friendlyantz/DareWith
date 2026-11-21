@@ -1,0 +1,13 @@
+<%# locals: (challenge_story:) %>
+<%# The preview card a shared link shows in WhatsApp, iMessage and Instagram DMs %>
+<% photo = challenge_story.latest_photo_check_in&.photo %>
+<% content_for :head do %>
+  <meta name="description" content="<%= challenge_story_preview_description(challenge_story) %>">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DareWith">
+  <meta property="og:title" content="<%= challenge_story.title %>">
+  <meta property="og:description" content="<%= challenge_story_preview_description(challenge_story) %>">
+  <meta property="og:url" content="<%= challenge_story_share_url(challenge_story.share_code) %>">
+  <meta property="og:image" content="<%= photo ? cl_image_path(photo.key, width: 1200, height: 630, crop: :fill, secure: true) : image_url("/icons/icon-512.png") %>">
+  <meta name="twitter:card" content="<%= photo ? "summary_large_image" : "summary" %>">
+<% end %>
