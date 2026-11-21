@@ -3,7 +3,7 @@
   <section class="flex flex-col gap-5">
     <h1 class="font-display text-5xl font-bold leading-[1.05] tracking-tight">Bet on Yourself</h1>
     <p class="text-lg text-base-content/80">
-      Personal challenges with social proof. Check in every day, and let friends keep you honest.
+      Daily challenges with friends and real stakes. Miss a day, and you owe them.
     </p>
     <div class="flex flex-col gap-3">
       <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary btn-lg" %>
@@ -15,10 +15,10 @@
     <h2 class="font-display text-2xl font-bold tracking-tight">How it works</h2>
     <ol class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
       <% [
-        [:plus, "Start a challenge", "Pick a habit and a finish date: the gym every day, 20 pages, 10 quiet minutes."],
-        [:share, "Invite up to #{ChallengeStory::MAX_PARTICIPANTS - 1} friends", "Share the link. Everyone checks in to the same challenge."],
-        [:camera, "Check in daily", "A photo and a line. One check-in per day, and no edits afterwards."],
-        [:gift, "Pledge rewards", "Promise each other something for finishing, and settle up when time's up."]
+        [:plus, "Start a challenge", "Pick a template (push-ups, a run, kicking a vice) or write your own, for 1 to 4 weeks or 30 days."],
+        [:share, "Invite up to #{ChallengeStory::MAX_PARTICIPANTS - 1} friends", "Send a short link. It shows a preview in WhatsApp and iMessage, and everyone checks in to the same challenge."],
+        [:camera, "Check in with proof", "A photo and a line. Reps and minutes add up over the day. Friends can doubt a check-in, and you reply with proof."],
+        [:target, "Put something on the line", "Each miss: coffee for everyone. Or pledge rewards for finishing, and settle up when time's up."]
       ].each do |icon_name, title, text| %>
         <li class="flex items-start gap-4 p-4">
           <div class="flex size-10 shrink-0 items-center justify-center rounded-field bg-primary/10 text-accent">
@@ -37,7 +37,7 @@
 
   <section class="flex flex-col items-start gap-3 rounded-box bg-neutral p-6 text-neutral-content">
     <h2 class="font-display text-2xl font-bold tracking-tight">Ready to start?</h2>
-    <p class="opacity-80">It takes a minute: pick a username and sign in with a passkey.</p>
+    <p class="opacity-80">It takes a minute: pick a username, sign in with a passkey, and set your first dare.</p>
     <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary" %>
   </section>
 </div>
