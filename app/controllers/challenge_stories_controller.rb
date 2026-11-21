@@ -30,7 +30,8 @@ class ChallengeStoriesController < ApplicationController
         challenge_rewards: [{giver: :user}, {receiver: :user}],
         challenge_check_ins: [{challenge_participant: {user: {avatar_attachment: :blob}}}, :challenge_check_in_likes, {challenge_check_in_replies: {user: {avatar_attachment: :blob}}}, {challenge_check_in_doubts: :user}, photo_attachment: :blob]
       )
-      .find(params[:id])
+      .find_by(id: params[:id])
+    return redirect_to root_path, alert: "That challenge no longer exists" unless @challenge_story
 
     @current_challenge_participant = @challenge_story.participant_for(current_user) if current_user
   end

@@ -37,6 +37,13 @@ RSpec.describe "ChallengeStories", type: :request do
       expect(response.body).to include(story.title)
     end
 
+    it "sends you home when the challenge was deleted, e.g. from an old alert" do
+      get challenge_story_path(id: SecureRandom.uuid)
+
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq("That challenge no longer exists")
+    end
+
     it "counts down to the start instead of offering a check-in" do
       story.update!(start: Time.zone.today + 3.days, finish: Time.zone.today + 10.days)
       user = create(:user)
