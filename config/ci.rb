@@ -1,8 +1,6 @@
 # Run using bin/ci
 
 CI.run do
-  step "Setup", "bin/setup --skip-server"
-
   step "Style: Ruby", "bundle exec standardrb"
 
   step "Security: Importmap vulnerability audit", "bin/importmap audit"
