@@ -28,7 +28,7 @@
     <%# Turbo does a full reload when this changes, so open tabs pick up new JavaScript after a deploy %>
     <meta name="importmap-digest" content="<%= Rails.application.importmap.digest(resolver: self) %>" data-turbo-track="reload">
   </head>
-  <body class="pt-[env(safe-area-inset-top)]">
+  <body class="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
     <script>
       // Make the VAPID public key available to the client as a Uint8Array
