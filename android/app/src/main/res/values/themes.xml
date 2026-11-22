@@ -1,9 +1,17 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.DareWith" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+    <!-- The site's colours for the toolbar and tabs. Dark mode swaps the colours in values-night -->
+    <style name="Theme.DareWith" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/primary_content</item>
+        <item name="android:colorBackground">@color/base_200</item>
+        <item name="colorSurface">@color/base_100</item>
+        <item name="colorSurfaceContainer">@color/base_100</item>
+        <item name="colorOnSurface">@color/base_content</item>
+        <item name="colorOnSurfaceVariant">@color/base_content_soft</item>
+        <item name="colorSecondaryContainer">@color/primary_soft</item>
+        <item name="colorOnSecondaryContainer">@color/primary</item>
+        <item name="colorOutlineVariant">@color/base_300</item>
+        <!-- Flat white bars like the site's, not tinted by their elevation -->
+        <item name="elevationOverlayEnabled">false</item>
     </style>
-
-    <style name="Theme.DareWith" parent="Base.Theme.DareWith" />
 </resources>

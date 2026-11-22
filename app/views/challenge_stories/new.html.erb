@@ -1,10 +1,13 @@
 <% content_for :title, "New challenge" %>
 <div class="w-full max-w-md flex flex-col gap-4">
-  <div class="-mx-2">
-    <%= link_to today_path, class: "btn btn-ghost px-2 gap-1" do %>
-      <%= icon(:chevron_left) %> Today
-    <% end %>
-  </div>
+  <%# The Android app's toolbar has its own back button %>
+  <% unless hotwire_native_app? %>
+    <div class="-mx-2">
+      <%= link_to today_path, class: "btn btn-ghost px-2 gap-1" do %>
+        <%= icon(:chevron_left) %> Today
+      <% end %>
+    </div>
+  <% end %>
 
   <div>
     <% if (previous = @challenge_story.previous_challenge_story) %>

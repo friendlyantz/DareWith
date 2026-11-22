@@ -12,7 +12,8 @@ class AndroidPathConfigurationsController < ApplicationController
           patterns: [".*"],
           properties: {context: "default", pull_to_refresh_enabled: true}
         },
-        # The dock's tabs (and the signed-out home) replace the screen instead of stacking up
+        # Going back to a tab's first page (or the signed-out home) starts that tab over instead of stacking up.
+        # A link to another tab's first page switches tabs instead (TabRouteDecisionHandler in the app)
         {
           patterns: ["^/(\\?|$)", "^/today(\\?|$)", "^/challenge_check_ins(\\?|$)", "^/me(\\?|$)"],
           properties: {presentation: "replace_root"}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The site's dark theme (app/assets/tailwind/daisyui-theme.js) -->
+<resources>
+    <color name="base_100">#1E1F23</color>
+    <color name="base_200">#141518</color>
+    <color name="base_300">#2E3036</color>
+    <color name="base_content">#ECEBE6</color>
+    <color name="base_content_soft">#A9A8A4</color>
+    <color name="primary">#C2410C</color>
+    <color name="primary_content">#FFFFFF</color>
+    <color name="primary_soft">#4A2412</color>
+</resources>

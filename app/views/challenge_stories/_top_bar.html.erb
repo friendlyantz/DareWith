@@ -1,10 +1,13 @@
 <%# locals: (challenge_story:, participant:) %>
 <div class="flex items-center justify-between -mx-2">
-  <%= link_to current_user ? today_path : challenge_stories_path, class: "btn btn-ghost px-2 gap-1" do %>
-    <%= icon(:chevron_left) %> <%= current_user ? "Today" : "Challenges" %>
+  <%# The Android app's toolbar has its own back button %>
+  <% unless hotwire_native_app? %>
+    <%= link_to current_user ? today_path : challenge_stories_path, class: "btn btn-ghost px-2 gap-1" do %>
+      <%= icon(:chevron_left) %> <%= current_user ? "Today" : "Challenges" %>
+    <% end %>
   <% end %>
 
-  <div class="flex items-center">
+  <div class="flex items-center ml-auto">
     <%= render "challenge_stories/likes", challenge_story: challenge_story %>
 
     <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_share_url(challenge_story.share_code) %>">

@@ -1,10 +1,13 @@
 <% content_for :title, "Sign in another device" %>
 <div class="w-full max-w-md flex flex-col gap-5">
-  <div class="-mx-2">
-    <%= link_to profile_path, class: "btn btn-ghost px-2 gap-1" do %>
-      <%= icon(:chevron_left) %> Me
-    <% end %>
-  </div>
+  <%# The Android app's toolbar has its own back button %>
+  <% unless hotwire_native_app? %>
+    <div class="-mx-2">
+      <%= link_to profile_path, class: "btn btn-ghost px-2 gap-1" do %>
+        <%= icon(:chevron_left) %> Me
+      <% end %>
+    </div>
+  <% end %>
 
   <div>
     <h1 class="font-display text-3xl font-bold tracking-tight">Sign in another device</h1>

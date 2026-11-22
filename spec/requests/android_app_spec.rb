@@ -43,7 +43,7 @@ RSpec.describe "The Android app", type: :request do
       expect(response.parsed_body).to eq(bundled)
     end
 
-    it "switches between the dock's tabs instead of stacking them up" do
+    it "starts a tab over when going back to its first page, instead of stacking it up" do
       %w[/ /today /today?day=2026-11-22 /challenge_check_ins /me].each do |tab|
         expect(properties_for(tab)).to include("presentation" => "replace_root"), tab
       end
@@ -59,6 +59,49 @@ RSpec.describe "The Android app", type: :request do
       %w[/challenge_stories/new /challenge_stories/1/edit /webauthn/session/new /email/session/code].each do |form|
         expect(properties_for(form)).to include("pull_to_refresh_enabled" => false), form
       end
+    end
+  end
+
+  describe "the app's own toolbar and tabs" do
+    it "replaces the site's header, tabs and back links once signed in, and gives the app the bell's count" do
+      user = create(:user)
+      create(:challenge_participant, user:)
+      sign_in_as(user)
+
+      get today_path, headers: {"User-Agent" => android_app}
+
+      page = Capybara.string(response.body)
+      expect(page).to have_css("meta[name='current-user-id'][content='#{user.id}']", visible: :all)
+      expect(page).to have_css("meta[name='unread-notifications-count'][content='0']", visible: :all)
+      expect(page).not_to have_css(".navbar")
+      expect(page).not_to have_css("nav.dock")
+    end
+
+    it "keeps the site's tabs while signed out, since the app only has tabs once signed in" do
+      get root_path, headers: {"User-Agent" => android_app}
+
+      page = Capybara.string(response.body)
+      expect(page).not_to have_css("meta[name='current-user-id']", visible: :all)
+      expect(page).not_to have_css(".navbar")
+      expect(page).to have_css("nav.dock")
+    end
+
+    it "keeps the site's header and tabs in browsers" do
+      get root_path
+
+      page = Capybara.string(response.body)
+      expect(page).to have_css(".navbar")
+      expect(page).to have_css("nav.dock")
+    end
+
+    it "leaves back links to the app's toolbar" do
+      sign_in_as(create(:user))
+
+      get credentials_path, headers: {"User-Agent" => android_app}
+      expect(response.body).not_to include(%(href="#{profile_path}"))
+
+      get credentials_path
+      expect(response.body).to include(%(href="#{profile_path}"))
     end
   end
 

@@ -11,6 +11,8 @@
     <%= csp_meta_tag %>
     <% if current_user %>
       <meta name="current-user-id" content="<%= current_user.id %>">
+      <%# The Android app reads these: signed in shows its tabs, and the count goes on its bell %>
+      <meta name="unread-notifications-count" content="<%= current_user.unread_notifications_count %>">
     <% end %>
     <%= yield :head %>
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
@@ -28,7 +30,8 @@
     <%# Turbo does a full reload when this changes, so open tabs pick up new JavaScript after a deploy %>
     <meta name="importmap-digest" content="<%= Rails.application.importmap.digest(resolver: self) %>" data-turbo-track="reload">
   </head>
-  <body class="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+  <%# The Android app's toolbar sits under the status bar already %>
+  <body class="<%= class_names("pb-[env(safe-area-inset-bottom)]", "pt-[env(safe-area-inset-top)]": !hotwire_native_app?) %>">
 
     <script>
       // Make the VAPID public key available to the client as a Uint8Array
@@ -41,7 +44,8 @@
       <% end %>
     </script>
 
-    <%= render "layouts/navbar" %>
+    <%# The Android app has its own toolbar, and its own tabs once signed in %>
+    <%= render "layouts/navbar" unless hotwire_native_app? %>
     <%= render "layouts/flash" %>
 
     <% if current_user&.in_a_challenge? && !current_page?(profile_path) %>
@@ -63,6 +67,6 @@
       <% end %>
     </div>
     <%= turbo_stream_from current_user, "notifications" if current_user %>
-    <%= render "layouts/footer" %>
+    <%= render "layouts/footer" unless hotwire_native_app? && current_user %>
   </body>
 </html>
