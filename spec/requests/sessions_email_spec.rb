@@ -266,6 +266,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       post confirm_email_session_path, params: {code:}
       expect(response).to redirect_to(new_email_registration_path)
+      expect(EmailSignup.last.verified_at).to be_present
       follow_redirect!
       expect(response.body).to include("Pick a username", "new@example.com")
 
@@ -286,6 +287,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       get signup_link
       expect(response).to redirect_to(new_email_registration_path)
+      expect(EmailSignup.last.verified_at).to be_present
       post email_registration_path, params: {user: {username: "newbie"}}
 
       expect(response).to redirect_to(challenge_story_path(story))
@@ -301,6 +303,7 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       someone_else.get new_email_registration_path
       expect(someone_else.response.location).to end_with(new_email_session_path)
+      expect(EmailSignup.last.verified_at).to be_nil
     end
 
     it "can carry on in the browser the link opened in, with a new code emailed there" do

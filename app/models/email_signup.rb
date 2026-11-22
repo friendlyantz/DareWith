@@ -5,7 +5,12 @@
 class EmailSignup < ApplicationRecord
   normalizes :email, with: -> { it.strip.downcase }
 
+  KEPT_FOR = 30.days
+
   validates :email, presence: true, uniqueness: true, format: {with: URI::MailTo::EMAIL_REGEXP}
+
+  # Never finished: the email of someone without an account shouldn't be kept for long
+  scope :stale, -> { where(created_at: ...KEPT_FOR.ago) }
 
   # The signup a link from the email was made for; nil once the account exists or the link expired
   def self.find_by_link(token)
@@ -35,6 +40,19 @@ class EmailSignup < ApplicationRecord
 
     self.class.update_counters(id, code_attempts: 1)
     false
+  end
+
+  # They proved the email is theirs, but haven't picked a username yet
+  def verified!
+    touch(:verified_at)
+  end
+
+  # Where they stopped, for the admin dashboard
+  def stage
+    if verified_at then "Proved the email, didn't pick a username"
+    elsif code_attempts >= User::MAX_EMAIL_CODE_ATTEMPTS then "Locked out after 5 wrong codes"
+    else "Didn't enter the code or open the link"
+    end
   end
 
   # The account for this email, with its username; check persisted? for errors

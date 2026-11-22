@@ -19,6 +19,11 @@ class Admin::Overview
     User.order(created_at: :desc).limit(RECENT_USERS)
   end
 
+  # Email signups: a row is deleted once the account exists, so every one left is unfinished
+  def unfinished_email_signups = EmailSignup.order(created_at: :desc).limit(RECENT_USERS)
+
+  def new_users_with_email_count = User.where.not(email: nil).where(created_at: WEEK.ago..).count
+
   def passkeys_by_user = @passkeys_by_user ||= Credential.on_this_domain.group(:user_id).count
 
   def devices_by_user = @devices_by_user ||= WebPushNotification.group(:user_id).count

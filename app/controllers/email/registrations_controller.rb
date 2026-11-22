@@ -13,6 +13,7 @@ module Email
       return redirect_to new_email_session_path, alert: "That link has expired or was already used. Ask for a new code." unless signup
       return render :other_browser, locals: {signup:}, status: :forbidden unless started_here?(signup)
 
+      signup.verified!
       session[:verified_email_signup_id] = signup.id
       redirect_to new_email_registration_path
     end

@@ -122,6 +122,29 @@
   <% end %>
 
   <section class="flex flex-col gap-2">
+    <h2 class="text-sm font-semibold text-base-content/70">Unfinished email signups</h2>
+    <% signups = @overview.unfinished_email_signups %>
+    <% if signups.any? %>
+      <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
+        <% signups.each do |signup| %>
+          <li class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 px-4 py-2">
+            <p class="flex-1 min-w-0 truncate font-medium"><%= signup.email %></p>
+            <p class="text-sm text-base-content/70">
+              <%= signup.stage %> · <%= time_ago_in_words(signup.created_at) %> ago
+            </p>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-1 text-sm text-base-content/60">Everyone who started an email signup finished it.</p>
+    <% end %>
+    <p class="px-1 text-xs text-base-content/60">
+      <%= pluralize(@overview.new_users_with_email_count, "user") %> with an email joined this week ·
+      unfinished signups are deleted after <%= EmailSignup::KEPT_FOR.in_days.to_i %> days
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
     <h2 class="text-sm font-semibold text-base-content/70">Newest users</h2>
     <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
       <% @overview.recent_users.each do |user| %>

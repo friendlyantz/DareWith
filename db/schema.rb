@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_22_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -263,6 +263,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
     t.datetime "code_sent_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "verified_at"
     t.index ["email"], name: "index_email_signups_on_email", unique: true
     t.check_constraint "email::text = lower(btrim(email::text))", name: "email_signups_email_normalized"
   end

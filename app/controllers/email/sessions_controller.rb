@@ -71,6 +71,7 @@ module Email
       return redirect_to new_email_session_path, alert: "Ask for a new code" unless signup
       return wrong_code unless signup.verify_code(params[:code])
 
+      signup.verified!
       session.delete(:email_signup_id)
       session[:verified_email_signup_id] = signup.id
       redirect_to new_email_registration_path

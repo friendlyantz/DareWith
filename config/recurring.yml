@@ -14,3 +14,6 @@ production:
   device_sign_in_cleanup:
     command: "DeviceSignIn.stale.delete_all"
     schedule: "30 3 * * *"
+  email_signup_cleanup:
+    command: "EmailSignup.stale.delete_all"
+    schedule: "35 3 * * *"

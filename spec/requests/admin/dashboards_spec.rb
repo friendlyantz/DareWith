@@ -36,6 +36,22 @@ RSpec.describe "Admin dashboard", type: :request do
         expect(response.body).to include("1 of 2 users have push on")
         expect(response.body).to include("Job stats show in production only")
       end
+
+      it "lists email signups nobody finished, and where each one stopped" do
+        create(:email_signup, email: "waiting@example.com")
+        create(:email_signup, email: "proven@example.com", verified_at: Time.current)
+        create(:email_signup, email: "locked@example.com", code_attempts: 5)
+        create(:user, email: "done@example.com")
+
+        get admin_root_path
+
+        expect(response.body).to include(
+          "waiting@example.com", "Didn&#39;t enter the code or open the link",
+          "proven@example.com", "Proved the email, didn&#39;t pick a username",
+          "locked@example.com", "Locked out after 5 wrong codes",
+          "1 user with an email joined this week"
+        )
+      end
     end
   end
 
