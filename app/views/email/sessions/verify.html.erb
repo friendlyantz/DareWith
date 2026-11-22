@@ -27,7 +27,6 @@
     <% end %>
     <%= button_to likely_webview? ? "Sign in here anyway" : "Sign in", verify_email_session_path,
       params: {token: params[:token], return_to: params[:return_to]}.compact_blank,
-      class: "btn w-full #{likely_webview? ? "btn-ghost btn-sm" : "btn-primary"}",
-      form: {data: {turbo: false}} %>
+      class: "btn w-full #{likely_webview? ? "btn-ghost btn-sm" : "btn-primary"}" %>
   </div>
 </div>

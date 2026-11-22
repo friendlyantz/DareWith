@@ -1,56 +1,28 @@
 <% content_for :title, "Continue with email" %>
 <div class="w-full max-w-sm flex flex-col gap-5 pt-6">
   <div>
-    <h1 class="font-display text-3xl font-bold tracking-tight"><%= @email_sent ? "Check your email" : "Continue with email" %></h1>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Continue with email</h1>
     <p class="text-sm text-base-content/70 mt-1">New or back again, we'll email you a code. No password needed.</p>
   </div>
 
   <% if @error %>
     <div class="alert alert-error alert-soft"><%= @error %></div>
-  <% elsif @email_sent %>
-    <%# Same message whether or not the email has an account, so it doesn't reveal who has one %>
-    <div class="alert alert-success alert-soft">Check your email for a 6-digit code and a link.</div>
   <% end %>
 
-  <% if @email_sent %>
-    <div class="rounded-box border border-base-300 bg-base-100 p-5">
-      <%= form_with url: confirm_email_session_path, data: {turbo: false}, class: "flex flex-col gap-4" do |form| %>
-        <div>
-          <%= form.label :code, "Code from the email", class: "text-sm font-semibold" %>
-          <%= form.text_field :code,
-            required: true,
-            inputmode: "numeric",
-            autocomplete: "one-time-code",
-            pattern: "[0-9 ]{6,7}",
-            maxlength: 7,
-            placeholder: "123456",
-            class: "input w-full mt-1.5 font-mono text-lg tracking-widest" %>
-          <p class="text-xs text-base-content/70 mt-1">Type it here to stay in this browser. Or tap the link in the email.</p>
+  <div class="rounded-box border border-base-300 bg-base-100 p-5">
+    <%= form_with scope: :session, url: email_session_path, id: "email-form", class: "flex flex-col gap-4" do |form| %>
+      <div>
+        <%= form.label :email, "Email", class: "text-sm font-semibold" %>
+        <div data-controller="textfield" class="mt-1.5">
+          <%= form.email_field :email, value: params.dig(:session, :email), class: "input mdc-text-field__input w-full", placeholder: "your@email.com", required: true, autocapitalize: "none" %>
         </div>
-        <%= form.submit "Continue", class: "btn btn-primary w-full" %>
-      <% end %>
-    </div>
-    <div class="flex flex-col gap-2 text-center text-sm">
-      <p><%= link_to "Didn't get it? Check the spelling and try again", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
-    </div>
-  <% else %>
-    <div class="rounded-box border border-base-300 bg-base-100 p-5">
-      <%= form_with scope: :session, url: email_session_path, data: {turbo: false}, id: "email-form", class: "flex flex-col gap-4" do |form| %>
-        <div>
-          <%= form.label :email, "Email", class: "text-sm font-semibold" %>
-          <div data-controller="textfield" class="mt-1.5">
-            <%= form.email_field :email, value: params.dig(:session, :email), class: "input mdc-text-field__input w-full", placeholder: "your@email.com", required: true, autocapitalize: "none" %>
-          </div>
-        </div>
+      </div>
 
-        <%= form.submit "Continue with email", class: "btn btn-primary w-full" %>
-      <% end %>
-    </div>
-  <% end %>
+      <%= form.submit "Continue with email", class: "btn btn-primary w-full" %>
+    <% end %>
+  </div>
 
-  <% unless @email_sent %>
-    <div class="flex flex-col gap-2 text-center text-sm">
-      <p><%= link_to "Sign in with a passkey instead", new_webauthn_session_path, class: "link link-hover text-base-content/70" %></p>
-    </div>
-  <% end %>
+  <div class="flex flex-col gap-2 text-center text-sm">
+    <p><%= link_to "Sign in with a passkey instead", new_webauthn_session_path, class: "link link-hover text-base-content/70" %></p>
+  </div>
 </div>

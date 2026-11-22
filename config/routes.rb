@@ -63,6 +63,7 @@ Rails.application.routes.draw do
     resource :session, only: %i[new create] do
       get :verify, on: :collection
       post :verify, on: :collection, action: :redeem
+      get :code, on: :collection
       post :confirm, on: :collection
     end
     resource :registration, only: %i[new create] do

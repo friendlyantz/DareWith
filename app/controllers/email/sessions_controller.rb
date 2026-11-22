@@ -12,6 +12,11 @@ module Email
     def new
     end
 
+    # Typing the code comes after a redirect, so the form works with Turbo and in the Android app
+    def code
+      redirect_to new_email_session_path unless code_requested?
+    end
+
     def create
       return render_error("That doesn't look like an email address") unless URI::MailTo::EMAIL_REGEXP.match?(normalized_email.to_s)
 
@@ -78,21 +83,22 @@ module Email
     end
 
     def show_code_box
-      @email_sent = true
-      render :new
+      redirect_to code_email_session_path
+    end
+
+    def code_requested?
+      session[:email_sign_in_user_id].present? || session[:email_signup_id].present?
     end
 
     def wrong_code
-      @email_sent = true
       @error = "That code didn't work. Check the email or ask for a new one."
-      render :new, status: :unprocessable_content
+      render :code, status: :unprocessable_content
     end
 
     # Same limit whether or not the email has an account, so this doesn't reveal one either
     def too_many_emails
-      @email_sent = session[:email_sign_in_user_id].present? || session[:email_signup_id].present?
       @error = "That's a lot of emails. Use the code from the last one, or try again in 15 minutes."
-      render :new, status: :too_many_requests
+      render (code_requested? ? :code : :new), status: :too_many_requests
     end
 
     def render_error(message)

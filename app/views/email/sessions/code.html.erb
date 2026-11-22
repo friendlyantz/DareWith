@@ -1,0 +1,35 @@
+<% content_for :title, "Check your email" %>
+<div class="w-full max-w-sm flex flex-col gap-5 pt-6">
+  <div>
+    <h1 class="font-display text-3xl font-bold tracking-tight">Check your email</h1>
+    <p class="text-sm text-base-content/70 mt-1">New or back again, we'll email you a code. No password needed.</p>
+  </div>
+
+  <% if @error %>
+    <div class="alert alert-error alert-soft"><%= @error %></div>
+  <% else %>
+    <%# Same message whether or not the email has an account, so it doesn't reveal who has one %>
+    <div class="alert alert-success alert-soft">Check your email for a 6-digit code and a link.</div>
+  <% end %>
+
+  <div class="rounded-box border border-base-300 bg-base-100 p-5">
+    <%= form_with url: confirm_email_session_path, class: "flex flex-col gap-4" do |form| %>
+      <div>
+        <%= form.label :code, "Code from the email", class: "text-sm font-semibold" %>
+        <%= form.text_field :code,
+          required: true,
+          inputmode: "numeric",
+          autocomplete: "one-time-code",
+          pattern: "[0-9 ]{6,7}",
+          maxlength: 7,
+          placeholder: "123456",
+          class: "input w-full mt-1.5 font-mono text-lg tracking-widest" %>
+        <p class="text-xs text-base-content/70 mt-1">Type it here to stay in this browser. Or tap the link in the email.</p>
+      </div>
+      <%= form.submit "Continue", class: "btn btn-primary w-full" %>
+    <% end %>
+  </div>
+  <div class="flex flex-col gap-2 text-center text-sm">
+    <p><%= link_to "Didn't get it? Check the spelling and try again", new_email_session_path, class: "link link-hover text-base-content/70" %></p>
+  </div>
+</div>

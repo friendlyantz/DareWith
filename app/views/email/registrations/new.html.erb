@@ -12,7 +12,7 @@
   <% end %>
 
   <div class="rounded-box border border-base-300 bg-base-100 p-5">
-    <%= form_with model: @user, url: email_registration_path, data: {turbo: false}, id: "email-registration-form", class: "flex flex-col gap-4" do |form| %>
+    <%= form_with model: @user, url: email_registration_path, id: "email-registration-form", class: "flex flex-col gap-4" do |form| %>
       <div>
         <%= form.label :username, "Username", class: "text-sm font-semibold" %>
         <div data-controller="textfield" class="mt-1.5">

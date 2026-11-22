@@ -21,14 +21,16 @@ RSpec.describe "Sessions Email Authentication", type: :request do
         post email_session_path, params: {session: {email: user.email}}
       }.to have_enqueued_job
 
-      expect(response).to have_http_status(:success)
+      expect(response).to redirect_to(code_email_session_path)
+      follow_redirect!
       expect(response.body).to include("Check your email")
     end
 
     it "looks the same for an email with no account, so attackers can't enumerate users" do
       post email_session_path, params: {session: {email: "unknown@example.com"}}
 
-      expect(response).to have_http_status(:success)
+      expect(response).to redirect_to(code_email_session_path)
+      follow_redirect!
       expect(response.body).to include("Check your email for a 6-digit code and a link.")
       expect(response.body).to include("Code from the email")
     end
@@ -61,11 +63,11 @@ RSpec.describe "Sessions Email Authentication", type: :request do
     end
 
     it "strips and lowercases email" do
-      create(:user, email: "test@example.com")
+      user
       post email_session_path, params: {session: {email: "  TEST@EXAMPLE.COM  "}}
 
-      expect(response).to have_http_status(:success)
-      expect(response.body).to include("Check your email")
+      expect(response).to redirect_to(code_email_session_path)
+      expect(user.reload.email_login_token).to be_present
     end
 
     it "generates and stores hashed token" do
@@ -81,6 +83,14 @@ RSpec.describe "Sessions Email Authentication", type: :request do
 
       user.reload
       expect(user.email_login_token_expires_at).to be_within(5.seconds).of(24.hours.from_now)
+    end
+  end
+
+  describe "GET /email/session/code" do
+    it "sends anyone who hasn't asked for a code to the email form" do
+      get code_email_session_path
+
+      expect(response).to redirect_to(new_email_session_path)
     end
   end
 

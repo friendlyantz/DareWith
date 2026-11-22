@@ -19,8 +19,7 @@
       <%# The email goes in a hidden field, so the page doesn't show a forwarded link's address to whoever opened it %>
       <%= button_to "Email a new code to use here", email_session_path,
         params: {session: {email: signup.email}},
-        class: "btn btn-primary w-full",
-        form: {data: {turbo: false}} %>
+        class: "btn btn-primary w-full" %>
     </div>
   </div>
 </div>
