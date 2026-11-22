@@ -21,9 +21,17 @@ window.addEventListener("beforeinstallprompt", (event) => {
   window.dispatchEvent(new CustomEvent("install-app:changed"))
 })
 window.addEventListener("appinstalled", () => {
+  rememberAppInstalled()
   window.installAppPrompt = null
   window.dispatchEvent(new CustomEvent("install-app:changed"))
 })
+
+// Some browsers (Brave) keep offering to install the app after it's on the Home Screen,
+// so the browser tab learns it's installed once the app has been opened or added
+function rememberAppInstalled() {
+  document.cookie = "app_installed=true; path=/; max-age=31536000; samesite=lax"
+}
+if (window.matchMedia("(display-mode: standalone)").matches) rememberAppInstalled()
 
 // Detect Telegram WebView and set a cookie
 document.addEventListener('DOMContentLoaded', () => {

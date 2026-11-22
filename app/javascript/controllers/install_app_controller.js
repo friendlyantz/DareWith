@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 // "Add to Home Screen" for browsers that can install the app themselves (Chrome, Edge,
-// Samsung Internet). Stays hidden on iPhone, which has no install button to press, and
-// inside the installed app.
+// Samsung Internet). Stays hidden on iPhone, which has no install button to press, inside
+// the installed app, and in a browser where the app has already been installed or opened.
 export default class extends Controller {
   connect() {
     this.refresh()
@@ -13,7 +13,8 @@ export default class extends Controller {
   }
 
   isInstalled() {
-    return window.matchMedia("(display-mode: standalone)").matches
+    return window.matchMedia("(display-mode: standalone)").matches ||
+      document.cookie.includes("app_installed=true")
   }
 
   async install() {

@@ -41,4 +41,14 @@ RSpec.describe "Installing the app", type: :system do
 
     expect(page).to have_no_content("Add DareWith to your Home Screen")
   end
+
+  scenario "Once the app is installed the browser tab stops offering it" do
+    visit profile_path
+    page.execute_script("window.dispatchEvent(new Event('appinstalled'))")
+
+    visit profile_path
+    offer_install
+
+    expect(page).to have_no_content("Add DareWith to your Home Screen")
+  end
 end
