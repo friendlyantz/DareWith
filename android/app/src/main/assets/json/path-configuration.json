@@ -6,7 +6,7 @@
       "properties": { "context": "default", "pull_to_refresh_enabled": true }
     },
     {
-      "patterns": ["^/(\\?|$)", "^/today(\\?|$)", "^/challenge_check_ins(\\?|$)", "^/me(\\?|$)"],
+      "patterns": ["^/(\\?|$)", "^/today(\\?|$)", "^/challenge_check_ins(\\?|$)", "^/notifications(\\?|$)", "^/me(\\?|$)"],
       "properties": { "presentation": "replace_root" }
     },
     {

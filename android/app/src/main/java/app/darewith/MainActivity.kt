@@ -6,6 +6,7 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -19,7 +20,7 @@ class MainActivity : HotwireActivity() {
     private val preferences by lazy { getSharedPreferences("session", MODE_PRIVATE) }
     val signedIn by lazy { preferences.getBoolean(SIGNED_IN, false) }
 
-    // The bell's count, from the last page loaded
+    // The Alerts tab's count, from the last page loaded
     val unreadNotifications = MutableLiveData(0)
 
     private lateinit var bottomNavigation: HotwireBottomNavigationController
@@ -58,7 +59,14 @@ class MainActivity : HotwireActivity() {
         bottomNavigation = HotwireBottomNavigationController(this, findViewById(R.id.bottom_navigation), lazyLoadTabs = true)
         bottomNavigation.load(Tabs.all)
 
-        // Back on the first page of Feed or Me goes to Today first, like other Android apps
+        val alertsBadge = findViewById<BottomNavigationView>(R.id.bottom_navigation).getOrCreateBadge(Tabs.all.indexOf(Tabs.alerts))
+        alertsBadge.maxNumber = 9
+        unreadNotifications.observe(this) {
+            alertsBadge.number = it
+            alertsBadge.isVisible = it > 0
+        }
+
+        // Back on the first page of another tab goes to Today first, like other Android apps
         onBackPressedDispatcher.addCallback(this) {
             val navigator = delegate.currentNavigator
             when {

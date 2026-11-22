@@ -30,8 +30,7 @@
     <%# Turbo does a full reload when this changes, so open tabs pick up new JavaScript after a deploy %>
     <meta name="importmap-digest" content="<%= Rails.application.importmap.digest(resolver: self) %>" data-turbo-track="reload">
   </head>
-  <%# The Android app's toolbar sits under the status bar already %>
-  <body class="<%= class_names("pb-[env(safe-area-inset-bottom)]", "pt-[env(safe-area-inset-top)]": !hotwire_native_app?) %>">
+  <body class="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
     <script>
       // Make the VAPID public key available to the client as a Uint8Array

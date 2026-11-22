@@ -9,10 +9,12 @@ object Tabs {
     val all = listOf(
         tab("Today", R.drawable.ic_today, "/today", R.id.today_navigator),
         tab("Feed", R.drawable.ic_feed, "/challenge_check_ins", R.id.feed_navigator),
+        tab("Alerts", R.drawable.ic_bell, "/notifications", R.id.alerts_navigator),
         tab("Me", R.drawable.ic_me, "/me", R.id.me_navigator)
     )
 
     val today = all.first()
+    val alerts = all[2]
 
     // The tab whose first page is at this location, if any
     fun showing(location: String) = all.find { it.configuration.startLocation.toUri().path == location.toUri().path }

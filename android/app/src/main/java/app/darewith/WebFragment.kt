@@ -2,29 +2,37 @@ package app.darewith
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
-import com.google.android.material.badge.ExperimentalBadgeUtils
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import dev.hotwire.navigation.destinations.HotwireDestinationDeepLink
 import dev.hotwire.navigation.fragments.HotwireWebFragment
 import org.json.JSONObject
 
-// Every page in the app. Tells MainActivity whether someone is signed in, and has the bell once they are
-// (except on forms that slide up, which only have a close button)
+// Every page in the app. Tells MainActivity whether someone is signed in and how many alerts are unread.
+// No toolbar: the page fills the screen and scrolls under the status bar; forms that slide up get a
+// close button floating over it (layout/hotwire_fragment_web.xml)
 @HotwireDestinationDeepLink(uri = "hotwire://fragment/web")
 class WebFragment : HotwireWebFragment() {
     private val mainActivity get() = activity as? MainActivity
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (mainActivity?.signedIn == true && !isModal) {
-            addBell()
+        keepBelowStatusBar(view)
+
+        if (isModal) {
+            showClose(view)
+        } else if (mainActivity?.signedIn == true) {
             leaveGestureBarToTabs(view)
         }
     }
+
+    // No title or back arrow: the page has its own heading, and Android has the back gesture
+    override fun toolbarForNavigation(): Toolbar? = null
 
     override fun onVisitCompleted(location: String, completedOffline: Boolean) {
         super.onVisitCompleted(location, completedOffline)
@@ -47,20 +55,23 @@ class WebFragment : HotwireWebFragment() {
         }
     }
 
-    @OptIn(ExperimentalBadgeUtils::class)
-    private fun addBell() {
-        val toolbar = toolbarForNavigation() ?: return
-        toolbar.inflateMenu(R.menu.web)
-        toolbar.setOnMenuItemClickListener {
-            navigator.route("${BuildConfig.START_LOCATION}/notifications")
-            true
-        }
+    // The close button sits just below the status bar, and the page fades out under it
+    private fun keepBelowStatusBar(view: View) {
+        val buttons = view.findViewById<View>(R.id.floating_buttons)
+        val fade = view.findViewById<View>(R.id.status_bar_fade)
 
-        val badge = BadgeDrawable.create(requireContext()).apply { maxNumber = 9 }
-        BadgeUtils.attachBadgeDrawable(badge, toolbar, R.id.notifications)
-        mainActivity?.unreadNotifications?.observe(viewLifecycleOwner) {
-            badge.number = it
-            badge.isVisible = it > 0
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            buttons.updatePadding(top = statusBar + buttons.paddingBottom)
+            fade.updateLayoutParams { height = statusBar * 2 }
+            insets
+        }
+    }
+
+    private fun showClose(view: View) {
+        view.findViewById<View>(R.id.close).apply {
+            isVisible = true
+            setOnClickListener { navigator.pop() }
         }
     }
 

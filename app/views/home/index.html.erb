@@ -1,5 +1,5 @@
 <%# The Android app shows the title in its toolbar, where the search-friendly one is too long %>
-<% content_for :title, hotwire_native_app? ? "DareWith" : "DareWith · Dare your #{landing_dare_who}" %>
+<% content_for :title, "DareWith · Dare your #{landing_dare_who}" %>
 <div class="mx-auto flex w-full max-w-md flex-col gap-12 px-5 pt-10 pb-28">
   <section class="flex flex-col gap-5">
     <h1 class="font-display text-5xl font-bold leading-[1.05] tracking-tight">Dare Your <%= landing_dare_who.capitalize %></h1>

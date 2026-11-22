@@ -1,0 +1,7 @@
+<%# locals: () %>
+<%# Only on the web: the Android app has the system back gesture %>
+<div class="-mx-2">
+  <%= link_to current_user ? today_path : challenge_stories_path, class: "btn btn-ghost px-2 gap-1" do %>
+    <%= icon(:chevron_left) %> <%= current_user ? "Today" : "Challenges" %>
+  <% end %>
+</div>

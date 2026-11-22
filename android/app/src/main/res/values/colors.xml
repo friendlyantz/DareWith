@@ -3,6 +3,7 @@
 <resources>
     <color name="base_100">#FFFFFF</color>
     <color name="base_200">#F6F5F1</color>
+    <color name="base_200_clear">#00F6F5F1</color>
     <color name="base_300">#E4E2DC</color>
     <color name="base_content">#17181A</color>
     <color name="base_content_soft">#5C5D60</color>

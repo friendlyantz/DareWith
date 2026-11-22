@@ -44,7 +44,7 @@ RSpec.describe "The Android app", type: :request do
     end
 
     it "starts a tab over when going back to its first page, instead of stacking it up" do
-      %w[/ /today /today?day=2026-11-22 /challenge_check_ins /me].each do |tab|
+      %w[/ /today /today?day=2026-11-22 /challenge_check_ins /notifications /me].each do |tab|
         expect(properties_for(tab)).to include("presentation" => "replace_root"), tab
       end
 

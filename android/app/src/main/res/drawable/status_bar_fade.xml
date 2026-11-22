@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The page fades out under the status bar, so the clock stays readable -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:endColor="@color/base_200_clear"
+        android:startColor="@color/base_200" />
+</shape>

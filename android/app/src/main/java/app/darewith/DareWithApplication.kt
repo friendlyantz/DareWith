@@ -22,7 +22,7 @@ class DareWithApplication : Application() {
         // Lets chrome://inspect on the Mac debug the page in debug builds
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
 
-        // Every page opens in our WebFragment (toolbar bell, signed-in check)
+        // Every page opens in our WebFragment (signed-in check, alerts count)
         Hotwire.defaultFragmentDestination = WebFragment::class
         Hotwire.registerFragmentDestinations(WebFragment::class, HotwireWebBottomSheetFragment::class)
 
