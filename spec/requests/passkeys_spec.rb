@@ -66,6 +66,16 @@ RSpec.describe "Passkeys", type: :request do
       expect(session[:user_id]).to eq user.id
     end
 
+    # Not the home page: the Android app would go back to the signed-out home page it came from
+    it "goes straight to Today for someone already in a challenge" do
+      register_passkey
+      create(:challenge_participant, user:)
+
+      sign_in_with_passkey(user_handle:)
+
+      expect(response.parsed_body["redirect_to"]).to eq today_path
+    end
+
     it "lets the browser offer every passkey it holds" do
       register_passkey
 

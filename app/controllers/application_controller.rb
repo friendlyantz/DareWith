@@ -60,10 +60,11 @@ class ApplicationController < ActionController::Base
     session[:return_to] = path if path.start_with?("/") && !path.start_with?("//")
   end
 
-  # Someone not in any challenge yet (e.g. just signed up) starts by making one
+  # Someone not in any challenge yet (e.g. just signed up) starts by making one.
+  # Today directly, not the home page: the Android app would go back to the signed-out home page it came from
   def after_sign_in_path
     return session.delete(:return_to) if session[:return_to].present?
 
-    current_user.challenge_participants.none? ? new_challenge_story_path : root_path
+    current_user.challenge_participants.none? ? new_challenge_story_path : today_path
   end
 end
