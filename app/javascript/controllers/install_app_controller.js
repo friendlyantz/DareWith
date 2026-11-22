@@ -27,9 +27,9 @@ export default class extends Controller {
     this.refresh()
   }
 
-  // "Later": the banner stays away for a month; the card on Me stays
+  // "Later": the banner stays away for a week, like the notifications one; the card on Me stays
   dismiss() {
-    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString()
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
     document.cookie = `install_app_dismissed=true; expires=${expires}; path=/`
     this.element.remove()
   }
