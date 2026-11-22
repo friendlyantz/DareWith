@@ -1,7 +1,8 @@
 <%# locals: (message:, dismissable:, ask: true) %>
 <%# The push-notifications controller shows the one state that fits this browser, or removes the prompt %>
+<%# The bell centres beside the short "Turn on" row and stays at the top of the longer explanations %>
 <div data-push-notifications-target="banner" class="hidden w-full">
-  <div class="flex items-start gap-3 rounded-box border border-base-300 bg-base-200 p-3 text-left text-sm">
+  <div class="flex items-start gap-3 rounded-box has-[[data-push-notifications-target=ask]:not([hidden])]:items-center border border-base-300 bg-base-200 p-3 text-left text-sm">
     <%= icon(:bell, css: "mt-0.5 size-5 shrink-0 text-primary") %>
     <% if ask %>
       <div data-push-notifications-target="ask" hidden class="flex flex-1 flex-wrap items-center gap-2">
