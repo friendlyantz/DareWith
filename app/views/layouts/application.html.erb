@@ -46,6 +46,11 @@
 
     <% if current_user&.in_a_challenge? && !current_page?(profile_path) %>
       <%= render "web_push_notifications/banner" %>
+      <% unless cookies[:install_app_dismissed] %>
+        <div class="flex justify-center px-5 pt-3">
+          <div class="w-full max-w-md"><%= render "install_app/prompt", dismissable: true %></div>
+        </div>
+      <% end %>
     <% end %>
 
     <div id="content">

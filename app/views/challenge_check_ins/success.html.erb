@@ -64,6 +64,8 @@
       </div>
     <% end %>
 
+    <%= render "install_app/prompt", dismissable: false %>
+
     <%# The page behind the sheet doesn't reload, so its menu's progress card gets this check-in too %>
     <%= turbo_stream.replace dom_id(@challenge_participant, :share_card),
       partial: "challenge_stories/share_card_button",

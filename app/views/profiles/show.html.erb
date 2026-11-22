@@ -38,6 +38,8 @@
 
   <%= render "profiles/badges", badges_by_kind: @badges_by_kind, next_badges: @next_badges %>
 
+  <%= render "install_app/prompt", dismissable: false %>
+
   <%# The switch below is the way to turn on; this only explains iPhone and blocked browsers %>
   <%= render "web_push_notifications/prompt", message: "Get notified when friends check in", dismissable: false, ask: false %>
 

@@ -14,6 +14,17 @@ try {
   console.warn("Could not detect time zone", error)
 }
 
+// Chrome offers to install the app once per page load, often before any controller
+// connects, so keep the offer for the install-app controller to use later
+window.addEventListener("beforeinstallprompt", (event) => {
+  window.installAppPrompt = event
+  window.dispatchEvent(new CustomEvent("install-app:changed"))
+})
+window.addEventListener("appinstalled", () => {
+  window.installAppPrompt = null
+  window.dispatchEvent(new CustomEvent("install-app:changed"))
+})
+
 // Detect Telegram WebView and set a cookie
 document.addEventListener('DOMContentLoaded', () => {
   const isTelegramAndroid = navigator.userAgent.includes('Android') && typeof TelegramWebview !== 'undefined';
