@@ -22,6 +22,12 @@ class AndroidPathConfigurationsController < ApplicationController
         {
           patterns: ["/new(\\?|$)", "/edit(\\?|$)", "^/webauthn/", "^/email/", "^/device_sign_in"],
           properties: {pull_to_refresh_enabled: false}
+        },
+        # Making or changing a challenge and pledging a reward slide up over the page, with a close button.
+        # Saving closes it: the redirect opens the new page, or reloads the one underneath
+        {
+          patterns: ["^/challenge_stories/new(\\?|$)", "^/challenge_stories/[^/]+/edit(\\?|$)", "^/challenge_stories/[^/]+/challenge_rewards/new(\\?|$)"],
+          properties: {context: "modal"}
         }
       ]
     }

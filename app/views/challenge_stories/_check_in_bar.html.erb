@@ -1,5 +1,5 @@
 <%# locals: (challenge_story:, participant:) %>
-<div class="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t border-base-300 bg-base-200 px-5 py-3">
+<div class="<%= class_names("sticky z-10 -mx-5 border-t border-base-300 bg-base-200 px-5 pt-3", web_dock? ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] pb-3" : "bottom-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]") %>">
   <% if !challenge_story.started? %>
     <div class="flex h-12 items-center justify-center gap-2 rounded-field bg-base-100 font-semibold">
       <%= starts_in(challenge_story) %> · <%= challenge_story.start.strftime("%a %-d %b") %>

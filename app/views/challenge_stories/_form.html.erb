@@ -166,7 +166,7 @@
     <p class="mt-1.5 text-sm text-base-content/70">Next round starts the day after this one ends. Everyone stays in.</p>
   </div>
 
-  <div class="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-5 -mb-5 mt-2 flex flex-col gap-2 rounded-b-box border-t border-base-300 bg-base-200 px-5 py-3">
+  <div class="<%= class_names("sticky z-10 -mx-5 -mb-5 mt-2 flex flex-col gap-2 rounded-b-box border-t border-base-300 bg-base-200 px-5 pt-3", web_dock? ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] pb-3" : "bottom-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]") %>">
     <p class="text-sm text-base-content/70">Rules: <span class="font-semibold text-base-content" data-challenge-goal-target="summary"></span></p>
     <%= form.button submit_text, type: "submit", class: "btn btn-primary btn-block" %>
   </div>

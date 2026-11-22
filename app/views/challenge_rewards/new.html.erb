@@ -1,10 +1,13 @@
 <% content_for :title, "Pledge a reward" %>
 <div class="w-full max-w-md flex flex-col gap-4">
-  <div class="-mx-2">
-    <%= link_to challenge_story_path(@challenge_story), class: "btn btn-ghost px-2 gap-1" do %>
-      <%= icon(:chevron_left) %> <%= @challenge_story.title %>
-    <% end %>
-  </div>
+  <%# The Android app's toolbar has its own back button %>
+  <% unless hotwire_native_app? %>
+    <div class="-mx-2">
+      <%= link_to challenge_story_path(@challenge_story), class: "btn btn-ghost px-2 gap-1" do %>
+        <%= icon(:chevron_left) %> <%= @challenge_story.title %>
+      <% end %>
+    </div>
+  <% end %>
 
   <div>
     <h1 class="font-display text-3xl font-bold tracking-tight">Pledge a reward</h1>

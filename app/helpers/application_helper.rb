@@ -1,4 +1,9 @@
 module ApplicationHelper
+  # The site's own bottom tabs. The Android app has native ones once someone is signed in
+  def web_dock?
+    !(hotwire_native_app? && current_user)
+  end
+
   def real_browser_name
     ua = request.user_agent.to_s
     if /iPhone|iPad|iPod/.match?(ua)

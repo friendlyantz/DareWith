@@ -60,6 +60,18 @@ RSpec.describe "The Android app", type: :request do
         expect(properties_for(form)).to include("pull_to_refresh_enabled" => false), form
       end
     end
+
+    it "slides up the forms for making or changing a challenge and pledging a reward" do
+      id = "0b6c3f4e-1d2a-4c5b-9e8f-7a6b5c4d3e2f"
+
+      ["/challenge_stories/new", "/challenge_stories/new?template=pushups", "/challenge_stories/#{id}/edit", "/challenge_stories/#{id}/challenge_rewards/new"].each do |form|
+        expect(properties_for(form)).to include("context" => "modal"), form
+      end
+
+      ["/challenge_stories/#{id}", "/challenge_stories/#{id}/challenge_rewards", "/webauthn/session/new"].each do |page|
+        expect(properties_for(page)).to include("context" => "default"), page
+      end
+    end
   end
 
   describe "the app's own toolbar and tabs" do

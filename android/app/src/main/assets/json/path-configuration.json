@@ -12,6 +12,10 @@
     {
       "patterns": ["/new(\\?|$)", "/edit(\\?|$)", "^/webauthn/", "^/email/", "^/device_sign_in"],
       "properties": { "pull_to_refresh_enabled": false }
+    },
+    {
+      "patterns": ["^/challenge_stories/new(\\?|$)", "^/challenge_stories/[^/]+/edit(\\?|$)", "^/challenge_stories/[^/]+/challenge_rewards/new(\\?|$)"],
+      "properties": { "context": "modal" }
     }
   ]
 }

@@ -1,4 +1,5 @@
 <%# locals: (selected:) %>
+<%# Picking a template swaps the form in place, so back leaves the form instead of stepping through templates %>
 <section class="flex flex-col gap-2" aria-label="Templates">
   <h2 class="text-sm font-semibold text-base-content/70">Start from a template</h2>
   <div class="flex flex-wrap gap-2">
@@ -6,12 +7,13 @@
       <%= link_to new_challenge_story_path(template: template.key),
         class: class_names("btn btn-sm rounded-full", "btn-primary": template.key == selected&.key, "bg-base-100": template.key != selected&.key),
         title: template.title,
+        data: {turbo_action: "replace"},
         aria: {current: (template.key == selected&.key) || nil, label: template.title} do %>
         <span aria-hidden="true"><%= template.emoji %></span> <%= template.chip %>
       <% end %>
     <% end %>
     <% if selected %>
-      <%= link_to "Start blank", new_challenge_story_path, class: "btn btn-sm btn-ghost rounded-full" %>
+      <%= link_to "Start blank", new_challenge_story_path, class: "btn btn-sm btn-ghost rounded-full", data: {turbo_action: "replace"} %>
     <% end %>
   </div>
 </section>

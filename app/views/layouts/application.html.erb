@@ -67,6 +67,6 @@
       <% end %>
     </div>
     <%= turbo_stream_from current_user, "notifications" if current_user %>
-    <%= render "layouts/footer" unless hotwire_native_app? && current_user %>
+    <%= render "layouts/footer" if web_dock? %>
   </body>
 </html>
