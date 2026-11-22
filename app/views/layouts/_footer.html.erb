@@ -8,6 +8,10 @@
       <%= icon(:photo, css: "size-6") %>
       <span class="dock-label">Feed</span>
     <% end %>
+    <%= link_to notifications_path, class: class_names("dock-active": current_page?(notifications_path)) do %>
+      <%= render "notifications/badge", user: current_user %>
+      <span class="dock-label">Alerts</span>
+    <% end %>
     <%= link_to profile_path, class: class_names("dock-active": current_page?(profile_path) || current_page?(credentials_path)) do %>
       <%= icon(:user, css: "size-6") %>
       <span class="dock-label">Me</span>

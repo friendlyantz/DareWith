@@ -13,6 +13,6 @@ RSpec.describe "Home Page", type: :system do
   scenario "visitor can navigate to sign in" do
     home_page.load
 
-    expect(home_page).to have_navbar
+    expect(home_page.dock).to have_link("Sign in")
   end
 end

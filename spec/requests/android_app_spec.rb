@@ -85,7 +85,6 @@ RSpec.describe "The Android app", type: :request do
       page = Capybara.string(response.body)
       expect(page).to have_css("meta[name='current-user-id'][content='#{user.id}']", visible: :all)
       expect(page).to have_css("meta[name='unread-notifications-count'][content='0']", visible: :all)
-      expect(page).not_to have_css(".navbar")
       expect(page).not_to have_css("nav.dock")
     end
 
@@ -94,16 +93,16 @@ RSpec.describe "The Android app", type: :request do
 
       page = Capybara.string(response.body)
       expect(page).not_to have_css("meta[name='current-user-id']", visible: :all)
-      expect(page).not_to have_css(".navbar")
       expect(page).to have_css("nav.dock")
     end
 
-    it "keeps the site's header and tabs in browsers" do
-      get root_path
+    it "keeps the site's tabs in browsers, the same ones as the app's" do
+      sign_in_as(create(:user))
 
-      page = Capybara.string(response.body)
-      expect(page).to have_css(".navbar")
-      expect(page).to have_css("nav.dock")
+      get today_path
+
+      dock = Capybara.string(response.body).find("nav.dock")
+      expect(dock.all(".dock-label").map(&:text)).to eq(%w[Today Feed Alerts Me])
     end
 
     it "leaves back links to the app's toolbar" do

@@ -43,8 +43,6 @@
       <% end %>
     </script>
 
-    <%# The Android app has its own toolbar, and its own tabs once signed in %>
-    <%= render "layouts/navbar" unless hotwire_native_app? %>
     <%= render "layouts/flash" %>
 
     <% if current_user&.in_a_challenge? && !current_page?(profile_path) %>
