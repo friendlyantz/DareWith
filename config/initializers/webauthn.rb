@@ -2,7 +2,11 @@ WebAuthn.configure do |config|
   # This value needs to match `window.location.origin` evaluated by
   # the User Agent during registration and authentication ceremonies.
   # Multiple origins can be used when needed. Using more than one will imply you MUST configure rp_id explicitely. If you need your credentials to be bound to a single origin but you have more than one tenant, please see [our Advanced Configuration section](https://github.com/cedarcode/webauthn-ruby/blob/master/docs/advanced_configuration.md) instead of adding multiple origins.
-  config.allowed_origins = [Rails.configuration.webauthn_origin]
+  # Passkeys used in the Android app come from the app's signing key, not the web page
+  android_app_origins = Rails.configuration.android_app_cert_fingerprints.map do |fingerprint|
+    "android:apk-key-hash:" + Base64.urlsafe_encode64([fingerprint.delete(":")].pack("H*"), padding: false)
+  end
+  config.allowed_origins = [Rails.configuration.webauthn_origin, *android_app_origins]
   # Passkeys belong to this domain. A new domain means new passkeys
   config.rp_id = URI(Rails.configuration.webauthn_origin).host
   # Relying Party name for display purposes

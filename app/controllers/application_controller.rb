@@ -18,8 +18,10 @@ class ApplicationController < ActionController::Base
     Time.use_zone(current_user&.time_zone || browser_zone || "UTC", &)
   end
 
-  # In-app browsers (Telegram, WhatsApp, Instagram...) can't use passkeys
+  # In-app browsers (Telegram, WhatsApp, Instagram...) can't use passkeys. Our own Android app can
   def likely_webview?
+    return false if hotwire_native_app?
+
     ua = request.user_agent.to_s
     android_webview = /; ?wv\)/.match?(ua)
     ios_webview = /iPhone|iPad|iPod/.match?(ua) && !ua.include?("Safari")

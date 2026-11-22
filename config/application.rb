@@ -26,6 +26,14 @@ module TakeOnMe
     # The app's domain. Passkeys, emails and push all follow it
     config.app_host = "darewith.app"
 
+    # The Android app in android/, and the SHA-256 of the keys that sign it.
+    # Served in /.well-known/assetlinks.json so the app can use this site's passkeys
+    config.android_app_package = "app.darewith"
+    config.android_app_cert_fingerprints = [
+      "A5:F1:3A:BA:34:02:02:98:BD:8E:3E:16:C1:85:78:3F:5D:16:25:3C:4B:05:CA:84:89:5C:DB:D6:72:32:BD:CC", # release
+      "E5:60:07:1E:FE:7D:6B:4A:E8:08:FC:FF:43:A0:51:CC:7E:99:F2:59:73:45:2E:E2:AE:D7:2C:36:24:C0:40:A4" # debug builds from Anton's Mac
+    ]
+
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.

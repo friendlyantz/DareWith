@@ -9,7 +9,6 @@ material = "1.10.0"
 activityKtx = "1.13.0"
 constraintlayout = "2.1.4"
 hotwire = "1.4.1"
-webkit = "1.18.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,7 +22,6 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 hotwire-core = { group = "dev.hotwire", name = "core", version.ref = "hotwire" }
 hotwire-navigation-fragments = { group = "dev.hotwire", name = "navigation-fragments", version.ref = "hotwire" }
-androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)
-    implementation(libs.androidx.webkit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

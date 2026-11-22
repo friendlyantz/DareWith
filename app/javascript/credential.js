@@ -1,3 +1,4 @@
+import { Turbo } from "@hotwired/turbo-rails";
 import { showMessage } from "messenger";
 
 function getCSRFToken() {
@@ -23,8 +24,8 @@ function callback(url, body) {
   }).then(function(response) {
     if (response.ok) {
       response.json()
-        .then((data) => window.location.replace(data.redirect_to || "/"))
-        .catch(() => window.location.replace("/"))
+        .then((data) => Turbo.visit(data.redirect_to || "/", { action: "replace" }))
+        .catch(() => Turbo.visit("/", { action: "replace" }))
       return true;
     } else if (response.status < 500) {
       response.text().then(showMessage);
