@@ -1,9 +1,11 @@
 package app.darewith
 
 import android.app.Application
+import dev.hotwire.core.bridge.BridgeComponentFactory
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.turbo.config.PathConfiguration
 import dev.hotwire.navigation.config.defaultFragmentDestination
+import dev.hotwire.navigation.config.registerBridgeComponents
 import dev.hotwire.navigation.config.registerFragmentDestinations
 import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.fragments.HotwireWebBottomSheetFragment
@@ -25,6 +27,9 @@ class DareWithApplication : Application() {
         // Every page opens in our WebFragment (signed-in check, alerts count)
         Hotwire.defaultFragmentDestination = WebFragment::class
         Hotwire.registerFragmentDestinations(WebFragment::class, HotwireWebBottomSheetFragment::class)
+
+        // Native features the site's JavaScript can ask for (app/javascript/native_share.js)
+        Hotwire.registerBridgeComponents(BridgeComponentFactory("share", ::ShareComponent))
 
         // Links to another tab's page switch tabs; the rest is Hotwire's default routing
         Hotwire.registerRouteDecisionHandlers(

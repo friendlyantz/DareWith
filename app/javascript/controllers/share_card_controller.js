@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { copyText } from "controllers/clipboard_controller"
+import { shareInApp, dataUrl } from "native_share"
 
 export const WIDTH = 1080
 export const HEIGHT = 1920
@@ -25,7 +26,10 @@ export default class extends Controller {
   async share() {
     copyText(this.urlValue)
     this.confirmCopied()
-    const file = new File([await this.card], this.fileName, { type: "image/png" })
+    const card = await this.card
+    if (shareInApp({ text: this.shareText, image: await dataUrl(card), fileName: this.fileName })) return
+
+    const file = new File([card], this.fileName, { type: "image/png" })
 
     if (navigator.canShare?.({ files: [file] })) {
       navigator.share({ files: [file], text: this.shareText }).catch(() => {})
