@@ -3,12 +3,12 @@ require "rails_helper"
 RSpec.describe "The Android app", type: :request do
   let(:android_app) { "Hotwire Native Android; Turbo Native Android; bridge-components: []; Mozilla/5.0 (Linux; Android 16; Pixel 9; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/142.0 Mobile Safari/537.36" }
 
-  it "is linked to this site, so it can use the site's passkeys" do
+  it "is linked to this site, so it can use the site's passkeys and open its invite links" do
     get "/.well-known/assetlinks.json", headers: {"User-Agent" => "Google-Digital-Asset-Links"}
 
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.sole).to include(
-      "relation" => include("delegate_permission/common.get_login_creds"),
+      "relation" => include("delegate_permission/common.get_login_creds", "delegate_permission/common.handle_all_urls"),
       "target" => {
         "namespace" => "android_app",
         "package_name" => "app.darewith",

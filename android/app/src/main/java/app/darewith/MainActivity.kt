@@ -8,14 +8,14 @@ import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dev.hotwire.navigation.activities.HotwireActivity
-import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 import dev.hotwire.navigation.tabs.HotwireBottomNavigationController
 import dev.hotwire.navigation.tabs.HotwireBottomTab
 import dev.hotwire.navigation.tabs.navigatorConfigurations
 
 // Signed out, one screen with the site's own tabs. Signed in, native bottom tabs.
-// Every page says whether someone is signed in; when that changes, the app starts over in the other mode
+// Every page says whether someone is signed in; when that changes, the app starts over in the other mode.
+// Invite links (https://darewith.app/c/...) open here instead of the browser
 class MainActivity : HotwireActivity() {
     private val preferences by lazy { getSharedPreferences("session", MODE_PRIVATE) }
     val signedIn by lazy { preferences.getBoolean(SIGNED_IN, false) }
@@ -24,13 +24,13 @@ class MainActivity : HotwireActivity() {
     val unreadNotifications = MutableLiveData(0)
 
     private lateinit var bottomNavigation: HotwireBottomNavigationController
-    private var openAfterSignIn: String? = null
+    private var openOnStart: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState == null) openAfterSignIn = intent.getStringExtra(OPEN_AFTER_SIGN_IN)
+        if (savedInstanceState == null) openOnStart = intent.getStringExtra(OPEN_ON_START) ?: intent.linkedPage()
 
         if (signedIn) showTabs() else setContentView(R.layout.activity_main)
     }
@@ -38,18 +38,24 @@ class MainActivity : HotwireActivity() {
     override fun navigatorConfigurations() =
         if (signedIn) Tabs.all.navigatorConfigurations else listOf(signedOut)
 
-    // An invite or "make your first challenge" opens over Today, so back goes to Today
-    override fun onNavigatorReady(navigator: Navigator) {
-        openAfterSignIn?.let { navigator.route(it) }
-        openAfterSignIn = null
+    // An invite link tapped while the app is already open
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.linkedPage()?.let { delegate.currentNavigator?.route(it) }
     }
 
     fun pageLoaded(location: String, signedIn: Boolean, unreadNotifications: Int) {
         this.unreadNotifications.value = unreadNotifications
-        if (signedIn == this.signedIn || isFinishing) return
+        if (isFinishing) return
 
-        preferences.edit { putBoolean(SIGNED_IN, signedIn) }
-        startOver(openAfterSignIn = location.takeIf { signedIn && Tabs.showing(it) == null })
+        if (signedIn != this.signedIn) {
+            preferences.edit { putBoolean(SIGNED_IN, signedIn) }
+            return startOver(openOnStart = openOnStart ?: location.takeIf { signedIn && Tabs.showing(it) == null })
+        }
+
+        // An invite or "make your first challenge" opens over the first page once it has loaded, so back goes there
+        openOnStart?.let { delegate.currentNavigator?.route(it) }
+        openOnStart = null
     }
 
     fun select(tab: HotwireBottomTab) = bottomNavigation.selectTab(Tabs.all.indexOf(tab))
@@ -82,14 +88,21 @@ class MainActivity : HotwireActivity() {
     }
 
     // A fresh start, so no tab shows the previous person's pages
-    private fun startOver(openAfterSignIn: String?) {
-        startActivity(Intent(this, MainActivity::class.java).putExtra(OPEN_AFTER_SIGN_IN, openAfterSignIn))
-        finish()
+    // (clearing the task, since there is only ever one of this screen)
+    private fun startOver(openOnStart: String?) {
+        startActivity(
+            Intent(this, MainActivity::class.java)
+                .putExtra(OPEN_ON_START, openOnStart)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        )
     }
+
+    // The same page on this build's site (debug builds use localhost)
+    private fun Intent.linkedPage() = data?.takeIf { action == Intent.ACTION_VIEW }?.path?.let { BuildConfig.START_LOCATION + it }
 
     private companion object {
         const val SIGNED_IN = "signed_in"
-        const val OPEN_AFTER_SIGN_IN = "open_after_sign_in"
+        const val OPEN_ON_START = "open_on_start"
 
         val signedOut = NavigatorConfiguration(
             name = "signed_out",
