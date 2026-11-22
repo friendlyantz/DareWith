@@ -45,7 +45,7 @@
     <%= render "layouts/flash" %>
 
     <% if current_user&.in_a_challenge? && !current_page?(profile_path) %>
-      <%= render "web_push_notifications/banner" %>
+      <%= render "web_push_notifications/banner" unless hotwire_native_app? %>
       <% unless cookies[:install_app_dismissed] || cookies[:app_installed] %>
         <div class="flex justify-center px-5 pt-3">
           <div class="w-full max-w-md"><%= render "install_app/prompt", dismissable: true %></div>

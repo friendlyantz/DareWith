@@ -203,6 +203,16 @@ RSpec.describe "ChallengeCheckIns", type: :request do
         expect(response.body).to include("data-close-sheet-after-value")
       end
 
+      it "closes the sheet by itself in the Android app, which can't turn on browser notifications" do
+        create(:badge, user:)
+        create(:challenge_check_in, challenge_participant: participant)
+
+        post challenge_story_challenge_check_ins_path(story), params: valid_params,
+          headers: {"User-Agent" => "Hotwire Native Android; Turbo Native Android; bridge-components: []"}
+
+        expect(response.body).to include("data-close-sheet-after-value")
+      end
+
       it "offers the progress card, which keeps a closing sheet open" do
         create(:badge, user:)
         create(:web_push_notification, user:)

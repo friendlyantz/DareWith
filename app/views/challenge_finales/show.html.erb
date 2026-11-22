@@ -4,7 +4,7 @@
 <% mine = @current_challenge_participant %>
 
 <%= tag.div class: "fixed inset-0 z-50 flex flex-col bg-linear-to-b from-primary to-neutral text-neutral-content pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
-  data: {controller: "slides", action: "click->slides#tap keydown@window->slides#key"} do %>
+  data: {controller: "slides", action: "click->slides#tap keydown@window->slides#key", native_prevent_pull_to_refresh: true} do %>
   <div class="flex items-center gap-3 px-4 pt-3">
     <div class="flex flex-1 gap-1.5" data-slides-target="ticks"></div>
     <%= link_to @challenge_story, class: "btn btn-ghost btn-sm btn-circle text-neutral-content", aria: {label: "Close"} do %>

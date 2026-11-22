@@ -47,6 +47,7 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", :as => :rails_health_check
   get ".well-known/assetlinks.json", to: "android_asset_links#show", as: :android_asset_links
+  get "configurations/android_v1.json", to: "android_path_configurations#show", as: :android_path_configuration
   mount Challenge::Engine, at: "/challenge"
   root "home#index"
 

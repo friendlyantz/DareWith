@@ -1,5 +1,6 @@
 <%# locals: (title:, frame_id:) %>
-<dialog class="modal modal-bottom sm:modal-middle" data-sheet-target="dialog" data-action="close->sheet#reset turbo:submit-end->sheet#submitted">
+<%# Pulling down inside the sheet in the Android app shouldn't reload the page behind it %>
+<dialog class="modal modal-bottom sm:modal-middle" data-sheet-target="dialog" data-native-prevent-pull-to-refresh data-action="close->sheet#reset turbo:submit-end->sheet#submitted">
   <div class="modal-box bg-base-200">
     <div class="flex items-center justify-between gap-3 mb-2">
       <h2 class="font-display text-2xl font-bold"><%= title %></h2>

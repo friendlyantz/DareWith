@@ -40,15 +40,20 @@
 
   <%= render "install_app/prompt", dismissable: false %>
 
-  <%# The switch below is the way to turn on; this only explains iPhone and blocked browsers %>
-  <%= render "web_push_notifications/prompt", message: "Get notified when friends check in", dismissable: false, ask: false %>
+  <%# Web push doesn't work in the Android app's WebView %>
+  <% unless hotwire_native_app? %>
+    <%# The switch below is the way to turn on; this only explains iPhone and blocked browsers %>
+    <%= render "web_push_notifications/prompt", message: "Get notified when friends check in", dismissable: false, ask: false %>
+  <% end %>
 
   <ul class="rounded-box border border-base-300 bg-base-100 divide-y divide-base-300">
-    <li class="flex min-h-14 items-center gap-3 px-4">
-      <%= icon(:bell, css: "size-5 text-base-content/70") %>
-      <label for="push_toggle" class="flex-1">Notifications in this browser</label>
-      <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
-    </li>
+    <% unless hotwire_native_app? %>
+      <li class="flex min-h-14 items-center gap-3 px-4">
+        <%= icon(:bell, css: "size-5 text-base-content/70") %>
+        <label for="push_toggle" class="flex-1">Notifications in this browser</label>
+        <input id="push_toggle" type="checkbox" class="toggle toggle-primary" data-push-notifications-target="toggle" data-action="change->push-notifications#toggle">
+      </li>
+    <% end %>
     <li class="flex min-h-14 items-center gap-3 px-4">
       <%= icon(:clock, css: "size-5 text-base-content/70") %>
       <%= form_with model: current_user, url: profile_path, method: :patch, class: "flex flex-1 items-center gap-3", data: {controller: "autosubmit"} do |form| %>

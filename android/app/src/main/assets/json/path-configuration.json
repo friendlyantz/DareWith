@@ -1,0 +1,17 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": [".*"],
+      "properties": { "context": "default", "pull_to_refresh_enabled": true }
+    },
+    {
+      "patterns": ["^/(\\?|$)", "^/today(\\?|$)", "^/challenge_check_ins(\\?|$)", "^/me(\\?|$)"],
+      "properties": { "presentation": "replace_root" }
+    },
+    {
+      "patterns": ["/new(\\?|$)", "/edit(\\?|$)", "^/webauthn/", "^/email/", "^/device_sign_in"],
+      "properties": { "pull_to_refresh_enabled": false }
+    }
+  ]
+}

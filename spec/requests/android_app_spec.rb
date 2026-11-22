@@ -26,4 +26,47 @@ RSpec.describe "The Android app", type: :request do
 
     expect(response.body).not_to include("Open this in your browser")
   end
+
+  describe "path configuration" do
+    # The properties the app gives a page: every matching rule applies, later ones win
+    def properties_for(path)
+      response.parsed_body["rules"]
+        .select { |rule| rule["patterns"].any? { Regexp.new(it).match?(path) } }
+        .reduce({}) { |properties, rule| properties.merge(rule["properties"]) }
+    end
+
+    before { get android_path_configuration_path }
+
+    it "is the same as the copy bundled in the app, which it uses until this one downloads" do
+      bundled = JSON.parse(Rails.root.join("android/app/src/main/assets/json/path-configuration.json").read)
+
+      expect(response.parsed_body).to eq(bundled)
+    end
+
+    it "switches between the dock's tabs instead of stacking them up" do
+      %w[/ /today /today?day=2026-11-22 /challenge_check_ins /me].each do |tab|
+        expect(properties_for(tab)).to include("presentation" => "replace_root"), tab
+      end
+
+      %w[/challenge_stories/1 /challenge_check_ins/1/challenge_check_in_replies /me/edit].each do |page|
+        expect(properties_for(page)).not_to include("presentation"), page
+      end
+    end
+
+    it "refreshes pages by pulling down, except forms" do
+      expect(properties_for("/challenge_stories/1")).to include("pull_to_refresh_enabled" => true)
+
+      %w[/challenge_stories/new /challenge_stories/1/edit /webauthn/session/new /email/session/code].each do |form|
+        expect(properties_for(form)).to include("pull_to_refresh_enabled" => false), form
+      end
+    end
+  end
+
+  it "doesn't offer browser notifications, which the app can't receive" do
+    sign_in_as(create(:user))
+
+    get profile_path, headers: {"User-Agent" => android_app}
+
+    expect(response.body).not_to include("Notifications in this browser")
+  end
 end
