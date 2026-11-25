@@ -2,10 +2,10 @@ require "rails_helper"
 
 RSpec.describe "Notifications", type: :request do
   describe "GET /notifications" do
-    it "asks visitors to sign in" do
+    it "asks visitors to sign up" do
       get notifications_path
 
-      expect(response).to redirect_to(new_webauthn_session_path)
+      expect(response).to redirect_to(new_webauthn_registration_path)
     end
 
     context "when signed in" do

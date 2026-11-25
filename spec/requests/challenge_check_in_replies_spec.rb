@@ -10,10 +10,10 @@ RSpec.describe "ChallengeCheckInReplies", type: :request do
     post challenge_check_in_challenge_check_in_replies_path(check_in), params:, **options
   end
 
-  it "asks visitors to sign in" do
+  it "asks visitors to sign up" do
     post_reply
 
-    expect(response).to redirect_to(new_webauthn_session_path)
+    expect(response).to redirect_to(new_webauthn_registration_path)
   end
 
   context "when signed in as a participant" do

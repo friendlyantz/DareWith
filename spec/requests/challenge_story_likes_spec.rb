@@ -6,10 +6,10 @@ RSpec.describe "ChallengeStoryLikes", type: :request do
 
   describe "POST /challenge_stories/:challenge_story_id/challenge_story_like" do
     context "when not signed in" do
-      it "redirects to sign in" do
+      it "redirects to sign up" do
         post challenge_story_challenge_story_like_path(story)
 
-        expect(response).to redirect_to(new_webauthn_session_path)
+        expect(response).to redirect_to(new_webauthn_registration_path)
       end
     end
 

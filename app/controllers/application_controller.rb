@@ -52,7 +52,12 @@ class ApplicationController < ActionController::Base
     return if current_user.present?
 
     remember_location if request.get? || request.head?
-    redirect_to new_webauthn_session_path
+    redirect_to signed_out_visitor_path
+  end
+
+  # Someone signed out is most likely new, so they start on sign up, which links to sign in
+  def signed_out_visitor_path
+    new_webauthn_registration_path
   end
 
   # Where to send a visitor back to once they sign in or sign up, e.g. an invite link

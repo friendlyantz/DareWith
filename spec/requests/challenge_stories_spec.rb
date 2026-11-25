@@ -156,10 +156,10 @@ RSpec.describe "ChallengeStories", type: :request do
 
   describe "GET /challenge_stories/new" do
     context "when not signed in" do
-      it "redirects to sign in" do
+      it "redirects to sign up" do
         get new_challenge_story_path
 
-        expect(response).to redirect_to(new_webauthn_session_path)
+        expect(response).to redirect_to(new_webauthn_registration_path)
       end
     end
 
@@ -287,10 +287,10 @@ RSpec.describe "ChallengeStories", type: :request do
     let(:story) { create(:challenge_story) }
 
     context "when not signed in" do
-      it "redirects to sign in" do
+      it "redirects to sign up" do
         get edit_challenge_story_path(story)
 
-        expect(response).to redirect_to(new_webauthn_session_path)
+        expect(response).to redirect_to(new_webauthn_registration_path)
       end
     end
   end

@@ -15,4 +15,11 @@ class DeviceSignInApprovalsController < ApplicationController
     device_sign_in.approve!(current_user)
     redirect_to profile_path, notice: "#{device_sign_in.device_label.upcase_first} is signing in"
   end
+
+  private
+
+  # Only someone with an account can approve another device
+  def signed_out_visitor_path
+    new_webauthn_session_path
+  end
 end

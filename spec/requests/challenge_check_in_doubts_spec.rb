@@ -6,10 +6,10 @@ RSpec.describe "ChallengeCheckInDoubts", type: :request do
   let(:check_in) { create(:challenge_check_in, challenge_participant: create(:challenge_participant, challenge_story: story)) }
   let(:params) { {challenge_check_in_doubt: {note: "That's yesterday's photo"}} }
 
-  it "asks visitors to sign in" do
+  it "asks visitors to sign up" do
     post challenge_check_in_challenge_check_in_doubt_path(check_in), params: params
 
-    expect(response).to redirect_to(new_webauthn_session_path)
+    expect(response).to redirect_to(new_webauthn_registration_path)
   end
 
   context "when signed in as a friend in the challenge" do
