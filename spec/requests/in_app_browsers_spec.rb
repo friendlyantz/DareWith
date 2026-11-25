@@ -37,7 +37,7 @@ RSpec.describe "In-app browsers", type: :request do
     get challenge_story_path(story), headers: {"User-Agent" => android_chrome}
 
     expect(response.body).not_to include("Open this in your browser")
-    expect(response.body).to include("Sign up to join")
+    expect(response.body).to include(%(href="#{new_webauthn_registration_path}">Join Challenge</a>))
   end
 
   it "copies the invite link, not the sign-in page, on the sign-up page" do

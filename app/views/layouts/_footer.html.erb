@@ -25,9 +25,9 @@
       <%= icon(:compass, css: "size-6") %>
       <span class="dock-label">Challenges</span>
     <% end %>
-    <%= link_to new_webauthn_session_path, class: class_names("dock-active": current_page?(new_webauthn_session_path)) do %>
+    <%= link_to new_webauthn_registration_path, class: class_names("dock-active": current_page?(new_webauthn_registration_path) || current_page?(new_webauthn_session_path)) do %>
       <%= icon(:log_in, css: "size-6") %>
-      <span class="dock-label">Sign in</span>
+      <span class="dock-label">Sign up</span>
     <% end %>
   <% end %>
 </nav>

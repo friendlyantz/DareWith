@@ -10,9 +10,11 @@ RSpec.describe "Home Page", type: :system do
     expect(page).to have_content("DareWith")
   end
 
-  scenario "visitor can navigate to sign in" do
+  scenario "visitor is pointed to sign up, never sign in" do
     home_page.load
 
-    expect(home_page.dock).to have_link("Sign in")
+    expect(page).to have_link("Get started", href: new_webauthn_registration_path, count: 2)
+    expect(home_page.dock).to have_link("Sign up", href: new_webauthn_registration_path)
+    expect(page).to have_no_link(href: new_webauthn_session_path)
   end
 end

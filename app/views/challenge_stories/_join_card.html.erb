@@ -1,31 +1,30 @@
 <%# locals: (challenge_story:) %>
-<div class="card bg-base-100 border border-base-300">
-  <div class="card-body gap-3 p-4">
-    <% if current_user %>
-      <h2 class="font-display text-lg font-semibold">Join to check in</h2>
-      <p class="text-sm text-base-content/70">Participants check in daily and keep each other honest.</p>
-      <% if challenge_story.at_capacity? %>
-        <%= render "challenge_stories/alerts/challenge_at_capacity" %>
-      <% else %>
-        <%= link_to challenge_participants_path(challenge_story_id: challenge_story.id),
-          data: {turbo_method: :post},
-          id: "join_challenge",
-          class: "btn btn-primary" do %>
-          Join Challenge
-          <span class="badge badge-sm bg-primary-content/20 border-0 text-primary-content">
-            <%= pluralize(challenge_story.available_spots, "spot") %> left
-          </span>
+<% if current_user || likely_webview? %>
+  <div class="card bg-base-100 border border-base-300">
+    <div class="card-body gap-3 p-4">
+      <% if current_user %>
+        <h2 class="font-display text-lg font-semibold">Join to check in</h2>
+        <p class="text-sm text-base-content/70">Participants check in daily and keep each other honest.</p>
+        <% if challenge_story.at_capacity? %>
+          <%= render "challenge_stories/alerts/challenge_at_capacity" %>
+        <% else %>
+          <%= link_to challenge_participants_path(challenge_story_id: challenge_story.id),
+            data: {turbo_method: :post},
+            id: "join_challenge",
+            class: "btn btn-primary" do %>
+            Join Challenge
+            <span class="badge badge-sm bg-primary-content/20 border-0 text-primary-content">
+              <%= pluralize(challenge_story.available_spots, "spot") %> left
+            </span>
+          <% end %>
         <% end %>
+      <% else %>
+        <h2 class="font-display text-lg font-semibold">Want to join this challenge?</h2>
+        <%= render "application/alerts/unsupported_browser", url: challenge_story_url(challenge_story) %>
       <% end %>
-    <% elsif likely_webview? %>
-      <h2 class="font-display text-lg font-semibold">Want to join this challenge?</h2>
-      <%= render "application/alerts/unsupported_browser", url: challenge_story_url(challenge_story) %>
-    <% else %>
-      <h2 class="font-display text-lg font-semibold">Want to join this challenge?</h2>
-      <p class="text-sm text-base-content/70">Sign up to start tracking your progress.</p>
-      <div class="flex flex-col sm:flex-row gap-2">
-        <%= render "shared/call_to_action_sign_up" %>
-      </div>
-    <% end %>
+    </div>
   </div>
-</div>
+<% else %>
+  <%# Signing up brings them back here to join %>
+  <%= link_to "Join Challenge", new_webauthn_registration_path, class: "btn btn-primary btn-lg btn-block" %>
+<% end %>

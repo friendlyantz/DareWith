@@ -6,10 +6,7 @@
     <p class="text-lg text-base-content/80">
       Daily challenges with friends and real stakes. Miss a day, and you owe them.
     </p>
-    <div class="flex flex-col gap-3">
-      <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary btn-lg" %>
-      <%= link_to "Sign in", new_webauthn_session_path, class: "btn btn-lg border-base-300 bg-base-100" %>
-    </div>
+    <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary btn-lg" %>
   </section>
 
   <section class="flex flex-col gap-4">
@@ -36,9 +33,9 @@
 
   <%= render "challenge_stories/demo_challenges" %>
 
-  <section class="flex flex-col items-start gap-3 rounded-box bg-neutral p-6 text-neutral-content">
+  <section class="flex flex-col gap-3 rounded-box bg-neutral p-6 text-neutral-content">
     <h2 class="font-display text-2xl font-bold tracking-tight">Ready to start?</h2>
-    <p class="opacity-80">It takes a minute: pick a username, sign in with a passkey, and set your first dare.</p>
-    <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary" %>
+    <p class="opacity-80">Sign in with one tap, set your first dare.</p>
+    <%= link_to "Get started", new_webauthn_registration_path, class: "btn btn-primary btn-lg mt-2" %>
   </section>
 </div>
