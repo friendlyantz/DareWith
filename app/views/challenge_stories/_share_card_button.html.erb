@@ -1,9 +1,10 @@
-<%# locals: (participant:, css: "", action: nil, id: nil) %>
-<%= tag.button type: "button", id:, class: css,
+<%# locals: (participant:, css: "", action: nil, aria_label: nil) %>
+<%# Shares the participant's progress card; the block is what the button shows %>
+<%= tag.button type: "button", class: css, aria: {label: aria_label},
   data: {
     controller: "share-card",
     action: ["share-card#share", action].compact.join(" "),
     **share_card_values(participant).transform_keys { "share_card_#{it}_value" }
   } do %>
-  <%= icon(:share, css: "size-4") %> Share my progress
+  <%= yield %>
 <% end %>

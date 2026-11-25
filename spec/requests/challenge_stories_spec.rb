@@ -152,6 +152,17 @@ RSpec.describe "ChallengeStories", type: :request do
       get challenge_story_path(story)
       expect(response.body).to include("Share my progress").and include('data-controller="share-card"')
     end
+
+    it "invites with the progress card rather than a bare link" do
+      user = create(:user)
+      create(:challenge_participant, user:, challenge_story: story)
+      sign_in_as(user)
+
+      get challenge_story_path(story)
+
+      expect(response.body.scan('data-controller="share-card"').size).to eq 3 # beside the title, the empty spots, the invite card
+      expect(response.body).not_to include('data-controller="share-link"')
+    end
   end
 
   describe "GET /challenge_stories/new" do

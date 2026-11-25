@@ -62,5 +62,15 @@ RSpec.describe ShareCardsHelper, type: :helper do
 
       expect(helper.share_card_values(participant)[:photo_url]).to start_with "https://res.cloudinary.com/"
     end
+
+    it "says what friends who join collect when the participant misses" do
+      expect(helper.share_card_values(participant)).to include(penalty_caption: nil, penalty: nil)
+
+      challenge_story.update!(penalty_mode: :per_miss, penalty: "coffee")
+      expect(helper.share_card_values(participant)).to include(penalty_caption: "Every day I miss, everyone else gets", penalty: "coffee")
+
+      challenge_story.update!(penalty_mode: :most_misses)
+      expect(helper.share_card_values(participant)).to include(penalty_caption: "If I miss the most, everyone else gets", penalty: "coffee")
+    end
   end
 end

@@ -15,7 +15,7 @@ export const SANS = '"Inter", ui-sans-serif, system-ui, sans-serif'
 export default class extends Controller {
   static values = {
     title: String, name: String, headline: String, caption: String, emoji: String,
-    progressLabel: String, progress: Number, url: String, qrCode: Array, photoUrl: String
+    progressLabel: String, progress: Number, penaltyCaption: String, penalty: String, url: String, qrCode: Array, photoUrl: String
   }
 
   connect() {
@@ -121,6 +121,8 @@ export default class extends Controller {
     context.font = `600 40px ${SANS}`
     context.fillText(this.urlValue.replace(/^https?:\/\//, ""), PADDING, HEIGHT - 130)
 
+    if (this.penaltyValue) y = this.drawPenalty(context, y - 60, width)
+
     y -= 70
     context.globalAlpha = 0.25
     this.roundedRect(context, PADDING, y, width, 28)
@@ -169,6 +171,29 @@ export default class extends Controller {
     size = this.fitFontSize(context, this.headlineValue, PADDING + width - x, size)
     context.font = `700 ${size}px ${DISPLAY}`
     context.fillText(this.headlineValue, x, y)
+  }
+
+  // What a miss costs, which the friends who join collect, in a box right above the invite:
+  // the rule, then the penalty itself in big type.
+  // Takes the box's bottom and returns its top, for what goes above it.
+  drawPenalty(context, bottom, width) {
+    context.font = `700 52px ${DISPLAY}`
+    const lines = this.wrap(context, this.penaltyValue, width - 80, 2)
+    const top = bottom - 110 - lines.length * 62
+
+    context.globalAlpha = 0.15
+    context.beginPath()
+    context.roundRect(PADDING, top, width, bottom - top, 32)
+    context.fill()
+    context.globalAlpha = 1
+    lines.forEach((line, index) => context.fillText(line, PADDING + 40, top + 128 + index * 62))
+
+    context.font = `600 36px ${SANS}`
+    context.globalAlpha = 0.85
+    context.fillText(this.penaltyCaptionValue, PADDING + 40, top + 60)
+    context.globalAlpha = 1
+
+    return top
   }
 
   // Dark squares on a white tile in the bottom corner, so a camera or a screenshot can open the challenge.

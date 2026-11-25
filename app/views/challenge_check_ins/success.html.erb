@@ -67,15 +67,18 @@
 
     <%= render "install_app/prompt", dismissable: false %>
 
-    <%# The page behind the sheet doesn't reload, so its menu's progress card gets this check-in too %>
-    <%= turbo_stream.replace dom_id(@challenge_participant, :share_card),
-      partial: "challenge_stories/share_card_button",
-      locals: {participant: @challenge_participant, id: dom_id(@challenge_participant, :share_card)} %>
+    <%# The page behind the sheet doesn't reload, so its progress cards get this check-in too %>
+    <%= turbo_stream.replace dom_id(challenge_story, :header),
+      partial: "challenge_stories/header", locals: {challenge_story:, participant: @challenge_participant} %>
+    <%= turbo_stream.replace dom_id(challenge_story, :invite_card),
+      partial: "challenge_stories/invite_card", locals: {challenge_story:, participant: @challenge_participant} %>
 
     <div class="flex w-full flex-col gap-2">
       <%= render "challenge_stories/share_card_button", participant: @challenge_participant,
         css: "btn btn-outline btn-block rounded-full",
-        action: ("close-sheet#stay:stop" if auto_close) %>
+        action: ("close-sheet#stay:stop" if auto_close) do %>
+        <%= icon(:share, css: "size-4") %> Share my progress
+      <% end %>
       <p class="text-xs text-base-content/60">Sharing to Instagram? The link is copied too: paste it into a Link sticker.</p>
       <%# Closes the sheet; opened as a full page, it goes to the challenge instead %>
       <%= link_to "Done", challenge_story_path(challenge_story),

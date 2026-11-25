@@ -173,6 +173,10 @@ class ChallengeStory < ApplicationRecord
     MAX_PARTICIPANTS - active_participants.size
   end
 
+  def open_to_invites?
+    accepting_check_ins? && !at_capacity?
+  end
+
   def mark_complete!(by: nil)
     update!(completed: true)
     charge_penalties!

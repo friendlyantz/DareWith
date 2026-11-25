@@ -1,5 +1,6 @@
-<%# locals: (challenge_story:, participant:, can_invite: false) %>
-<header class="flex flex-col gap-2">
+<%# locals: (challenge_story:, participant:) %>
+<%# Replaced after a check-in (challenge_check_ins/success), since the page behind the sheet doesn't reload %>
+<header id="<%= dom_id(challenge_story, :header) %>" class="flex flex-col gap-2">
   <% if challenge_story.completed? || challenge_story.finished? || challenge_story.round > 1 %>
     <div class="flex gap-2">
       <% if challenge_story.round > 1 %>
@@ -43,17 +44,15 @@
           <%= render "shared/avatar", name: participant.name, user: participant.user, checked_in: participant.checked_in_today? %>
         <% end %>
       </div>
-      <% if can_invite %>
-        <div data-controller="share-link" data-share-link-url-value="<%= challenge_story_share_url(challenge_story.share_code) %>">
-          <button type="button" data-action="share-link#nativeShare" class="flex gap-1 -ml-1"
-            aria-label="Invite friends, <%= pluralize(challenge_story.available_spots, "spot") %> left">
-            <% challenge_story.available_spots.times do %>
-              <span class="grid size-8 place-items-center rounded-full border-2 border-dashed border-base-content/30 text-base-content/60">
-                <%= icon(:plus, css: "size-4") %>
-              </span>
-            <% end %>
-          </button>
-        </div>
+      <% if participant && challenge_story.open_to_invites? %>
+        <%= render "challenge_stories/share_card_button", participant:, css: "flex gap-1 -ml-1",
+          aria_label: "Invite friends, #{pluralize(challenge_story.available_spots, "spot")} left" do %>
+          <% challenge_story.available_spots.times do %>
+            <span class="grid size-8 place-items-center rounded-full border-2 border-dashed border-base-content/30 text-base-content/60">
+              <%= icon(:plus, css: "size-4") %>
+            </span>
+          <% end %>
+        <% end %>
       <% end %>
       <% if challenge_story.accepting_check_ins? %>
         <span class="text-sm text-base-content/70">
