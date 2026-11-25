@@ -19,11 +19,12 @@ RSpec.describe "In-app browsers", type: :request do
     expect(response.body).to include("Open this in your browser")
   end
 
-  it "offers one tap to reopen the invite in Chrome on Android" do
+  it "offers one tap to reopen the invite in the default browser on Android" do
     get challenge_story_path(story), headers: {"User-Agent" => android_webview}
 
-    expect(response.body).to include("Open in Chrome")
-    expect(response.body).to include("intent://www.example.com/challenge_stories/#{story.id}#Intent;scheme=http;package=com.android.chrome;")
+    expect(response.body).to include("Open in your browser")
+    expect(response.body).to include("intent://www.example.com/challenge_stories/#{story.id}#Intent;scheme=http;action=android.intent.action.VIEW;")
+    expect(response.body).not_to include("package=com.android.chrome")
   end
 
   it "offers one tap to reopen the invite in Safari on iPhone" do

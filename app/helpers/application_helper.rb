@@ -9,18 +9,19 @@ module ApplicationHelper
     if /iPhone|iPad|iPod/.match?(ua)
       "Safari"
     elsif ua.include?("Android")
-      "Chrome"
+      "your browser"
     end
   end
 
-  # Asks the phone to reopen the page outside the in-app browser; some apps ignore it
+  # Asks the phone to reopen the page outside the in-app browser; some apps ignore it.
+  # iPhone can only be sent to Safari. Android picks the default browser, or our app for links it handles
   def open_in_browser_url(url)
     case real_browser_name
     when "Safari"
       "x-safari-#{url}"
-    when "Chrome"
+    when "your browser"
       uri = URI(url)
-      "intent://#{uri.host}#{uri.request_uri}#Intent;scheme=#{uri.scheme};package=com.android.chrome;S.browser_fallback_url=#{CGI.escape(url)};end"
+      "intent://#{uri.host}#{uri.request_uri}#Intent;scheme=#{uri.scheme};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=#{CGI.escape(url)};end"
     end
   end
 
